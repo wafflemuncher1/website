@@ -2,77 +2,110 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zane | Systems & Detailing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mirror Mobile Pro | Louisville Detailing</title>
     <style>
-        :root {
-            --bg: #0a0a0a;
-            --accent: #0070f3;
-            --text: #ededed;
+        :root { --bg: #000000; --card: #111111; --accent: #0070f3; --text: #ffffff; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: var(--bg); color: var(--text); 
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto;
+            margin: 0; padding: 0; line-height: 1.5;
         }
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
+
+        /* Hero Section */
+        .hero { 
+            padding: 40px 20px; 
+            text-align: left; 
+            background: linear-gradient(180deg, #111 0%, #000 100%);
+            border-bottom: 1px solid #222;
         }
-        .container {
-            text-align: center;
-            border: 1px solid #333;
-            padding: 3rem;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(10px);
+        h1 { font-size: 2.5rem; margin: 0; font-weight: 800; letter-spacing: -1px; }
+        .accent { color: var(--accent); }
+        .tagline { color: #888; margin: 10px 0 20px 0; font-size: 1.1rem; }
+
+        /* Fast Action Buttons */
+        .cta-container { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { 
+            flex: 1; text-align: center; padding: 16px; 
+            border-radius: 12px; font-weight: bold; text-decoration: none; font-size: 1rem;
         }
-        h1 {
-            font-size: 2.5rem;
-            letter-spacing: -1px;
-            margin-bottom: 0.5rem;
+        .primary { background: var(--accent); color: white; }
+        .secondary { background: #222; color: white; border: 1px solid #333; }
+
+        /* Services - Mobile Stack */
+        .section-label { padding: 30px 20px 10px; font-size: 0.8rem; text-transform: uppercase; color: var(--accent); letter-spacing: 2px; font-weight: bold; }
+        
+        .service-list { padding: 0 15px; }
+        .service-card { 
+            background: var(--card); border: 1px solid #222; 
+            padding: 20px; border-radius: 16px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        p {
-            color: #888;
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
+        .service-info h3 { margin: 0; font-size: 1.2rem; }
+        .service-info p { margin: 5px 0 0; color: #666; font-size: 0.9rem; }
+        .price-badge { background: #222; padding: 8px 12px; border-radius: 8px; font-weight: bold; border: 1px solid #333; }
+
+        /* Proof/Status area */
+        .status-bar { 
+            background: #111; margin: 20px; padding: 15px; 
+            border-radius: 12px; font-family: monospace; font-size: 0.8rem; color: #444;
+            border-left: 3px solid var(--accent);
         }
-        .btn {
-            background-color: var(--text);
-            color: var(--bg);
-            padding: 0.8rem 2rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: 0.2s;
-        }
-        .btn:hover {
-            background-color: var(--accent);
-            color: white;
-        }
-        .status {
-            margin-top: 2rem;
-            font-family: monospace;
-            font-size: 0.8rem;
-            color: #444;
+
+        /* Bottom Fixed Bar (Mobile Standard) */
+        .bottom-nav {
+            position: fixed; bottom: 20px; left: 20px; right: 20px;
+            display: flex; gap: 10px; z-index: 100;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Zane Risinger</h1>
-        <p>High-Performance Systems & Mobile Detailing.</p>
+    <section class="hero">
+        <h1>Mirror<br><span class="accent">Mobile</span> Pro</h1>
+        <p class="tagline">Mobile Detailing in Louisville & Mt. Washington. We bring the showroom to you.</p>
         
-        <a href="mailto:your-email@example.com" class="btn">Get in Touch</a>
+        <div class="cta-container">
+            <a href="tel:YOUR-NUMBER-HERE" class="btn primary">Call Now</a>
+            <a href="sms:YOUR-NUMBER-HERE" class="btn secondary">Text Quote</a>
+        </div>
+    </section>
 
-        <div class="status">
-            [ Deployment: Successful ]<br>
-            [ System: Optimized ]
+    <div class="section-label">Service Menu</div>
+    
+    <div class="service-list">
+        <div class="service-card">
+            <div class="service-info">
+                <h3>The Express</h3>
+                <p>Exterior Wash & Interior Blowout</p>
+            </div>
+            <div class="price-badge">$80+</div>
+        </div>
+
+        <div class="service-card">
+            <div class="service-info">
+                <h3>The Signature</h3>
+                <p>Full Detail & Paint Protection</p>
+            </div>
+            <div class="price-badge">$180+</div>
+        </div>
+
+        <div class="service-card">
+            <div class="service-info">
+                <h3>The Mirror</h3>
+                <p>Correction & Ceramic Sealant</p>
+            </div>
+            <div class="price-badge">$350+</div>
         </div>
     </div>
 
-</body>
+    <div class="status-bar">
+        > SYSTEM_STATUS: ONLINE<br>
+        > SERVICE_AREA: 502_REGION<br>
+        > BOOKING: OPEN
+    </div>
+
+    <div style="height: 100px;"></div> </body>
 </html>
