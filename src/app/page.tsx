@@ -2,11 +2,12 @@ import Footer from '@/components/Footer'
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-black">
+    // min-h-dvh (dynamic viewport height) is best for mobile browsers
+    <div className="flex flex-col min-h-dvh bg-black overflow-hidden">
       
-      {/* This empty main tag pushes the footer down */}
+      {/* This empty space pushes the footer to the bottom of the phone screen */}
       <main className="flex-grow">
-        {/* Everything is removed from here */}
+        {/* Keeping this empty as requested */}
       </main>
 
       <Footer />
