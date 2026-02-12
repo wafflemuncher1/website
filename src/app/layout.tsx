@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import './Sidebar.css';
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
