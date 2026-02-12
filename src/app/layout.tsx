@@ -1,6 +1,9 @@
 import './globals.css'
-import Sidebar from '@/components/Sidebar'
-import Footer from '@/components/Footer' // Import the new footer
+
+export const metadata = {
+  title: 'GlossWorks KY',
+  description: 'Premium Mobile Detailing in Mount Washington, KY',
+}
 
 export default function RootLayout({
   children,
@@ -9,16 +12,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* min-h-screen and flex-col ensures the footer is pushed to the bottom */}
-      <body className="bg-black text-white min-h-screen flex flex-col">
-        <Sidebar />
-        
-        {/* main grow ensures this area takes up all available space */}
-        <main className="flex-grow">
-          {children}
-        </main>
-
-        <Footer />
+      <body>
+        {/* We removed the Sidebar and Footer here. It's now a clean slate. */}
+        {children}
       </body>
     </html>
   )
