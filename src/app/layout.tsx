@@ -3,8 +3,13 @@ import Sidebar from '@/components/Sidebar';
 import './globals.css';
 
 export const metadata: Metadata = {
+<<<<<<< HEAD
   title: 'GlossWorks KY | Mobile Detailing',
   description: 'Professional mobile car detailing services in Mt. Washington',
+=======
+  title: 'Mobile Detailing',
+  description: 'Professional mobile car detailing services',
+>>>>>>> 07db4cc1d75b3dc001d56e76bd38bb758a322361
 };
 
 export default function RootLayout({
@@ -14,6 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+<<<<<<< HEAD
       {/* We add bg-black here to ensure the whole screen is dark */}
       <body className="bg-black text-white antialiased">
         <div className="flex flex-col min-h-screen">
@@ -46,6 +52,19 @@ export default function RootLayout({
             </div>
           </footer>
 
+=======
+      <body>
+        <div className="layout-container">
+          <header className="header">
+            <div className="header-content">
+              <h1>Mobile Detailing</h1>
+              <Sidebar />
+            </div>
+          </header>
+          <main className="main-content">
+            {children}
+          </main>
+>>>>>>> 07db4cc1d75b3dc001d56e76bd38bb758a322361
         </div>
       </body>
     </html>
