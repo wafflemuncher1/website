@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-start-rgb));
+  /* This prevents horizontal scrolling on mobile */
+  overflow-x: hidden; 
+}
+
+/* Optional: Smooth scrolling for when people click sidebar links */
+html {
+  scroll-behavior: smooth;
+}
