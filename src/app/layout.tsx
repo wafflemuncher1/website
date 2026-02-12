@@ -1,9 +1,10 @@
+import type { Metadata } from 'next';
+import Sidebar from '@/components/Sidebar';
 import './globals.css';
-import Sidebar from '@/components/Sidebar'; // Points to the clean component folder
 
-export const metadata = {
-  title: 'GlossWorks KY | Mobile Detailing',
-  description: 'Premium mobile detailing in Mt. Washington, KY',
+export const metadata: Metadata = {
+  title: 'Mobile Detailing',
+  description: 'Professional mobile car detailing services',
 };
 
 export default function RootLayout({
@@ -13,15 +14,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-black text-white antialiased">
-        {/* The Sidebar is a "Global" component here */}
-        <Sidebar /> 
-        
-        {/* main wraps your page content. pt-20 adds space so content 
-            doesn't hide behind your fixed header/sidebar button */}
-        <main className="pt-20 min-h-screen">
-          {children}
-        </main>
+      <body>
+        <div className="layout-container">
+          <header className="header">
+            <div className="header-content">
+              <h1>Mobile Detailing</h1>
+              <Sidebar />
+            </div>
+          </header>
+          <main className="main-content">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
