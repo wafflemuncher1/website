@@ -2,53 +2,76 @@ import PricingCard from '@/components/PricingCard'
 
 export default function Home() {
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col bg-black text-white">
       
-      {/* HERO SECTION */}
-      <section className="relative h-[90vh] flex flex-col justify-center px-6 md:px-12">
-        {/* Decorative background element */}
-        <div className="absolute top-20 left-[-10%] w-[500px] h-[500px] bg-blue-900/20 rounded-full blur-[120px] -z-10" />
+      {/* 1. HERO: The "First Impression" */}
+      <section className="min-h-screen flex flex-col justify-center px-6 md:px-20 relative overflow-hidden">
+        {/* Subtle Gradient Glow */}
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px]" />
         
-        <h1 className="text-6xl md:text-[120px] font-black tracking-tighter leading-[0.85] mb-6">
-          GLOSS<br />
-          <span className="text-blue-600">WORKS</span><br />
-          KY
-        </h1>
-        
-        <p className="text-zinc-400 text-lg md:text-2xl max-w-xl mb-10 leading-relaxed">
-          Premium mobile detailing for those who value precision. Serving Mount Washington and Louisville.
-        </p>
+        <div className="relative z-10">
+          <h1 className="text-[18vw] md:text-[12vw] font-black leading-[0.8] tracking-tighter mb-8">
+            GLOSS<br />
+            <span className="text-blue-600">WORKS</span>
+          </h1>
+          
+          <p className="text-zinc-400 text-lg md:text-2xl max-w-lg mb-12 leading-tight">
+            Premium mobile detailing systems for Mt. Washington & Louisville. 
+            We restore. You drive.
+          </p>
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <a href="sms:5025555555" className="bg-blue-600 hover:bg-blue-700 text-white text-center px-10 py-5 rounded-2xl font-bold text-xl transition-all active:scale-95">
-            Get a Quote
-          </a>
-          <a href="#services" className="bg-zinc-900 border border-zinc-800 text-white text-center px-10 py-5 rounded-2xl font-bold text-xl hover:bg-zinc-800 transition-all">
-            View Services
-          </a>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <a href="sms:5025555555" className="bg-white text-black text-center px-8 py-5 rounded-full font-bold text-lg hover:bg-zinc-200 transition-all active:scale-95">
+              Request Quote
+            </a>
+            <a href="#services" className="bg-zinc-900 border border-zinc-800 text-white text-center px-8 py-5 rounded-full font-bold text-lg hover:bg-zinc-800 transition-all">
+              View Services
+            </a>
+          </div>
         </div>
       </section>
 
-      {/* SERVICES SECTION */}
-      <section id="services" className="px-6 py-24 bg-zinc-950">
+      {/* 2. SERVICES: The "Money" Section */}
+      <section id="services" className="px-6 py-32 border-t border-zinc-900 bg-zinc-950/50">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-16">
-            <h2 className="text-blue-500 font-bold uppercase tracking-widest text-sm mb-2">Packages</h2>
-            <h3 className="text-4xl font-bold">The Service Menu</h3>
+          <div className="mb-20">
+            <h2 className="text-blue-500 font-bold uppercase tracking-[0.3em] text-xs mb-4">Precision Packages</h2>
+            <h3 className="text-4xl md:text-6xl font-bold tracking-tight">The Service Menu</h3>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <PricingCard 
-              name="The Express"
+              name="The Maintenance"
               price="$80+"
-              features={['Exterior Foam Wash', 'Wheel Deep Clean', 'Interior Vacuum', 'Glass Clarity Treatment']}
+              features={['Exterior Foam Wash', 'Wheel & Tire Treatment', 'Interior Vacuum', 'Streak-Free Glass']}
             />
             <PricingCard 
               name="The Signature"
               price="$180+"
               recommended={true}
-              features={['Everything in Express', 'Clay Bar & Decon', '6-Month Paint Protection', 'Interior Steam Clean', 'Leather/Fabric Conditioning']}
+              features={['Decontamination Wash', 'Clay Bar Treatment', '6-Month Paint Protection', 'Interior Steam Clean', 'Deep Leather Conditioning']}
             />
+          </div>
+        </div>
+      </section>
+
+      {/* 3. LOGIC: Why GlossWorks? */}
+      <section className="px-6 py-32 border-t border-zinc-900">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div>
+            <span className="text-blue-600 text-2xl font-bold">01.</span>
+            <h4 className="text-xl font-bold mt-2">Mobile System</h4>
+            <p className="text-zinc-500 mt-2 text-sm italic">We bring the studio to your driveway. Zero friction.</p>
+          </div>
+          <div>
+            <span className="text-blue-600 text-2xl font-bold">02.</span>
+            <h4 className="text-xl font-bold mt-2">Technical Detail</h4>
+            <p className="text-zinc-500 mt-2 text-sm italic">Using chemistry, not just soap, to protect your investment.</p>
+          </div>
+          <div>
+            <span className="text-blue-600 text-2xl font-bold">03.</span>
+            <h4 className="text-xl font-bold mt-2">Local Pride</h4>
+            <p className="text-zinc-500 mt-2 text-sm italic">Mt. Washington based. We treat your car like our own.</p>
           </div>
         </div>
       </section>
