@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import './Sidebar.css';
+import styles from './Sidebar.module.css';
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,16 +13,16 @@ export default function Sidebar() {
 
   return (
     <>
-      <button className="sidebar-toggle" onClick={toggleSidebar}>
+      <button className={styles.sidebarToggle} onClick={toggleSidebar}>
         ☰
       </button>
       
-      <nav className={`sidebar ${isOpen ? 'open' : ''}`}>
-        <button className="sidebar-close" onClick={toggleSidebar}>
+      <nav className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>  
+        <button className={styles.sidebarClose} onClick={toggleSidebar}>
           ✕
         </button>
         
-        <ul className="sidebar-menu">
+        <ul className={styles.sidebarMenu}>
           <li>
             <Link href="/" onClick={() => setIsOpen(false)}>
               Home
