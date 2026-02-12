@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react'; // Better looking icons than text ☰
+import styles from './Sidebar.module.css'; // Matches the new filename
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,78 +11,28 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* 1. THE TOGGLE BUTTON (Placed in your header area) */}
-      <button 
-        className="fixed top-6 right-6 z-[70] p-2 text-blue-500" 
-        onClick={toggleSidebar}
-      >
-        <Menu size={28} />
-      </button>
-      
-      {/* 2. THE SEMI-TRANSPARENT OVERLAY (Dims the screen when menu is open) */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 z-[80] backdrop-blur-sm transition-opacity"
-          onClick={toggleSidebar}
-        />
+      {/* The Burger Button */}
+      {!isOpen && (
+        <button className={styles.sidebarToggle} onClick={toggleSidebar}>
+          ☰
+        </button>
       )}
-
-      {/* 3. THE SIDEBAR PANEL (Slides from the right) */}
-      <nav className={`fixed top-0 right-0 h-full w-[280px] bg-zinc-950 z-[90] border-l border-zinc-900 transition-transform duration-300 ease-in-out shadow-2xl ${
-        isOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      
+      {/* The Slide-out Menu */}
+      <nav className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
+        <button className={styles.sidebarClose} onClick={toggleSidebar}>
+          ✕
+        </button>
         
-        {/* Close Button Inside Sidebar */}
-        <div className="flex justify-end p-6 border-b border-zinc-900">
-          <button className="text-zinc-400" onClick={toggleSidebar}>
-            <X size={28} />
-          </button>
-        </div>
-        
-        <ul className="flex flex-col p-8 gap-y-6">
-          <li>
-            <Link href="/" className="text-xl font-bold italic tracking-tighter" onClick={() => setIsOpen(false)}>
-              HOME
-            </Link>
-          </li>
-          <li>
-            <Link href="/about" className="text-xl font-bold italic tracking-tighter text-zinc-400 hover:text-white" onClick={() => setIsOpen(false)}>
-              ABOUT ME
-            </Link>
-          </li>
-          <li>
-            <Link href="/gallery" className="text-xl font-bold italic tracking-tighter text-zinc-400 hover:text-white" onClick={() => setIsOpen(false)}>
-              GALLERY
-            </Link>
-          </li>
-          <li>
-            <Link href="/services" className="text-xl font-bold italic tracking-tighter text-zinc-400 hover:text-white" onClick={() => setIsOpen(false)}>
-              SERVICES
-            </Link>
-          </li>
-          <li>
-            <Link href="/reviews" className="text-xl font-bold italic tracking-tighter text-zinc-400 hover:text-white" onClick={() => setIsOpen(false)}>
-              REVIEWS
-            </Link>
-          </li>
-          <li>
-            <Link href="/faq" className="text-xl font-bold italic tracking-tighter text-zinc-400 hover:text-white" onClick={() => setIsOpen(false)}>
-              FAQ
-            </Link>
-          </li>
-          <li>
-            <Link href="/contact" className="text-xl font-bold italic tracking-tighter text-zinc-400 hover:text-white" onClick={() => setIsOpen(false)}>
-              CONTACT US
-            </Link>
-          </li>
+        <ul className={styles.sidebarMenu}>
+          <li><Link href="/" onClick={() => setIsOpen(false)}>Home</Link></li>
+          <li><Link href="/about" onClick={() => setIsOpen(false)}>About Me</Link></li>
+          <li><Link href="/gallery" onClick={() => setIsOpen(false)}>Gallery</Link></li>
+          <li><Link href="/services" onClick={() => setIsOpen(false)}>Services</Link></li>
+          <li><Link href="/reviews" onClick={() => setIsOpen(false)}>Reviews</Link></li>
+          <li><Link href="/faq" onClick={() => setIsOpen(false)}>FAQ</Link></li>
+          <li><Link href="/contact" onClick={() => setIsOpen(false)}>Contact Us</Link></li>
         </ul>
-
-        {/* Action Button at Bottom of Sidebar */}
-        <div className="px-8 mt-4">
-          <a href="sms:5025555555" className="block w-full bg-blue-600 text-white text-center py-4 rounded-xl font-black italic">
-            BOOK NOW
-          </a>
-        </div>
       </nav>
     </>
   );
