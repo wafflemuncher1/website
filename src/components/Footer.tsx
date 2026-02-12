@@ -3,7 +3,7 @@ import { Instagram, Facebook, Youtube } from 'lucide-react'; // You'll need to i
 export default function Footer() {
   const locations = [
     'Mount Washington', 'Louisville', 'Shepherdsville', 
-    'Hillview', 'Brooks', 'Taylorsville', 'Fern Creek', 'Highview'
+    'Hillview', 'Brooks', 'Fairdell', 'Fern Creek', 'Highview'
   ];
 
   return (
@@ -36,7 +36,7 @@ export default function Footer() {
               Quick Links
             </h3>
             <ul className="space-y-3 text-xs text-zinc-300">
-              <li className="hover:text-blue-500 cursor-pointer transition">Gift Cards</li>
+              <li className="hover:text-blue-500 cursor-pointer transition">Hub</li>
               <li className="hover:text-blue-500 cursor-pointer transition">Contact Us</li>
             </ul>
           </div>
@@ -73,7 +73,7 @@ export default function Footer() {
             <div className="space-y-4 text-xs text-zinc-300">
               <p className="font-bold text-white">GlossWorks Mobile Detailing</p>
               <p>Monday – Sunday<br/>8:00 AM to 8:00 PM</p>
-              <p>Get In Touch <span className="text-blue-500 font-bold">502-555-5555</span></p>
+              <p>Get In Touch <span className="text-blue-500 font-bold">502-612-0430</span></p>
               
               {/* SOCIAL ICONS */}
               <div className="flex gap-4 pt-2">
