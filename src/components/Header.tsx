@@ -3,7 +3,7 @@ import { Menu } from 'lucide-react'; // Standard icon for the menu
 
 export default function Header() {
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-zinc-900 px-6 py-4">
+    <header className="fixed top-0 left-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-zinc-900 px-6 py-6">
       <div className="flex justify-between items-center max-w-screen-xl mx-auto">
         
         {/* LEFT: Logo Area */}
