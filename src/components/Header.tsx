@@ -20,7 +20,7 @@ export default function Header() {
 
           <div className="h-8 w-8 bg-blue-600 rounded flex items-center justify-center mr-2">
 
-            <span className="text-white font-black text-xs italic">GW</span>
+            <span className="text-white font-black text-xs italic"></span>
 
           </div>
 

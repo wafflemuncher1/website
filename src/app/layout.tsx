@@ -1,3 +1,4 @@
+import Header from '@/components/Header';
 import './globals.css';
 
 export const metadata = {
@@ -13,10 +14,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-black">
       <body className="bg-black text-white antialiased">
-        {/* The Layout Container: 
-            Everything inside here will inherit the black background 
-        */}
         <div className="flex flex-col min-h-screen">
+          <Header />
           {children}
         </div>
       </body>
