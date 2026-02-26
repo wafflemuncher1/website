@@ -22,26 +22,26 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
   }, [open, onClose]);
 
   const linkClass =
-    'block w-full rounded-lg px-4 py-3 text-lg font-semibold text-black ' +
+    'block w-full rounded-md px-4 py-3 text-base font-semibold text-black ' +
     'hover:bg-zinc-100 active:bg-zinc-200 transition';
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop (page stays visible behind it) */}
       <div
         className={[
-          'fixed inset-0 z-[9998] bg-black/50 transition-opacity duration-200',
+          'fixed inset-0 z-[9998] bg-black/60 transition-opacity duration-200',
           open ? 'opacity-100' : 'opacity-0 pointer-events-none',
         ].join(' ')}
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Sidebar (white, full height) */}
+      {/* White rectangle panel */}
       <aside
         className={[
-          'fixed top-0 left-0 z-[9999] h-dvh w-80 max-w-[85vw]',
-          'bg-white text-black',
+          'fixed top-0 left-0 z-[9999] h-dvh w-72', // <= rectangle width
+          'bg-white text-black shadow-2xl', // <= white panel only
           'transform transition-transform duration-200 will-change-transform',
           open ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
@@ -50,7 +50,6 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
         aria-label="Sidebar menu"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close */}
         <div className="flex justify-end p-3">
           <button
             type="button"
@@ -62,7 +61,6 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
           </button>
         </div>
 
-        {/* Links (only 2) */}
         <nav className="px-3">
           <ul className="flex flex-col gap-2">
             <li>
