@@ -32,13 +32,13 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
         aria-hidden="true"
       />
 
-      {/* Drawer (fixed width) */}
+      {/* Drawer (LEFT) */}
       <aside
         className={[
-          'fixed top-0 right-0 z-[70] h-dvh w-72', // <= not full screen
+          'fixed top-0 left-0 z-[70] h-dvh w-72', // left side + fixed width
           'bg-zinc-950 text-white shadow-2xl',
           'transform transition-transform duration-200 will-change-transform',
-          open ? 'translate-x-0' : 'translate-x-full',
+          open ? 'translate-x-0' : '-translate-x-full', // slide from left
         ].join(' ')}
         role="dialog"
         aria-modal="true"
@@ -55,7 +55,7 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
           </button>
         </div>
 
-        {/* Placeholder box so you can see it clearly */}
+        {/* Placeholder content so it’s obvious */}
         <div className="p-4">
           <div className="h-32 rounded-xl border border-zinc-800 bg-black/40" />
         </div>
