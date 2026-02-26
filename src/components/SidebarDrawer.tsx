@@ -22,6 +22,7 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
 
   return (
     <>
+      {/* Backdrop */}
       <div
         className={[
           'fixed inset-0 z-[60] bg-black/60 transition-opacity duration-200',
@@ -31,10 +32,11 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
         aria-hidden="true"
       />
 
+      {/* Drawer */}
       <aside
         className={[
           'fixed top-0 right-0 z-[70] h-dvh w-[85vw] max-w-sm',
-          'bg-black border-l border-zinc-900',
+          'bg-black', // removed border-l to eliminate the visible 1px line
           'transform transition-transform duration-200 will-change-transform',
           open ? 'translate-x-0' : 'translate-x-full',
         ].join(' ')}
