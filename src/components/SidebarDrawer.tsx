@@ -21,30 +21,21 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [open, onClose]);
 
-  const linkClass =
-    'block w-full rounded-md px-4 py-3 text-base font-semibold text-black ' +
-    'hover:bg-zinc-100 active:bg-zinc-200 transition';
+  if (!open) return null;
 
   return (
     <>
-      {/* Backdrop (page stays visible behind it) */}
+      {/* Backdrop (under the panel, above everything else) */}
       <div
-        className={[
-          'fixed inset-0 z-[9998] bg-black/60 transition-opacity duration-200',
-          open ? 'opacity-100' : 'opacity-0 pointer-events-none',
-        ].join(' ')}
+        className="fixed inset-0 z-[99999] bg-black/60"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* White rectangle panel */}
+      {/* Panel (top-most) */}
       <aside
-        className={[
-          'fixed top-0 left-0 z-[9999] h-dvh w-72', // <= rectangle width
-          'bg-white text-black shadow-2xl', // <= white panel only
-          'transform transition-transform duration-200 will-change-transform',
-          open ? 'translate-x-0' : '-translate-x-full',
-        ].join(' ')}
+        className="fixed top-0 left-0 z-[100000] h-dvh w-72 bg-white text-black shadow-2xl"
+        style={{ backgroundColor: '#ffffff', color: '#000000' }}
         role="dialog"
         aria-modal="true"
         aria-label="Sidebar menu"
@@ -64,12 +55,20 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
         <nav className="px-3">
           <ul className="flex flex-col gap-2">
             <li>
-              <Link href="/pricing" onClick={onClose} className={linkClass}>
+              <Link
+                href="/pricing"
+                onClick={onClose}
+                className="block w-full rounded-md px-4 py-3 text-base font-semibold hover:bg-zinc-100"
+              >
                 Pricing
               </Link>
             </li>
             <li>
-              <Link href="/about" onClick={onClose} className={linkClass}>
+              <Link
+                href="/about"
+                onClick={onClose}
+                className="block w-full rounded-md px-4 py-3 text-base font-semibold hover:bg-zinc-100"
+              >
                 About Me
               </Link>
             </li>
