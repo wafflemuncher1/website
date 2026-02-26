@@ -25,7 +25,7 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
       {/* Backdrop */}
       <div
         className={[
-          'fixed inset-0 z-[60] bg-black/60 transition-opacity duration-200',
+          'fixed inset-0 z-[60] bg-black/70 transition-opacity duration-200',
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
         ].join(' ')}
         onClick={onClose}
@@ -36,7 +36,7 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
       <aside
         className={[
           'fixed top-0 right-0 z-[70] h-dvh w-[85vw] max-w-sm',
-          'bg-black', // removed border-l to eliminate the visible 1px line
+          'bg-zinc-950 text-white shadow-2xl', // more visible than pure bg-black
           'transform transition-transform duration-200 will-change-transform',
           open ? 'translate-x-0' : 'translate-x-full',
         ].join(' ')}
@@ -44,7 +44,11 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
         aria-modal="true"
         aria-label="Sidebar menu"
       >
-        <div className="flex items-center justify-end p-4 border-b border-zinc-900">
+        <div className="flex items-center justify-between p-4 border-b border-zinc-800">
+          <div className="text-xs font-bold tracking-widest text-zinc-400 uppercase">
+            Sidebar
+          </div>
+
           <button
             type="button"
             onClick={onClose}
@@ -55,7 +59,14 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
           </button>
         </div>
 
-        <div className="p-4">{/* empty for now */}</div>
+        {/* Visible placeholder content */}
+        <div className="p-4">
+          <div className="rounded-xl border border-zinc-800 bg-black/40 p-4">
+            <p className="text-sm text-zinc-300">
+              Sidebar content goes here.
+            </p>
+          </div>
+        </div>
       </aside>
     </>
   );
