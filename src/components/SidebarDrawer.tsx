@@ -25,7 +25,7 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
       {/* Backdrop */}
       <div
         className={[
-          'fixed inset-0 z-[60] bg-black/60 transition-opacity duration-200',
+          'fixed inset-0 z-[9998] bg-black/60 transition-opacity duration-200',
           open ? 'opacity-100' : 'opacity-0 pointer-events-none',
         ].join(' ')}
         onClick={onClose}
@@ -35,14 +35,15 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
       {/* Drawer (LEFT) */}
       <aside
         className={[
-          'fixed top-0 left-0 z-[70] h-dvh w-72', // left side + fixed width
+          'fixed top-0 left-0 z-[9999] h-dvh w-72',
           'bg-zinc-950 text-white shadow-2xl',
           'transform transition-transform duration-200 will-change-transform',
-          open ? 'translate-x-0' : '-translate-x-full', // slide from left
+          open ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
         role="dialog"
         aria-modal="true"
         aria-label="Sidebar menu"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-end p-3 border-b border-zinc-800">
           <button
@@ -55,7 +56,6 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
           </button>
         </div>
 
-        {/* Placeholder content so it’s obvious */}
         <div className="p-4">
           <div className="h-32 rounded-xl border border-zinc-800 bg-black/40" />
         </div>
