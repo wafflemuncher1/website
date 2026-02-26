@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { X, Tag, User, Home } from 'lucide-react';
+import { X } from 'lucide-react';
 
 type SidebarDrawerProps = {
   open: boolean;
@@ -22,10 +22,8 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
   }, [open, onClose]);
 
   const linkClass =
-    'flex items-center gap-3 rounded-xl px-3 py-3 transition ' +
-    'text-zinc-900 hover:bg-zinc-100 active:bg-zinc-200';
-
-  const iconClass = 'text-blue-600';
+    'block w-full rounded-lg px-4 py-3 text-lg font-semibold text-black ' +
+    'hover:bg-zinc-100 active:bg-zinc-200 transition';
 
   return (
     <>
@@ -39,11 +37,11 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
         aria-hidden="true"
       />
 
-      {/* Drawer (LEFT) */}
+      {/* Drawer */}
       <aside
         className={[
           'fixed top-0 left-0 z-[9999] h-dvh w-80 max-w-[85vw]',
-          'bg-white text-zinc-900 shadow-2xl',
+          'bg-white', // full white top-to-bottom
           'transform transition-transform duration-200 will-change-transform',
           open ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
@@ -52,60 +50,33 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
         aria-label="Sidebar menu"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-zinc-200">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-black text-xs italic">GW</span>
-            </div>
-            <div className="leading-tight">
-              <div className="font-black tracking-tighter italic">
-                GLOSS<span className="text-blue-600">WORKS</span>
-              </div>
-              <div className="text-xs text-zinc-500">Menu</div>
-            </div>
-          </div>
-
+        {/* Close button */}
+        <div className="flex justify-end p-3">
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-zinc-100 transition text-zinc-700"
+            className="p-2 rounded-lg hover:bg-zinc-100 transition text-black"
             aria-label="Close menu"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
         {/* Links */}
-        <nav className="p-3">
-          <ul className="flex flex-col gap-1">
-            <li>
-              <Link href="/" onClick={onClose} className={linkClass}>
-                <Home size={18} className={iconClass} />
-                <span className="font-semibold">Home</span>
-              </Link>
-            </li>
-
+        <nav className="px-3">
+          <ul className="flex flex-col gap-2">
             <li>
               <Link href="/pricing" onClick={onClose} className={linkClass}>
-                <Tag size={18} className={iconClass} />
-                <span className="font-semibold">Pricing</span>
+                Pricing
               </Link>
             </li>
-
             <li>
               <Link href="/about" onClick={onClose} className={linkClass}>
-                <User size={18} className={iconClass} />
-                <span className="font-semibold">About Me</span>
+                About Me
               </Link>
             </li>
           </ul>
         </nav>
-
-        {/* Bottom area (optional) */}
-        <div className="mt-auto px-4 py-4 border-t border-zinc-200 text-xs text-zinc-500">
-          © {new Date().getFullYear()} GlossWorks
-        </div>
       </aside>
     </>
   );
