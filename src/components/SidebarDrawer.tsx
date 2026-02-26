@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Tag, User } from 'lucide-react';
 
 type SidebarDrawerProps = {
   open: boolean;
@@ -45,7 +46,11 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
         aria-label="Sidebar menu"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-end p-3 border-b border-zinc-800">
+        <div className="flex items-center justify-between p-3 border-b border-zinc-800">
+          <div className="text-xs font-bold tracking-widest text-zinc-400 uppercase">
+            Menu
+          </div>
+
           <button
             type="button"
             onClick={onClose}
@@ -56,9 +61,31 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
           </button>
         </div>
 
-        <div className="p-4">
-          <div className="h-32 rounded-xl border border-zinc-800 bg-black/40" />
-        </div>
+        <nav className="p-3">
+          <ul className="flex flex-col gap-2">
+            <li>
+              <Link
+                href="/pricing"
+                onClick={onClose}
+                className="flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-zinc-900 transition"
+              >
+                <Tag size={18} className="text-blue-500" />
+                <span className="font-semibold">Pricing</span>
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="/about"
+                onClick={onClose}
+                className="flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-zinc-900 transition"
+              >
+                <User size={18} className="text-blue-500" />
+                <span className="font-semibold">About Me</span>
+              </Link>
+            </li>
+          </ul>
+        </nav>
       </aside>
     </>
   );
