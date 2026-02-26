@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import Image from 'next/image';
 import { Menu } from 'lucide-react';
 
 type HeaderProps = {
@@ -8,7 +10,7 @@ type HeaderProps = {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   return (
-    <header className="fixed top-0 left-0 w-full z-[9999] bg-black/80 backdrop-blur-md border-b border-zinc-900 px-6 py-5">
+    <header className="fixed top-0 left-0 w-full z-[100001] bg-black/80 backdrop-blur-md border-b border-zinc-900 px-6 py-4">
       <div className="flex items-center justify-between max-w-screen-xl mx-auto">
         {/* LEFT: Sidebar Trigger */}
         <button
@@ -20,16 +22,17 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <Menu size={24} />
         </button>
 
-        {/* RIGHT: Company Name */}
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 bg-blue-600 rounded flex items-center justify-center">
-            <span className="text-white font-black text-xs italic">GW</span>
-          </div>
-
-          <span className="font-black tracking-tighter text-xl italic text-right">
-            GLOSS<span className="text-blue-600">WORKS</span>
-          </span>
-        </div>
+        {/* RIGHT: Clickable Logo (go home) */}
+        <Link href="/" aria-label="Go to homepage" className="shrink-0">
+          <Image
+            src="/glossworks-logo.png"
+            alt="GlossWorks"
+            width={220}
+            height={80}
+            priority
+            className="h-10 w-auto object-contain"
+          />
+        </Link>
       </div>
     </header>
   );
