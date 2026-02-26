@@ -1,4 +1,4 @@
-import Header from '@/components/Header';
+import AppShell from '@/components/AppShell';
 import './globals.css';
 
 export const metadata = {
@@ -15,8 +15,7 @@ export default function RootLayout({
     <html lang="en" className="bg-black">
       <body className="bg-black text-white antialiased">
         <div className="flex flex-col min-h-screen">
-          <Header />
-          {children}
+          <AppShell>{children}</AppShell>
         </div>
       </body>
     </html>
