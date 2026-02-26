@@ -37,11 +37,11 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
         aria-hidden="true"
       />
 
-      {/* Drawer */}
+      {/* Sidebar (white, full height) */}
       <aside
         className={[
           'fixed top-0 left-0 z-[9999] h-dvh w-80 max-w-[85vw]',
-          'bg-white text-black', // <-- this forces white sidebar
+          'bg-white text-black',
           'transform transition-transform duration-200 will-change-transform',
           open ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
@@ -50,17 +50,19 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
         aria-label="Sidebar menu"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close */}
         <div className="flex justify-end p-3">
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-zinc-100 transition text-black"
+            className="p-2 rounded-md hover:bg-zinc-100 transition text-black"
             aria-label="Close menu"
           >
             <X size={22} />
           </button>
         </div>
 
+        {/* Links (only 2) */}
         <nav className="px-3">
           <ul className="flex flex-col gap-2">
             <li>

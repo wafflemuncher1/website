@@ -12,6 +12,11 @@ body {
   min-height: 100%;
 }
 
+[data-sidebar-drawer] {
+  background: #fff;
+  color: #000;
+}
+
 * {
   box-sizing: border-box;
 }
