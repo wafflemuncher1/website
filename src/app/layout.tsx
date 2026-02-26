@@ -13,10 +13,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="bg-black">
-      <body className="bg-black text-white antialiased">
-        <div className="flex flex-col min-h-screen">
-          <AppShell>{children}</AppShell>
-        </div>
+      <body className="min-h-screen bg-black text-white antialiased">
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
