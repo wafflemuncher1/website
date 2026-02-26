@@ -4,7 +4,11 @@ import { Menu } from 'lucide-react'; // Standard icon for the menu
 
 
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
 
   return (
 
@@ -36,7 +40,12 @@ export default function Header() {
 
         {/* RIGHT: Sidebar Trigger */}
 
-        <button className="p-2 hover:bg-zinc-900 rounded-lg transition text-blue-500">
+        <button
+          type="button"
+          aria-label="Open menu"
+          onClick={onMenuClick}
+          className="p-2 hover:bg-zinc-900 rounded-lg transition text-blue-500"
+        >
 
           <Menu size={24} />
 
