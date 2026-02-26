@@ -2,10 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Force the entire site to be black by default */
-html, body {
-  background-color: #000000 !important;
-  color: #ffffff !important;
+/* Keep layout sane; let components decide their own colors */
+html,
+body {
   margin: 0;
   padding: 0;
   min-height: 100%;
