@@ -25,16 +25,16 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
 
   return (
     <>
-      {/* Backdrop (under the panel, above everything else) */}
+      {/* Backdrop */}
       <div
-        className="fixed inset-0 z-[99999] bg-black/60"
+        className="fixed inset-0 z-[100000] bg-black/60"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Panel (top-most) */}
+      {/* Panel (above header) */}
       <aside
-        className="fixed top-0 left-0 z-[100000] h-dvh w-72 bg-white text-black shadow-2xl"
+        className="fixed top-0 left-0 z-[100002] h-dvh w-72 bg-white text-black shadow-2xl"
         style={{ backgroundColor: '#ffffff', color: '#000000' }}
         role="dialog"
         aria-modal="true"
