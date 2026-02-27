@@ -23,19 +23,22 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
 
   if (!open) return null;
 
+  const linkClass =
+    'block w-full rounded-md px-4 py-3 text-base font-semibold text-black ' +
+    'hover:bg-zinc-100 active:bg-zinc-200 transition';
+
   return (
     <>
-      {/* Backdrop (under the panel, above everything else) */}
+      {/* Backdrop: below panel, clickable to close */}
       <div
-        className="fixed inset-0 z-[99999] bg-black/60"
+        className="fixed inset-0 z-[99998] bg-black/60"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Panel (top-most) */}
+      {/* Panel: above backdrop, receives clicks */}
       <aside
-        className="fixed top-0 left-0 z-[100000] h-dvh w-72 bg-white text-black shadow-2xl"
-        style={{ backgroundColor: '#ffffff', color: '#000000' }}
+        className="fixed top-0 left-0 z-[99999] h-dvh w-72 bg-white text-black shadow-2xl pointer-events-auto"
         role="dialog"
         aria-modal="true"
         aria-label="Sidebar menu"
@@ -55,20 +58,12 @@ export default function SidebarDrawer({ open, onClose }: SidebarDrawerProps) {
         <nav className="px-3">
           <ul className="flex flex-col gap-2">
             <li>
-              <Link
-                href="/pricing"
-                onClick={onClose}
-                className="block w-full rounded-md px-4 py-3 text-base font-semibold hover:bg-zinc-100"
-              >
+              <Link href="/pricing" onClick={onClose} className={linkClass}>
                 Pricing
               </Link>
             </li>
             <li>
-              <Link
-                href="/about"
-                onClick={onClose}
-                className="block w-full rounded-md px-4 py-3 text-base font-semibold hover:bg-zinc-100"
-              >
+              <Link href="/about" onClick={onClose} className={linkClass}>
                 About Me
               </Link>
             </li>
