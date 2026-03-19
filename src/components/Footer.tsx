@@ -1,101 +1,44 @@
-import { Instagram, Facebook, Youtube } from 'lucide-react'; // You'll need to install lucide-react or use simple SVGs
+import { Instagram, Mail, MapPin } from "lucide-react";
 
-export default function Footer() {
-  const locations = [
-    'Mount Washington', 'Louisville', 'Shepherdsville', 
-    'Hillview', 'Brooks', 'Fairdell', 'Fern Creek', 'Highview'
-  ];
-
+const Footer = () => {
   return (
-    <footer className="w-full bg-black text-white py-16 px-6 md:px-12 border-t border-zinc-900">
-      <div className="max-w-screen-xl mx-auto">
-        
-        {/* RESPONSIVE GRID: 
-            grid-cols-2 = 2 columns on mobile
-            md:grid-cols-5 = 5 columns on laptop/desktop 
-        */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-16">
-          
-          {/* 1. LOCATIONS */}
-          <div className="col-span-1">
-            <h3 className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] mb-6 border-b border-zinc-900 pb-2">
-              Locations Served
-            </h3>
-            <ul className="space-y-3">
-              {locations.map((city) => (
-                <li key={city} className="flex items-center gap-2 text-xs text-zinc-300 whitespace-nowrap">
-                  <span className="text-blue-600 text-[8px]">◆</span> {city}, KY
-                </li>
-              ))}
-            </ul>
+    <footer className="border-t border-border/50 py-12">
+      <div className="container mx-auto px-4 md:px-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <p className="text-lg font-bold tracking-wider">
+              GLOSS<span className="text-primary">WORKS</span>
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 font-body">Mobile Detailing — Louisville, KY</p>
           </div>
 
-          {/* 2. QUICK LINKS (Desktop only usually, or shared) */}
-          <div className="col-span-1">
-            <h3 className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] mb-6 border-b border-zinc-900 pb-2">
-              Quick Links
-            </h3>
-            <ul className="space-y-3 text-xs text-zinc-300">
-              <li className="hover:text-blue-500 cursor-pointer transition">Hub</li>
-              <li className="hover:text-blue-500 cursor-pointer transition">Contact Us</li>
-            </ul>
+          <div className="flex items-center gap-6">
+            <a
+              href="#"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Instagram"
+            >
+              <Instagram className="h-5 w-5" />
+            </a>
+            <a
+              href="mailto:hello@glossworks.com"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Email"
+            >
+              <Mail className="h-5 w-5" />
+            </a>
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="h-3 w-3" /> Louisville, KY
+            </span>
           </div>
-
-          {/* 3. SERVICES */}
-          <div className="col-span-1">
-            <h3 className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] mb-6 border-b border-zinc-900 pb-2">
-              Services
-            </h3>
-            <ul className="space-y-3 text-xs text-zinc-300">
-              <li>Car Detailing</li>
-              <li>Ceramic Coating</li>
-              <li>Dealership & Fleet</li>
-            </ul>
-          </div>
-
-          {/* 4. TERMS */}
-          <div className="col-span-1">
-            <h3 className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] mb-6 border-b border-zinc-900 pb-2">
-              Terms
-            </h3>
-            <ul className="space-y-3 text-xs text-zinc-300">
-              <li>Service Agreement</li>
-              <li>Privacy Policy</li>
-              <li>Terms of Service</li>
-            </ul>
-          </div>
-
-          {/* 5. CONTACT (Takes full width on mobile if needed, or stays in col) */}
-          <div className="col-span-2 md:col-span-1">
-            <h3 className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.2em] mb-6 border-b border-zinc-900 pb-2">
-              Contact
-            </h3>
-            <div className="space-y-4 text-xs text-zinc-300">
-              <p className="font-bold text-white">GlossWorks Mobile Detailing</p>
-              <p>Monday – Sunday<br/>8:00 AM to 8:00 PM</p>
-              <p>Get In Touch <span className="text-blue-500 font-bold">502-612-0430</span></p>
-              
-              {/* SOCIAL ICONS */}
-              <div className="flex gap-4 pt-2">
-                <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-blue-600 transition cursor-pointer">
-                  <span className="text-[10px]">IG</span>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-blue-600 transition cursor-pointer">
-                  <span className="text-[10px]">FB</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
 
-        {/* COPYRIGHT */}
-        <div className="pt-8 border-t border-zinc-900 text-center md:text-left">
-          <p className="text-zinc-600 text-[10px] uppercase tracking-[0.2em]">
-            Copyright © 2026 <span className="font-bold text-zinc-400">GlossWorks Mobile Detailing</span>. All rights reserved.
-          </p>
-        </div>
+        <p className="text-center text-xs text-muted-foreground mt-8 font-body">
+          © {new Date().getFullYear()} Glossworks Mobile Detailing. All rights reserved.
+        </p>
       </div>
     </footer>
   );
-}
+};
+
+export default Footer;
