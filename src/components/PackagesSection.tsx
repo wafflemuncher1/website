@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 
 const packages = [
   {
-    name: "The Maintenance",
+    name: "The Basics",
     tagline: "Express Wash & Protect",
-    price: "$149",
+    price: "$125",
     priceNote: "Starting at",
     popular: false,
     features: [
@@ -20,7 +20,7 @@ const packages = [
   {
     name: "The Signature Detail",
     tagline: "Full Interior & Exterior Deep Clean",
-    price: "$349",
+    price: "$165",
     priceNote: "Starting at",
     popular: true,
     features: [
@@ -33,9 +33,9 @@ const packages = [
     ],
   },
   {
-    name: "The Showroom Prep",
+    name: "The Luxury",
     tagline: "Paint Correction + Ceramic Coating",
-    price: "$899",
+    price: "$240",
     priceNote: "Starting at",
     popular: false,
     features: [
