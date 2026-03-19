@@ -2,11 +2,11 @@ import { motion } from "framer-motion";
 import { Cog, PawPrint, Lightbulb, Sparkles, Wind } from "lucide-react";
 
 const addOns = [
-  { icon: Cog, name: "Engine Bay Detail", desc: "Deep clean & dressing for your engine compartment." },
-  { icon: PawPrint, name: "Pet Hair Removal", desc: "Thorough extraction from seats, carpets & crevices." },
-  { icon: Lightbulb, name: "Headlight Restoration", desc: "UV-damaged lenses restored to crystal clarity." },
-  { icon: Sparkles, name: "Clay Bar & Wax", desc: "Surface decontamination plus protective carnauba wax." },
-  { icon: Wind, name: "Ozone Odor Treatment", desc: "Industrial ozone generator eliminates stubborn odors." },
+  { icon: Cog, name: "Engine Bay Detail $85 ", desc: "Deep clean & dressing for your engine compartment." },
+  { icon: PawPrint, name: "Pet Hair Removal $40 ", desc: "Thorough extraction from seats, carpets & crevices." },
+  { icon: Lightbulb, name: "Headlight Restoration $90 ", desc: "UV-damaged lenses restored to crystal clarity." },
+  { icon: Sparkles, name: "Clay Bar & Wax 20$ ", desc: "Surface decontamination plus protective carnauba wax." },
+
 ];
 
 const AddOnBoutique = () => {
