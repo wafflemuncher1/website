@@ -1,0 +1,58 @@
+import { motion } from "framer-motion";
+import { Award, Heart } from "lucide-react";
+
+const AboutSection = () => {
+  return (
+    <section id="about" className="py-24 md:py-32">
+      <div className="container mx-auto px-4 md:px-8">
+        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+          >
+            <p className="text-primary text-sm tracking-[0.3em] uppercase mb-3">About</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">The Vision Behind Glossworks</h2>
+            <p className="text-secondary-foreground font-body leading-relaxed mb-4">
+              Glossworks was born from a simple belief: your vehicle deserves more than a tunnel wash. 
+              As an ASE-certified technician, I've spent years perfecting the art and science of automotive 
+              surface care — combining German-engineered chemistry with meticulous hand techniques.
+            </p>
+            <p className="text-secondary-foreground font-body leading-relaxed">
+              Every detail is a chance to transform not just a car, but the way you feel driving it. 
+              We bring the showroom to your driveway — on your schedule, on your terms.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="space-y-5"
+          >
+            <div className="flex items-start gap-4 rounded-xl border border-border/50 bg-card/50 p-6">
+              <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Award className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">ASE Certified</h3>
+                <p className="text-xs text-muted-foreground font-body">Industry-recognized certification ensuring professional-grade results on every vehicle.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 rounded-xl border border-border/50 bg-card/50 p-6">
+              <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Heart className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Passion-Driven</h3>
+                <p className="text-xs text-muted-foreground font-body">Every job gets 100% — because we genuinely love making vehicles look their absolute best.</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default AboutSection;
