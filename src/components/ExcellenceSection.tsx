@@ -9,18 +9,18 @@ const items = [
   },
   {
     icon: FlaskConical,
-    title: "Koch Chemie Products",
+    title: "High Quailty Chemicals",
     desc: "We exclusively use German-engineered Koch Chemie chemicals — the gold standard in professional detailing.",
   },
   {
     icon: ShieldCheck,
-    title: "Ceramic Coating Specialists",
-    desc: "Factory-trained applicators delivering multi-year ceramic protection with guaranteed results.",
+    title: "Waxing and Sealant Specialists",
+    desc: "Factory-trained applicators delivering the finest service with guaranteed results.",
   },
   {
     icon: Droplets,
-    title: "Paint Correction Experts",
-    desc: "Multi-stage machine polishing to remove swirls, scratches, and oxidation — restoring factory finish.",
+    title: "Full insured bussiness",
+    desc: "",
   },
 ];
 
