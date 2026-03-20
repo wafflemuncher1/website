@@ -13,10 +13,10 @@ const steps = [
 
 // FLAT upcharges by vehicle size (edit these numbers to match your pricing)
 const vehicleSizes = [
-  { label: "Small", desc: "Coupe, Sedan", upcharge: 0 },
-  { label: "Medium", desc: "Crossover, Wagon", upcharge: 15 },
-  { label: "Large", desc: "SUV, Minivan", upcharge: 30 },
-  { label: "XL", desc: "Full-size Truck, Suburban", upcharge: 50 },
+  { label: "Small", desc: "Coupe / Sedan", upcharge: 0 },
+  { label: "Medium", desc: "Small SUV / Crossover", upcharge: 25 },
+  { label: "Large", desc: "Large SUV / Truck", upcharge: 50 },
+  { label: "XL", desc: "XL Vehicle / Minivan", upcharge: 75 },
 ];
 
 // Base package prices
