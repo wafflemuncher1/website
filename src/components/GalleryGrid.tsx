@@ -8,21 +8,12 @@ import image5 from "@/assets/image5.jpg";
 import image6 from "@/assets/image6.jpg";
 
 const images = [
-  { src: image1, alt: "Image 1", label: "Image 1" },
-  { src: image2, alt: "Image 2", label: "Image 2" },
-  { src: image3, alt: "Image 3", label: "Image 3" },
-  { src: image4, alt: "Image 4", label: "Image 4" },
-  { src: image5, alt: "Image 5", label: "Image 5" },
-  { src: image6, alt: "Image 6", label: "Image 6" },
-];
-
-const images = [
-  { src: heroCar, alt: "Ceramic coated SUV", label: "Ceramic Coating" },
-  { src: beforeAfter, alt: "Paint correction result", label: "Paint Correction" },
-  { src: heroCar, alt: "Interior deep clean", label: "Interior Detail" },
-  { src: beforeAfter, alt: "Engine bay detail", label: "Engine Bay" },
-  { src: heroCar, alt: "Full exterior detail", label: "Exterior Detail" },
-  { src: beforeAfter, alt: "Headlight restoration", label: "Headlight Restore" },
+  { src: image1, alt: "Ceramic coated SUV", label: "Ceramic Coating" },
+  { src: image2, alt: "Paint correction result", label: "Paint Correction" },
+  { src: image3, alt: "Interior deep clean", label: "Interior Detail" },
+  { src: image4, alt: "Engine bay detail", label: "Engine Bay" },
+  { src: image5, alt: "Full exterior detail", label: "Exterior Detail" },
+  { src: image6, alt: "Headlight restoration", label: "Headlight Restore" },
 ];
 
 const GalleryGrid = () => {
