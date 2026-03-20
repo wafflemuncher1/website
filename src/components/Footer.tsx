@@ -34,7 +34,7 @@ const Footer = () => {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-8 font-body">
-          © {new Date().getFullYear()} Glossworks Mobile Detailing. All rights reserved.
+          © {new Date().getFullYear()} Glossworks Mobile Detailing. All rights reserved .
         </p>
       </div>
     </footer>

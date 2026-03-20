@@ -2,12 +2,12 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 
 const reviews = [
-  { name: "James T.", text: "Best detail I've ever had. My Tesla looks showroom-new. Glossworks is the real deal." },
-  { name: "Sarah M.", text: "The ceramic coating is unreal. Water just beads right off. Worth every penny." },
-  { name: "David K.", text: "Professional, on-time, and meticulous. They came to my driveway and worked magic." },
-  { name: "Michelle R.", text: "My Tahoe had never looked this good, even when I bought it. Incredible attention to detail." },
-  { name: "Chris P.", text: "Koch Chemie products made a noticeable difference. The paint literally glows now." },
-  { name: "Amanda L.", text: "Booked the Showroom Prep — they corrected every swirl mark. Can't recommend enough." },
+  { name: "James T.", text: "Insert text here when ready" },
+  { name: "Sarah M.", text: "Insert text here when ready" },
+  { name: "David K.", text: "Insert text here when ready" },
+  { name: "Michelle R.", text: "Insert text here when ready" },
+  { name: "Chris P.", text: "Insert text here when ready" },
+  { name: "Amanda L.", text: "Insert text here when ready" },
 ];
 
 const ReviewCard = ({ name, text }: { name: string; text: string }) => (

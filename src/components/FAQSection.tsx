@@ -7,12 +7,12 @@ import {
 } from "@/components/ui/accordion";
 
 const faqs = [
-  { q: "How long does a full detail take?", a: "A full interior and exterior detail typically takes 2–4 hours depending on vehicle size and condition. Paint correction and ceramic coating jobs may take 6–8 hours." },
-  { q: "Do you come to me?", a: "Absolutely. We're a fully mobile operation. We come to your home, office, or anywhere with water and electric access in the Louisville metro area." },
-  { q: "What if it rains on my appointment day?", a: "We monitor the forecast closely. If rain is expected, we'll reach out to reschedule at the next available date — no cancellation fee." },
-  { q: "What products do you use?", a: "We exclusively use Koch Chemie — German-engineered, professional-grade detailing chemicals trusted by the world's top detailers." },
-  { q: "How often should I get my car detailed?", a: "We recommend a maintenance wash every 2–4 weeks and a full detail every 3–6 months. Ceramic-coated vehicles can go longer between details." },
-  { q: "Do you offer ceramic coating?", a: "Yes! We're factory-trained ceramic coating applicators. Our coatings provide 2+ years of protection with proper maintenance." },
+  { q: "How long does a full detail take?", a: "A full interior and exterior detail typically takes 2–4 hours depending on vehicle size and condition." },
+  { q: "Do you come to me?", a: "Absolutely. We're a fully mobile operation. We come to your home, office, or anywhere with water and electric access in our service areas." },
+  { q: "What if it rains on my appointment day?", a: "We monitor the forecast closely. If rain is expected, we'll reach out to reschedule at the next available date" },
+  { q: "What products do you use?", a: "We exclusively use High quality porducts such as Koch Chemie — German-engineered, professional-grade detailing chemicals trusted by the world's top detailers." },
+  { q: "How often should I get my car detailed?", a: "We recommend a maintenance wash every 2–4 weeks and a full detail every 3–6 months. Waxed and sealant vehicles can go longer between details." },
+  { q: "Do you offer Wax and sealants?", a: "Yes! We're factory-trained waxing and sealant applicators. Our coatings can provide anywhere from 4 weeks to 9 months of protection with proper maintenance." },
 ];
 
 const FAQSection = () => {

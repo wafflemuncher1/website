@@ -2,9 +2,8 @@ import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
 
 const areas = [
-  "Downtown Louisville", "The Highlands", "St. Matthews", "Jeffersontown",
-  "Prospect", "Anchorage", "Middletown", "Hurstbourne",
-  "Lyndon", "Crestwood", "La Grange", "New Albany (IN)",
+  "Southern Louisville", "Shepherdsville", "Bardstown", "Jeffersontown",
+  "Prospect", "Bullitt County", "Mt Washigton", 
 ];
 
 const ServiceArea = () => {
