@@ -11,46 +11,55 @@ const steps = [
   { label: "Quote", icon: Calculator },
 ];
 
+// FLAT upcharges by vehicle size (edit these numbers to match your pricing)
 const vehicleSizes = [
-  { label: "Small", desc: "Coupe, Sedan", multiplier: 1 },
-  { label: "Medium", desc: "Crossover, Wagon", multiplier: 1.25 },
-  { label: "Large", desc: "SUV, Minivan", multiplier: 1.5 },
-  { label: "XL", desc: "Full-size Truck, Suburban", multiplier: 1.8 },
+  { label: "Small", desc: "Coupe, Sedan", upcharge: 0 },
+  { label: "Medium", desc: "Crossover, Wagon", upcharge: 15 },
+  { label: "Large", desc: "SUV, Minivan", upcharge: 30 },
+  { label: "XL", desc: "Full-size Truck, Suburban", upcharge: 50 },
 ];
 
+// Base package prices
 const serviceCategories = [
-  { label: "Back to Basics $125", base: 125 },
-  { label: "The Signature Detail $165", base: 165 },
-  { label: "The luxury $240", base: 240 },
+  { label: "Back to Basics", base: 125 },
+  { label: "The Signature Detail", base: 165 },
+  { label: "The Luxury", base: 240 },
 ];
 
-const conditions = [
-  { label: "Engine Bay Detail $85", desc: "Deep clean & dressing for your engine compartment", multiplier: 1 },
-  { label: "Pet Hair Removal $40", desc: "Thorough extraction from seats, carpets & crevices", multiplier: 1.3 },
-  { label: "Headlight Restoration $90", desc: "UV-damaged lenses restored to crystal clarity", multiplier: 1.6 },
+// Multi-select add-ons (edit prices here)
+const addOns = [
+  { key: "engine", label: "Engine Bay Detail", desc: "Deep clean & dressing for your engine compartment", price: 85 },
+  { key: "petHair", label: "Pet Hair Removal", desc: "Thorough extraction from seats, carpets & crevices", price: 40 },
+  { key: "headlights", label: "Headlight Restoration", desc: "UV-damaged lenses restored to crystal clarity", price: 90 },
 ];
 
 const EstimateEngine = () => {
   const [step, setStep] = useState(0);
   const [vehicle, setVehicle] = useState<number | null>(null);
   const [service, setService] = useState<number | null>(null);
-  const [condition, setCondition] = useState<number | null>(null);
+
+  // multi-select add-ons: store indexes from addOns[]
+  const [selectedAddOns, setSelectedAddOns] = useState<number[]>([]);
+
   const [showContact, setShowContact] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [contact, setContact] = useState({ name: "", email: "", phone: "" });
 
-  const canNext =
-    (step === 0 && vehicle !== null) ||
-    (step === 1 && service !== null) ||
-    (step === 2 && condition !== null);
+  // Add-ons step is optional, so we allow Next even with nothing selected on step 2.
+  const canNext = (step === 0 && vehicle !== null) || (step === 1 && service !== null) || step === 2;
 
-  const getEstimate = () => {
-    if (vehicle === null || service === null || condition === null) return { low: 0, high: 0 };
+  const toggleAddOn = (idx: number) => {
+    setSelectedAddOns((prev) => (prev.includes(idx) ? prev.filter((x) => x !== idx) : [...prev, idx]));
+  };
+
+  const getTotal = () => {
+    if (vehicle === null || service === null) return 0;
+
     const base = serviceCategories[service].base;
-    const mult = vehicleSizes[vehicle].multiplier * conditions[condition].multiplier;
-    const low = Math.round(base * mult);
-    const high = Math.round(low * 1.35);
-    return { low, high };
+    const sizeUpcharge = vehicleSizes[vehicle].upcharge;
+    const addOnsTotal = selectedAddOns.reduce((sum, idx) => sum + addOns[idx].price, 0);
+
+    return base + sizeUpcharge + addOnsTotal;
   };
 
   const slideVariants = {
@@ -81,7 +90,11 @@ const EstimateEngine = () => {
     );
   }
 
-  const estimate = getEstimate();
+  const total = getTotal();
+
+  const basePrice = service !== null ? serviceCategories[service].base : 0;
+  const sizeUpcharge = vehicle !== null ? vehicleSizes[vehicle].upcharge : 0;
+  const addOnsTotal = selectedAddOns.reduce((sum, idx) => sum + addOns[idx].price, 0);
 
   return (
     <section id="estimate" className="py-24 md:py-32 bg-secondary/30">
@@ -122,7 +135,14 @@ const EstimateEngine = () => {
           {/* Step content */}
           <div className="rounded-xl border border-border/50 bg-card p-8 min-h-[280px]">
             <AnimatePresence mode="wait">
-              <motion.div key={step} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }}>
+              <motion.div
+                key={step}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3 }}
+              >
                 {step === 0 && (
                   <div>
                     <h3 className="text-lg font-semibold mb-6">What's Your Vehicle Size?</h3>
@@ -138,7 +158,10 @@ const EstimateEngine = () => {
                           }`}
                         >
                           <span className="text-sm font-semibold block">{v.label}</span>
-                          <span className="text-xs text-muted-foreground">{v.desc}</span>
+                          <span className="text-xs text-muted-foreground block">{v.desc}</span>
+                          <span className="text-xs mt-2 block">
+                            {v.upcharge === 0 ? "No size upcharge" : `+ $${v.upcharge} size upcharge`}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -159,7 +182,10 @@ const EstimateEngine = () => {
                               : "border-border/50 bg-secondary/50 text-muted-foreground hover:border-primary/30"
                           }`}
                         >
-                          {s.label}
+                          <div className="flex items-center justify-between">
+                            <span>{s.label}</span>
+                            <span className="font-semibold">${s.base}</span>
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -168,22 +194,34 @@ const EstimateEngine = () => {
 
                 {step === 2 && (
                   <div>
-                    <h3 className="text-lg font-semibold mb-6">Vehicle Condition</h3>
+                    <h3 className="text-lg font-semibold mb-2">Add Ons (optional)</h3>
+                    <p className="text-xs text-muted-foreground mb-6">Select as many as you want. We’ll total everything up.</p>
+
                     <div className="space-y-3">
-                      {conditions.map((c, i) => (
-                        <button
-                          key={c.label}
-                          onClick={() => setCondition(i)}
-                          className={`w-full text-left rounded-lg border p-4 transition-all ${
-                            condition === i
-                              ? "border-primary bg-primary/10 text-foreground"
-                              : "border-border/50 bg-secondary/50 text-muted-foreground hover:border-primary/30"
-                          }`}
-                        >
-                          <span className="text-sm font-semibold block">{c.label}</span>
-                          <span className="text-xs text-muted-foreground">{c.desc}</span>
-                        </button>
-                      ))}
+                      {addOns.map((a, i) => {
+                        const active = selectedAddOns.includes(i);
+
+                        return (
+                          <button
+                            key={a.key}
+                            onClick={() => toggleAddOn(i)}
+                            className={`w-full text-left rounded-lg border p-4 transition-all ${
+                              active
+                                ? "border-primary bg-primary/10 text-foreground"
+                                : "border-border/50 bg-secondary/50 text-muted-foreground hover:border-primary/30"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <span className="text-sm font-semibold block">{a.label}</span>
+                                <span className="text-xs text-muted-foreground">{a.desc}</span>
+                              </div>
+                              <div className="text-sm font-semibold whitespace-nowrap">${a.price}</div>
+                            </div>
+                            <div className="text-xs mt-2">{active ? "Selected" : "Click to add"}</div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -191,11 +229,49 @@ const EstimateEngine = () => {
                 {step === 3 && (
                   <div className="text-center">
                     <h3 className="text-lg font-semibold mb-2">Your Estimated Investment</h3>
-                    <p className="text-5xl md:text-6xl font-bold text-primary my-6">
-                      ${estimate.low} – ${estimate.high}
-                    </p>
+
+                    <p className="text-5xl md:text-6xl font-bold text-primary my-6">${total}</p>
+
+                    {/* Breakdown */}
+                    <div className="max-w-sm mx-auto text-left rounded-lg border border-border/50 bg-secondary/30 p-4 mb-8">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Package</span>
+                        <span className="font-medium">${basePrice}</span>
+                      </div>
+
+                      <div className="flex justify-between text-sm mt-2">
+                        <span className="text-muted-foreground">Vehicle size upcharge</span>
+                        <span className="font-medium">${sizeUpcharge}</span>
+                      </div>
+
+                      <div className="flex justify-between text-sm mt-2">
+                        <span className="text-muted-foreground">Add-ons total</span>
+                        <span className="font-medium">${addOnsTotal}</span>
+                      </div>
+
+                      {selectedAddOns.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-border/50">
+                          <p className="text-xs text-muted-foreground mb-2">Selected add-ons:</p>
+                          <ul className="text-xs space-y-1">
+                            {selectedAddOns.map((idx) => (
+                              <li key={addOns[idx].key} className="flex justify-between gap-4">
+                                <span>{addOns[idx].label}</span>
+                                <span className="font-medium">${addOns[idx].price}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between text-sm mt-4 pt-3 border-t border-border/50">
+                        <span className="font-semibold">Total</span>
+                        <span className="font-semibold">${total}</span>
+                      </div>
+                    </div>
+
                     <p className="text-sm text-muted-foreground font-body mb-8 max-w-sm mx-auto">
-                      {vehicleSizes[vehicle!].label} · {serviceCategories[service!].label} · {conditions[condition!].label} condition
+                      {vehicle !== null ? vehicleSizes[vehicle].label : ""} · {service !== null ? serviceCategories[service].label : ""}{" "}
+                      {selectedAddOns.length > 0 ? `· ${selectedAddOns.length} add-on(s)` : "· No add-ons"}
                     </p>
 
                     {!showContact ? (
@@ -203,10 +279,31 @@ const EstimateEngine = () => {
                         Get a Final Quote <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     ) : (
-                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 max-w-sm mx-auto text-left">
-                        <Input placeholder="Full Name" value={contact.name} onChange={(e) => setContact({ ...contact, name: e.target.value })} className="bg-secondary/50 border-border/50" />
-                        <Input placeholder="Email" type="email" value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} className="bg-secondary/50 border-border/50" />
-                        <Input placeholder="Phone (optional)" type="tel" value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} className="bg-secondary/50 border-border/50" />
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-4 max-w-sm mx-auto text-left"
+                      >
+                        <Input
+                          placeholder="Full Name"
+                          value={contact.name}
+                          onChange={(e) => setContact({ ...contact, name: e.target.value })}
+                          className="bg-secondary/50 border-border/50"
+                        />
+                        <Input
+                          placeholder="Email"
+                          type="email"
+                          value={contact.email}
+                          onChange={(e) => setContact({ ...contact, email: e.target.value })}
+                          className="bg-secondary/50 border-border/50"
+                        />
+                        <Input
+                          placeholder="Phone (optional)"
+                          type="tel"
+                          value={contact.phone}
+                          onChange={(e) => setContact({ ...contact, phone: e.target.value })}
+                          className="bg-secondary/50 border-border/50"
+                        />
                         <Button onClick={() => setSubmitted(true)} disabled={!contact.name || !contact.email} className="w-full">
                           Submit Quote Request <Send className="ml-2 h-4 w-4" />
                         </Button>
@@ -220,9 +317,18 @@ const EstimateEngine = () => {
 
           {/* Navigation */}
           <div className="flex justify-between mt-6">
-            <Button variant="outline" onClick={() => { setShowContact(false); setStep(step - 1); }} disabled={step === 0} className="border-border/50">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowContact(false);
+                setStep(step - 1);
+              }}
+              disabled={step === 0}
+              className="border-border/50"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
+
             {step < 3 && (
               <Button onClick={() => setStep(step + 1)} disabled={!canNext}>
                 Next <ArrowRight className="ml-2 h-4 w-4" />
