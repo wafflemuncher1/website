@@ -12,6 +12,8 @@ const HeroSection = () => {
           src={heroCar}
           alt="Luxury ceramic coated vehicle"
           className="w-full h-full object-cover opacity-40"
+          decoding="async"
+          fetchPriority="high"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/60" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50" />
@@ -41,8 +43,7 @@ const HeroSection = () => {
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-xl mb-10 font-body">
-            Elite Mobile Detailing & Paint Correction based in Louisville, KY.
-            We bring the showroom to you.
+            Elite Mobile Detailing & Polishing based in Louisville, KY. We bring the showroom to you.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -52,15 +53,17 @@ const HeroSection = () => {
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </a>
             </Button>
+
             <Button
               variant="outline"
               size="lg"
               className="text-base px-8 py-6 border-border/50 hover:border-primary/50"
               asChild
             >
-              <a href="#gallery">
+              {/* TODO: replace with your real phone number */}
+              <a href="tel:+15026120430">
                 <Play className="mr-2 h-4 w-4" />
-                View Portfolio
+                Book Now
               </a>
             </Button>
           </div>
