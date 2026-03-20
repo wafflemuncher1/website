@@ -5,7 +5,7 @@ const addOns = [
   { icon: Cog, name: "Engine Bay Detail $85 ", desc: "Deep clean & dressing for your engine compartment." },
   { icon: PawPrint, name: "Pet Hair Removal $40 ", desc: "Thorough extraction from seats, carpets & crevices." },
   { icon: Lightbulb, name: "Headlight Restoration $90 ", desc: "UV-damaged lenses restored to crystal clarity." },
-  { icon: Sparkles, name: "Clay Bar & Wax 20$ ", desc: "Surface decontamination plus protective carnauba wax." },
+  { icon: Sparkles, name: "Clay Bar 20$ ", desc: "Surface decontamination plus protective carnauba wax." },
 
 ];
 

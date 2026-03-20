@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 const steps = [
   { label: "Vehicle", icon: Car },
   { label: "Service", icon: Layers },
-  { label: "Condition", icon: ThermometerSun },
+  { label: "Add Ons", icon: ThermometerSun },
   { label: "Quote", icon: Calculator },
 ];
 
@@ -19,15 +19,15 @@ const vehicleSizes = [
 ];
 
 const serviceCategories = [
-  { label: "Interior Only", base: 120 },
-  { label: "Exterior Only", base: 100 },
-  { label: "Full Detail", base: 200 },
+  { label: "Back to Basics $125", base: 125 },
+  { label: "The Signature Detail $165", base: 165 },
+  { label: "The luxury $240", base: 240 },
 ];
 
 const conditions = [
-  { label: "Good", desc: "Regular upkeep, light dust", multiplier: 1 },
-  { label: "Fair", desc: "Some stains, moderate dirt", multiplier: 1.3 },
-  { label: "Heavy Soiling", desc: "Pet hair, heavy grime, neglect", multiplier: 1.6 },
+  { label: "Engine Bay Detail $85", desc: "Deep clean & dressing for your engine compartment", multiplier: 1 },
+  { label: "Pet Hair Removal $40", desc: "Thorough extraction from seats, carpets & crevices", multiplier: 1.3 },
+  { label: "Headlight Restoration $90", desc: "UV-damaged lenses restored to crystal clarity", multiplier: 1.6 },
 ];
 
 const EstimateEngine = () => {
@@ -95,7 +95,7 @@ const EstimateEngine = () => {
           <p className="text-primary text-sm tracking-[0.3em] uppercase mb-3">Estimate</p>
           <h2 className="text-3xl md:text-5xl font-bold">Instant Estimate Engine</h2>
           <p className="text-muted-foreground mt-3 font-body max-w-md mx-auto">
-            Get your ballpark investment in seconds — no commitment required.
+            Get your ballpark investment in seconds — no commitment required - prices may vary.
           </p>
         </motion.div>
 

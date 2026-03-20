@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 const packages = [
   {
-    name: "The Basics",
+    name: "Back to Basics",
     tagline: "Express Wash & Protect",
     price: "$125",
     priceNote: "Starting at",
