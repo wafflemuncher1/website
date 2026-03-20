@@ -3,7 +3,7 @@ import { MapPin } from "lucide-react";
 
 const areas = [
   "Southern Louisville", "Shepherdsville", "Bardstown", "Jeffersontown",
-  "Prospect", "Bullitt County", "Mt Washigton", 
+  "Prospect", "Bullitt County", "Mount Washington", "Hillview", 
 ];
 
 const ServiceArea = () => {

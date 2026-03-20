@@ -14,13 +14,15 @@ const AboutSection = () => {
             <p className="text-primary text-sm tracking-[0.3em] uppercase mb-3">About</p>
             <h2 className="text-3xl md:text-4xl font-bold mb-6">The Vision Behind Glossworks</h2>
             <p className="text-secondary-foreground font-body leading-relaxed mb-4">
-              Glossworks was born from a simple belief: your vehicle deserves more than a tunnel wash. 
-              As an ASE-certified technician, I've spent years perfecting the art and science of automotive 
-              surface care — combining German-engineered chemistry with meticulous hand techniques.
+              Most people see a car wash as a chore.
+               At Glossworks, we see it as a technical restoration.
+               Born in Louisville from a passion for automotive engineering,
+               we don't just "clean" cars—we perform a surgical decontamination of every surface.
             </p>
             <p className="text-secondary-foreground font-body leading-relaxed">
-              Every detail is a chance to transform not just a car, but the way you feel driving it. 
-              We bring the showroom to your driveway — on your schedule, on your terms.
+              As an ASE-certified technician, I approach your vehicle with a diagnostic eye.
+              I don't hide dirt under cheap waxes; I use German-engineered chemistry and
+              pH-balanced techniques to restore your vehicle’s factory-matte finish and crystal clarity.
             </p>
           </motion.div>
 
