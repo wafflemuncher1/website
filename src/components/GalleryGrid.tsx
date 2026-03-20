@@ -1,6 +1,20 @@
 import { motion } from "framer-motion";
-import beforeAfter from "@/assets/before-after.jpg";
-import heroCar from "@/assets/hero-car.jpg";
+
+import image1 from "@/assets/image1.jpg";
+import image2 from "@/assets/image2.jpg";
+import image3 from "@/assets/image3.jpg";
+import image4 from "@/assets/image4.jpg";
+import image5 from "@/assets/image5.jpg";
+import image6 from "@/assets/image6.jpg";
+
+const images = [
+  { src: image1, alt: "Image 1", label: "Image 1" },
+  { src: image2, alt: "Image 2", label: "Image 2" },
+  { src: image3, alt: "Image 3", label: "Image 3" },
+  { src: image4, alt: "Image 4", label: "Image 4" },
+  { src: image5, alt: "Image 5", label: "Image 5" },
+  { src: image6, alt: "Image 6", label: "Image 6" },
+];
 
 const images = [
   { src: heroCar, alt: "Ceramic coated SUV", label: "Ceramic Coating" },
