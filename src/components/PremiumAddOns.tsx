@@ -2,14 +2,14 @@ import { motion } from "framer-motion";
 import { Lightbulb, Cog, PawPrint, Wind, Droplets, CircleDot, ShieldCheck, Wrench } from "lucide-react";
 
 const addOns = [
-  { icon: Lightbulb, name: "Headlight Restoration", desc: "Crystal clear visibility restored", price: "$90" },
+  { icon: Lightbulb, name: "Trim Restoration", desc: "Restoring faded exterior plastics to deep black", price: "$60" },
   { icon: Cog, name: "Engine Bay Cleaning", desc: "Pristine engine compartment", price: "$85" },
   { icon: PawPrint, name: "Pet Hair Removal", desc: "Thorough fur extraction", price: "$40" },
-  { icon: Wind, name: "Odor Removal", desc: "Eliminate unwanted smells", price: "$110/hr" },
-  { icon: Droplets, name: "Windshield Coating", desc: "Rain-repelling protection", price: "$100" },
-  { icon: CircleDot, name: "Wheel Ceramic Coating", desc: "Durable wheel protection", price: "$120/wheel" },
-  { icon: ShieldCheck, name: "Interior Coating", desc: "Repels stains & prevents UV damage", price: "$150" },
-  { icon: Wrench, name: "Touch Up Service", desc: "Fix rock chips & deep scratches", price: "From $50" },
+  { icon: PawPrint, name: "Vehicle Size", desc: " +$30 for Small SUVs/Trucks | +$50 for XL SUVs/Duallys", price: "Price Varies" },
+  { icon: PawPrint, name: "Condition Fee", desc: "Price depends for Pet Hair or Excessive Mud/Dirt", price: "Price Varies" },
+  { icon: PawPrint, name: "Hard Wax Upgrade", desc: "Swapping the sealant for a hand-applied Paste Wax for that deep wet look", price: "$45" },
+  { icon: PawPrint, name: "Machine Liquid Wax", desc: "Application of a high quailty liquid wax using a DA Polisher with a soft finishing pad. ", price: "$45-65" },
+  { icon: PawPrint, name: "Pet Hair Removal", desc: "Always quote this as a starting at price (e.g., $50+). Tell the customer", price: "$40" },
 ];
 
 const PremiumAddOns = () => {
