@@ -20,7 +20,7 @@ const items = [
   {
     icon: Droplets,
     title: "Full insured bussiness",
-    desc: "",
+    desc: "Fully insured up to $500k",
   },
 ];
 

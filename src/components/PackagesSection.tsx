@@ -129,7 +129,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
     ],
   },
   interior: {
-    label: "Paint coorection",
+    label: "",
     packages: [
       {
         name: "",
@@ -167,7 +167,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
 const categories: { key: ServiceCategory; label: string }[] = [
   { key: "full", label: "Full Detail" },
   { key: "exterior", label: "Exterior Only" },
-  { key: "interior", label: "Interior Only" },
+  { key: "interior", label: "Paint Coorection" },
 ];
 
 const PackagesSection = () => {
