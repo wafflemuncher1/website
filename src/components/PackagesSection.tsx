@@ -82,7 +82,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         tagline: "",
         price: "$",
         interior: [
-          "",
+          "Sorry but we do not offer this service at this time please try again later, thank you",
         ],
         exterior: [
           "",
@@ -110,7 +110,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         badgeVariant: "popular",
         tagline: "",
         price: "$",
-        interior: [],
+        interior: ["Sorry but we do not offer this service at this time please try again later, thank you"],
         exterior: [
           "",
         ],
@@ -121,7 +121,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         badgeVariant: "vip",
         tagline: "",
         price: "$",
-        interior: [],
+        interior: ["Sorry but we do not offer this service at this time please try again later, thank you"],
         exterior: [
           "",
         ],
@@ -135,7 +135,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         name: "",
         tagline: "",
         price: "$",
-        interior: [""],
+        interior: ["Sorry but we do not offer this service at this time please try again later, thank you"],
         exterior: [],
       },
       {
@@ -145,7 +145,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         tagline: "",
         price: "$",
         interior: [
-          "",
+          "Sorry but we do not offer this service at this time please try again later, thank you",
         ],
         exterior: [],
       },
@@ -156,7 +156,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         tagline: "",
         price: "$",
         interior: [
-          "",
+          "Sorry but we do not offer this service at this time please try again later, thank you",
         ],
         exterior: [],
       },
