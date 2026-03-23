@@ -12,6 +12,7 @@ import ServiceAgreement from "@/components/ServiceAgreement";
 import ServiceArea from "@/components/ServiceArea";
 import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
+import PaintCorrectionPackages from "@/components/PaintCorrectionPackages";
 
 const Index = () => {
   return (
@@ -19,6 +20,7 @@ const Index = () => {
       <StickyHeader />
       <HeroSection />
       <PackagesSection />
+      <PaintCorrectionPackages />
       <AddOnBoutique />
       <WashComparison />
       <ExcellenceSection />
