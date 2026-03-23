@@ -129,7 +129,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
     ],
   },
   interior: {
-    label: "Interior Only",
+    label: "Paint coorection",
     packages: [
       {
         name: "",
@@ -185,7 +185,7 @@ const PackagesSection = () => {
         >
           <p className="text-primary text-sm tracking-[0.3em] uppercase mb-3">Services</p>
           <h2 className="text-3xl md:text-5xl font-bold mb-2">View Pricing & Packages Below</h2>
-          <p className="text-muted-foreground text-sm font-body">Swirl & Scratch Removal</p>
+          <p className="text-muted-foreground text-sm font-body">Swirl & Scratch Prevention</p>
         </motion.div>
 
         {/* Category Tabs */}
