@@ -13,6 +13,9 @@ import ServiceArea from "@/components/ServiceArea";
 import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
 import PaintCorrectionPackages from "@/components/PaintCorrectionPackages";
+import CeramicPackages from "@/components/CeramicPackages";
+import PremiumAddOns from "@/components/PremiumAddOns";
+
 
 const Index = () => {
   return (
@@ -21,16 +24,18 @@ const Index = () => {
       <HeroSection />
       <PackagesSection />
       <PaintCorrectionPackages />
+      <CeramicPackages />
+      <PremiumAddOns />
       <AddOnBoutique />
-      <WashComparison />
-      <ExcellenceSection />
-      <EstimateEngine />
       <GalleryGrid />
+      <ExcellenceSection />
+      <WashComparison />
       <ReviewsGrid />
       <AboutSection />
       <ServiceAgreement />
       <ServiceArea />
       <FAQSection />
+      <EstimateEngine />
       <Footer />
     </div>
   );
