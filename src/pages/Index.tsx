@@ -24,8 +24,6 @@ const Index = () => {
       <HeroSection />
       <ExcellenceSection />
       <PackagesSection />
-      <PaintCorrectionPackages />
-      <CeramicPackages />
       <PremiumAddOns />
       <WashComparison />
       <GalleryGrid />
