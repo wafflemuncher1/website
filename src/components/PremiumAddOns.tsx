@@ -2,14 +2,16 @@ import { motion } from "framer-motion";
 import { Lightbulb, Cog, PawPrint, Wind, Droplets, CircleDot, ShieldCheck, Wrench } from "lucide-react";
 
 const addOns = [
-  { icon: Lightbulb, name: "Trim Restoration", desc: "Restoring faded exterior plastics to deep black", price: "$60" },
+  { icon: Lightbulb, name: "Trim Restoration", desc: "Restoring faded exterior plastics to deep black", price: "$60 starting price" },
   { icon: Cog, name: "Engine Bay Cleaning", desc: "Pristine engine compartment", price: "$85" },
   { icon: PawPrint, name: "Pet Hair Removal", desc: "Thorough fur extraction", price: "$40" },
   { icon: PawPrint, name: "Vehicle Size", desc: " +$30 for Small SUVs/Trucks | +$50 for XL SUVs/Duallys", price: "Price Varies" },
   { icon: PawPrint, name: "Condition Fee", desc: "Price depends for Pet Hair or Excessive Mud/Dirt", price: "Price Varies" },
   { icon: PawPrint, name: "Hard Wax Upgrade", desc: "Swapping the sealant for a hand-applied Paste Wax for that deep wet look", price: "$45" },
   { icon: PawPrint, name: "Machine Liquid Wax", desc: "Application of a high quailty liquid wax using a DA Polisher with a soft finishing pad. ", price: "$45-65" },
-  { icon: PawPrint, name: "Pet Hair Removal", desc: "Always quote this as a starting at price (e.g., $50+). Tell the customer", price: "$40" },
+  { icon: PawPrint, name: "Stain Removal", desc: "I need to see the type of stain oil, ink, organic and the fabric before I can give a final price", price: "$50 starting price" },
+  { icon: PawPrint, name: "Iron Decontamination", desc: "Chemical removal of iron particles that are rusting into the paint. This should be mandatory if they are paying for any machine work or a sealant to ensure the surface is pure.", price: "$35" },
+
 ];
 
 const PremiumAddOns = () => {
