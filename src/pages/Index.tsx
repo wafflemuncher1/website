@@ -22,14 +22,13 @@ const Index = () => {
     <div className="min-h-screen">
       <StickyHeader />
       <HeroSection />
+      <ExcellenceSection />
       <PackagesSection />
       <PaintCorrectionPackages />
       <CeramicPackages />
       <PremiumAddOns />
-      <AddOnBoutique />
-      <GalleryGrid />
-      <ExcellenceSection />
       <WashComparison />
+      <GalleryGrid />
       <ReviewsGrid />
       <AboutSection />
       <ServiceAgreement />
