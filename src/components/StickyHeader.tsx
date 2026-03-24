@@ -34,10 +34,10 @@ const StickyHeader = () => {
       <div className="container mx-auto flex items-center justify-between py-4 px-4 md:px-8">
         {/* ✅ Logo replaces GLOSSWORKS text */}
         <a href="#" className="flex items-center gap-3">
-          <img
+         <img
   src={logo}
   alt="Glossworks"
-  className="h-[56px] md:h-[66px] w-auto"
+  className="h-[25vh] w-auto max-h-[120px] md:max-h-[160px]"
   loading="eager"
 />
           
