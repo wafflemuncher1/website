@@ -35,11 +35,12 @@ const StickyHeader = () => {
         {/* ✅ Logo replaces GLOSSWORKS text */}
         <a href="#" className="flex items-center gap-3">
           <img
-            src={logo}
-            alt="Glossworks"
-            className="h-23 w-auto"
-            loading="eager"
-          />
+  src={logo}
+  alt="Glossworks"
+  className="h-[44px] md:h-[56px] w-auto"
+  loading="eager"
+/>
+          
           {/* Optional: keep a text fallback on md+ if you want */}
           {/* <span className="text-xl font-bold tracking-wider hidden sm:inline">Glossworks</span> */}
         </a>
