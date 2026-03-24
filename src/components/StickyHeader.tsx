@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
+// ✅ import your logo (update the filename to match what you add)
+import logo from "../assets/logo.png";
+
 const StickyHeader = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -29,8 +32,16 @@ const StickyHeader = () => {
       }`}
     >
       <div className="container mx-auto flex items-center justify-between py-4 px-4 md:px-8">
-        <a href="#" className="text-xl font-bold tracking-wider">
-          GLOSS<span className="text-primary">WORKS</span>
+        {/* ✅ Logo replaces GLOSSWORKS text */}
+        <a href="#" className="flex items-center gap-3">
+          <img
+            src={logo}
+            alt="Glossworks"
+            className="h-8 w-auto"
+            loading="eager"
+          />
+          {/* Optional: keep a text fallback on md+ if you want */}
+          {/* <span className="text-xl font-bold tracking-wider hidden sm:inline">Glossworks</span> */}
         </a>
 
         <nav className="hidden md:flex items-center gap-8">

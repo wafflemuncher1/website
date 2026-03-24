@@ -32,7 +32,6 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
     "Full Interior Sanitization & Wipe Down",
     "UV Surface Armor (Prevents Fading & Cracking)",
     "Intricate Detail (Cup Holders, Vents, & Crevices)",
-    "Spot Treatment (Targeted Stain Removal)",
     "Streak-Free Glass & Mirror Restoration",
     "Deep-Clean Floor Mats (Rubber or Carpet)",
     "Hand-Cleaned Door Jambs & Thresholds",
@@ -166,7 +165,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
 
 const categories: { key: ServiceCategory; label: string }[] = [
   { key: "full", label: "Full Detail" },
-  { key: "exterior", label: "Exterior Only" },
+  { key: "exterior", label: "Speciality Services" },
   { key: "interior", label: "Paint Coorection" },
 ];
 
