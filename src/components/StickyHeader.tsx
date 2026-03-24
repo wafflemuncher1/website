@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
-
-// ✅ import your logo (update the filename to match what you add)
-import logo from "../assets/logo.png";
+import logo from "@/assets/logo.png";
 
 const StickyHeader = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -13,6 +11,15 @@ const StickyHeader = () => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Close mobile menu on resize to desktop
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 768) setMobileOpen(false);
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   const links = [
@@ -27,30 +34,26 @@ const StickyHeader = () => {
     <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? "glass-header" : "bg-transparent"
+        scrolled ? "glass-header shadow-lg" : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto flex items-center justify-between py-4 px-4 md:px-8">
-        {/* ✅ Logo replaces GLOSSWORKS text */}
-        <a href="#" className="flex items-center gap-3">
-         <img
-  src={logo}
-  alt="Glossworks"
-  className="h-[clamp(44px,7vh,84px)] w-auto"
-  loading="eager"
-/>
-          
-          {/* Optional: keep a text fallback on md+ if you want */}
-          {/* <span className="text-xl font-bold tracking-wider hidden sm:inline">Glossworks</span> */}
+      <div className="container mx-auto flex items-center justify-between py-2 px-4 md:px-8">
+        <a href="#" className="flex-shrink-0">
+          <img
+            src={logo}
+            alt="Glossworks Detailing"
+            className="h-12 sm:h-14 md:h-16 w-auto object-contain"
+          />
         </a>
 
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8">
           {links.map((l) => (
             <a
               key={l.label}
               href={l.href}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors tracking-wide uppercase"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors tracking-wide uppercase whitespace-nowrap"
             >
               {l.label}
             </a>
@@ -58,32 +61,36 @@ const StickyHeader = () => {
         </nav>
 
         <button
-          className="md:hidden text-foreground"
+          className="md:hidden text-foreground p-2 -mr-2"
           onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle menu"
         >
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {mobileOpen && (
-        <motion.nav
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          className="md:hidden glass-header border-t border-border/50 px-4 pb-6"
-        >
-          {links.map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              onClick={() => setMobileOpen(false)}
-              className="block py-3 text-sm font-medium text-muted-foreground hover:text-foreground tracking-wide uppercase"
-            >
-              {l.label}
-            </a>
-          ))}
-        </motion.nav>
-      )}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.nav
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden glass-header border-t border-border/50 px-4 pb-6 overflow-hidden"
+          >
+            {links.map((l) => (
+              <a
+                key={l.label}
+                href={l.href}
+                onClick={() => setMobileOpen(false)}
+                className="block py-3 text-sm font-medium text-muted-foreground hover:text-foreground tracking-wide uppercase"
+              >
+                {l.label}
+              </a>
+            ))}
+          </motion.nav>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
 };
