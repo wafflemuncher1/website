@@ -28,7 +28,7 @@ const Footer = () => {
             </ul>
             <h4 className="text-sm font-bold tracking-wider uppercase mt-6 mb-3">Social Media</h4>
             <div className="flex gap-3">
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Instagram">
+              <a href="#https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Instagram">
                 <Instagram className="h-5 w-5" />
               </a>
               <a href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Facebook">
