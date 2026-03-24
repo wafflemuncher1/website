@@ -15,6 +15,10 @@ import Footer from "@/components/Footer";
 import PaintCorrectionPackages from "@/components/PaintCorrectionPackages";
 import CeramicPackages from "@/components/CeramicPackages";
 import PremiumAddOns from "@/components/PremiumAddOns";
+import FullWidthParagraph from "@/components/FullWidthParagraph";
+import CTABanner from "@/components/CTABanner";
+import InstagramGallery from "@/components/InstagramGallery";
+import TextImageSection from "@/components/TextImageSection";
 
 
 const Index = () => {
@@ -33,6 +37,9 @@ const Index = () => {
       <ServiceArea />
       <FAQSection />
       <EstimateEngine />
+      <CTABanner />
+      <InstagramGallery />
+      <FullWidthParagraph />
       <Footer />
     </div>
   );
