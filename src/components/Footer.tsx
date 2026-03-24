@@ -10,11 +10,10 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-bold tracking-wider uppercase mb-4">Our Services</h4>
             <ul className="space-y-2 text-sm text-muted-foreground font-body">
-              <li>Ceramic Coatings</li>
+              <li>Waxing</li>
               <li>Paint Correction & Polishing</li>
-              <li>Window Tinting</li>
-              <li>Paint Protection Film</li>
-              <li>Matte Finish Paint Protection Film</li>
+              <li>Interior Detailing</li>
+              <li>Sealants</li>
               <li>Exterior Detailing</li>
             </ul>
           </div>
@@ -24,7 +23,7 @@ const Footer = () => {
             <h4 className="text-sm font-bold tracking-wider uppercase mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm text-muted-foreground font-body">
               <li><a href="#" className="hover:text-foreground transition-colors">Home</a></li>
-              <li><a href="#estimate" className="hover:text-foreground transition-colors">Contact Us</a></li>
+              <li><a href="#estimate" className="hover:text-foreground transition-colors">Estimates</a></li>
               <li><a href="#reviews" className="hover:text-foreground transition-colors">Reviews</a></li>
             </ul>
             <h4 className="text-sm font-bold tracking-wider uppercase mt-6 mb-3">Social Media</h4>
@@ -42,10 +41,10 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-bold tracking-wider uppercase mb-4">Service Areas</h4>
             <ul className="space-y-2 text-sm text-muted-foreground font-body">
-              <li>Riverview, FL</li>
-              <li>Sarasota, FL</li>
-              <li>Clearwater, FL</li>
-              <li>St. Petersburg, FL</li>
+              <li>Southern Louisville, KY</li>
+              <li>Bullitt County, KY</li>
+              <li>Prospect, KY</li>
+              <li>MiddleTown, KY</li>
               <li>Shepherdsville, KY</li>
             </ul>
           </div>
@@ -57,7 +56,7 @@ const Footer = () => {
               <p className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <span>
-                  Lousville Kentucky<br />
+                  Lousville, Kentucky<br />
                   United States
                 </span>
               </p>
