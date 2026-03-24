@@ -46,7 +46,7 @@ const Footer = () => {
               <li>Sarasota, FL</li>
               <li>Clearwater, FL</li>
               <li>St. Petersburg, FL</li>
-              <li>Wesley Chapel, FL</li>
+              <li>Shepherdsville, KY</li>
             </ul>
           </div>
 
@@ -57,8 +57,7 @@ const Footer = () => {
               <p className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <span>
-                  14309B N Nebraska Ave<br />
-                  Tampa, FL 33613<br />
+                  Lousville Kentucky<br />
                   United States
                 </span>
               </p>
@@ -71,11 +70,11 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-muted-foreground font-body">
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary" />
-                <a href="tel:8137239679" className="hover:text-foreground transition-colors">(813) 723-9679</a>
+                <a href="tel:5026120430" className="hover:text-foreground transition-colors">(502) 612-0430</a>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary" />
-                <a href="mailto:hello@glossworks.com" className="hover:text-foreground transition-colors">hello@glossworks.com</a>
+                <a href="mailto:Conatct@glossworksky.com" className="hover:text-foreground transition-colors">Contact@glossworksky.com</a>
               </li>
             </ul>
             <div className="mt-6">
