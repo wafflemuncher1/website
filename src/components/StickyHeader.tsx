@@ -37,7 +37,7 @@ const StickyHeader = () => {
           <img
   src={logo}
   alt="Glossworks"
-  className="h-[50px] md:h-[60px] w-auto"
+  className="h-[56px] md:h-[66px] w-auto"
   loading="eager"
 />
           
