@@ -75,7 +75,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
   ],
       },
       {
-        name: "Masterpiece Detail",
+        name: "",
         badge: "VIP",
         badgeVariant: "vip",
         tagline: "",

@@ -14,22 +14,28 @@ const steps = [
 // FLAT upcharges by vehicle size (edit these numbers to match your pricing)
 const vehicleSizes = [
   { label: "Small", desc: "Coupe / Sedan", upcharge: 0 },
-  { label: "Medium", desc: "Small SUV / Crossover", upcharge: 25 },
-  { label: "Large", desc: "Large SUV / Truck", upcharge: 50 },
-  { label: "XL", desc: "XL Vehicle / Minivan", upcharge: 75 },
+  { label: "Medium", desc: "Small SUV / Crossover", upcharge: 15 },
+  { label: "Large", desc: "Large SUV / Truck", upcharge: 25 },
+  { label: "XL", desc: "XL Vehicle / Minivan", upcharge: 50 },
 ];
 
 // Base package prices
 const serviceCategories = [
-  { label: "Back to Basics", base: 125 },
+  { label: "The Baseline", base: 110 },
+  { label: "Interior only", base: 125 },
   { label: "The Signature Detail", base: 165 },
-  { label: "The Luxury", base: 240 },
+  { label: "The Signature Transformation", base: 240 },
 ];
 
 // Multi-select add-ons (edit prices here)
 const addOns = [
-  { key: "engine", label: "Engine Bay Detail", desc: "Deep clean & dressing for your engine compartment", price: 85 },
-  { key: "petHair", label: "Pet Hair Removal", desc: "Thorough extraction from seats, carpets & crevices", price: 40 },
+  { key: "Trim Restoration", label: "Trim Restoration", desc: "Restoring faded exterior plastics to deep black- Price varies", price: 60 },
+  { key: "Engine Bay Cleaning", label: "Engine Bay Cleaning", desc: "Pristine engine compartment", price: 85 },
+  { key: "Pet Hair Removal", label: "Pet Hair Removal", desc: "Thorough fur extraction- Price varies", price: 40 },
+  { key: "Hard Wax Upgrade", label: "Hard Wax Upgrade", desc: "Swapping the sealant for a hand-applied Paste Wax for that deep wet look", price: 45 },
+  { key: "Machine Liquid Wax", label: "Machine Liquid Wax", desc: "Application of a high quailty liquid wax using a DA Polisher with a soft finishing pad.", price: 65 },
+  { key: "Stain Removal", label: "Stain Removal", desc: "I need to see the type of stain oil, ink, organic and the fabric before I can give a final price", price: 50 },
+  { key: "Iron Decontamination", label: "Iron Decontamination", desc: "Chemical removal of iron particles that are rusting into the paint. This should be mandatory if they are paying for any machine work or a sealant to ensure the surface is pure.", price: 35 },
   { key: "headlights", label: "Headlight Restoration", desc: "UV-damaged lenses restored to crystal clarity", price: 90 },
 ];
 
