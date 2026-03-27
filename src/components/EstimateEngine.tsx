@@ -42,7 +42,7 @@ const addOns = [
 ];
 
 // Google Sheets submission helper — replace SHEET_ENDPOINT with your Apps Script web app URL
-const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbz1lHi7JuSZ7aVARqS1KRWui0WB_NOsW0byVtrBwoViXesv04xhahZfDs2AIj5CPo70/exec";
+const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbwepoRsRMuzDTFfbVTh7xa5m7QF0xciOFY3LHkWyHAqYgpBZYD1crx8H-6l5AZLJhnb/exec";
 
 const submitToGoogleSheets = async (data: Record<string, string>) => {
   if (!SHEET_ENDPOINT) {
