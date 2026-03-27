@@ -141,7 +141,7 @@ const EstimateEngine = () => {
 
   return (
     <section id="estimate" className="py-24 md:py-32 relative bg-black overflow-hidden">
-      <CartoonBubbles count={8} variant="blue" />
+      
       <div className="container relative z-10 mx-auto px-4 md:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
