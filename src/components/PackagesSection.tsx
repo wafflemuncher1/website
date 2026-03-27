@@ -164,9 +164,9 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
 };
 
 const categories: { key: ServiceCategory; label: string }[] = [
-  { key: "full", label: "Full Detail" },
-  { key: "exterior", label: "Speciality Services" },
-  { key: "interior", label: "Paint Coorection" },
+  { key: "full", label: "Packages" },
+  { key: "exterior", label: "Not avalible" },
+  { key: "interior", label: "Not avalible" },
 ];
 
 const PackagesSection = () => {
