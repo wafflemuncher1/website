@@ -4,23 +4,23 @@ import { Award, FlaskConical, ShieldCheck, Droplets } from "lucide-react";
 const items = [
   {
     icon: Award,
-    title: "ASE Certified",
-    desc: "Our technicians carry ASE certifications, ensuring industry-leading expertise with every detail.",
+    title: "Instant Digital Quotes",
+    desc: "Our proprietary estimate engine provides immediate, transparent pricing—no phone calls or waiting required.",
   },
   {
     icon: FlaskConical,
-    title: "High Quailty Chemicals",
-    desc: "We exclusively use German-engineered Koch Chemie chemicals — the gold standard in professional detailing.",
+    title: "Zero-Friction Booking",
+    desc: "Automated SMS and email confirmations ensure your appointment is locked in the second you hit submit.",
   },
   {
     icon: ShieldCheck,
-    title: "Waxing and Sealant Specialists",
-    desc: "Factory-trained applicators delivering the finest service with guaranteed results.",
+    title: "ASE Certified Mastery",
+    desc: "Unlike standard detailers, our founder is a fully ASE-certified technician, bringing expert mechanical knowledge to every surface.",
   },
   {
     icon: Droplets,
-    title: "Full insured bussiness",
-    desc: "Fully insured up to $500k",
+    title: "Precision Work Ethic",
+    desc: "Built on eight years of high-intensity service labor, bringing a first-light to sunset discipline to every job.",
   },
 ];
 
