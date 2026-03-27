@@ -11,12 +11,15 @@ const HeroSection = () => {
         <img
           src={heroCar}
           alt="Luxury ceramic coated vehicle"
-          className="w-full h-full object-cover opacity-40"
+          className="w-full h-full object-cover"
           decoding="async"
           fetchPriority="high"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/60" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50" />
+
+        {/* OPTIONAL: keep a very light overlay to protect text readability.
+            Delete these two <div>s if you want ZERO overlay. */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-background/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-transparent to-transparent" />
       </div>
 
       <div className="container relative z-10 mx-auto px-4 md:px-8 pt-24">
@@ -38,8 +41,7 @@ const HeroSection = () => {
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight mb-6">
             Where Luxury
             <br />
-            Meets the{" "}
-            <span className="text-gradient">Driveway.</span>
+            Meets the <span className="text-gradient">Driveway.</span>
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-xl mb-10 font-body">
@@ -60,7 +62,6 @@ const HeroSection = () => {
               className="text-base px-8 py-6 border-border/50 hover:border-primary/50"
               asChild
             >
-              {/* TODO: replace with your real phone number */}
               <a href="tel:+15026120430">
                 <Play className="mr-2 h-4 w-4" />
                 Book Now
