@@ -51,10 +51,11 @@ const submitToGoogleSheets = async (data: Record<string, string>) => {
   }
   try {
     await fetch(SHEET_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+  method: "POST",
+  headers: { "Content-Type": "text/plain;charset=utf-8" },
+  body: JSON.stringify(data),
+});
+    
   } catch (err) {
     console.error("Failed to submit to Google Sheets:", err);
   }
