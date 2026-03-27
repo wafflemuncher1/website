@@ -21,13 +21,26 @@ interface Package {
 
 const categoryData: Record<ServiceCategory, { label: string; packages: Package[] }> = {
   full: {
-    label: "Full Detail",
+    label: "Current Packages",
     packages: [
       {
+        name: "The Baseline",
+        tagline: "Express Wash & Protect",
+        price: "$110",
+        interior: [],
+        exterior: [ "Exterior: Multi-stage foam bath & hand wash.",
+      "Wheels: Deep barrel cleaning & tire scrub.",
+      "Detailing: Bug & grime removal.",
+      "Protection: Finished with Bead Maker for signature slickness and high gloss.",
+      "Premium tire dressing applied.",],
+      },
+      {
         name: "The Signature Detail",
+        badge: "Most Popular",
+        badgeVariant: "popular",
         tagline: "High-Performance Interior & Exterior Deep Clean",
         price: "$165",
-       interior: [
+        interior: [
     "High-Power Deep Vacuum (Cabin & Trunk)",
     "Full Interior Sanitization & Wipe Down",
     "UV Surface Armor (Prevents Fading & Cracking)",
@@ -48,8 +61,8 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
       },
       {
         name: "The Signature Transformation",
-        badge: "Most Popular",
-        badgeVariant: "popular",
+        badge: "VIP",
+        badgeVariant: "vip",
         tagline: "Total Showroom Reset & Protection",
         price: "$240",
         interior: [
@@ -73,19 +86,6 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
     "Satin-Finish UV Tire & Wheel Arch Protection",
     "Exhaust Tip Polishing & Exterior Glass Clarity",
   ],
-      },
-      {
-        name: "",
-        badge: "VIP",
-        badgeVariant: "vip",
-        tagline: "",
-        price: "$",
-        interior: [
-          "Sorry but we do not offer this service at this time please try again later, thank you",
-        ],
-        exterior: [
-          "",
-        ],
       },
     ],
   },
