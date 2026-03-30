@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
-
-import image1 from "@/assets/image1.webp";
-import image2 from "@/assets/image2.webp";
-import image3 from "@/assets/image3.webp";
-import image4 from "@/assets/image4.webp";
-import image5 from "@/assets/image5.webp";
-import image6 from "@/assets/image6.webp";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import image1 from "@/assets/optimized/image1.webp";
+import image2 from "@/assets/optimized/image2.webp";
+import image3 from "@/assets/optimized/image3.webp";
+import image4 from "@/assets/optimized/image4.webp";
+import image5 from "@/assets/optimized/image5.webp";
+import image6 from "@/assets/optimized/image6.webp";
 
 const images = [
   { src: image1, alt: "Ceramic coated SUV", label: "Ceramic Coating" },
@@ -18,7 +20,7 @@ const images = [
 
 const GalleryGrid = () => {
   return (
-    <section id="gallery" className="py-24 md:py-32">
+    <section id="gallery" className="py-24 md:py-32 bg-gradient-to-b from-slate-900 via-gray-800/30 to-slate-900">
       <div className="container mx-auto px-4 md:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -52,6 +54,20 @@ const GalleryGrid = () => {
             </motion.div>
           ))}
         </div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center mt-10"
+        >
+          <Button variant="outline" size="lg" className="group" asChild>
+            <Link to="/portfolio">
+              View Full Portfolio
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </Button>
+        </motion.div>
       </div>
     </section>
   );
