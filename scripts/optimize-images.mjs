@@ -1,57 +1,99 @@
 import fs from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
+import heicConvert from "heic-convert";
 
 const ROOT = process.cwd();
-const INPUT_DIR = path.join(ROOT, "src", "assets", "raw");
-const OUTPUT_DIR = path.join(ROOT, "src", "assets", "optimized");
+const RAW_DIR = path.join(ROOT, "src", "assets", "raw");
+const OUT_DIR = path.join(ROOT, "src", "assets", "optimized");
 
-// Tune these once and forget them:
-const MAX_WIDTH = 1600;   // good for full-width/hero images
-const QUALITY = 78;       // 70-82 is usually a sweet spot for WebP
+const MAX_WIDTH = 1600;
+const QUALITY = 78;
 
-const allowedExt = new Set([".jpg", ".jpeg", ".png", ".webp", ".tiff", ".avif"]);
+const allowedExt = new Set([
+  ".jpg", ".jpeg", ".png", ".webp", ".tiff", ".avif",
+  ".heic", ".heif"
+]);
 
 function ensureDir(p) {
   fs.mkdirSync(p, { recursive: true });
 }
 
-function baseNameNoExt(file) {
-  return path.basename(file, path.extname(file));
+function getNextImageNumber(outDir) {
+  ensureDir(outDir);
+  const files = fs.readdirSync(outDir);
+
+  let maxN = 0;
+  for (const f of files) {
+    const m = /^image(\d+)\.webp$/i.exec(f);
+    if (m) maxN = Math.max(maxN, Number(m[1]));
+  }
+  return maxN + 1;
+}
+
+async function bufferToWebp(buffer, outPath) {
+  const image = sharp(buffer, { failOnError: false });
+  const meta = await image.metadata();
+
+  const resizeWidth =
+    meta.width && meta.width > MAX_WIDTH ? MAX_WIDTH : meta.width;
+
+  await image
+    .resize({ width: resizeWidth, withoutEnlargement: true })
+    .webp({ quality: QUALITY })
+    .toFile(outPath);
+}
+
+async function readAsBufferPossiblyHeic(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  const inputBuffer = fs.readFileSync(filePath);
+
+  if (ext === ".heic" || ext === ".heif") {
+    // HEIC -> JPEG buffer
+    const jpegBuffer = await heicConvert({
+      buffer: inputBuffer,
+      format: "JPEG",
+      quality: 0.92
+    });
+    return jpegBuffer;
+  }
+
+  return inputBuffer;
 }
 
 async function run() {
-  ensureDir(INPUT_DIR);
-  ensureDir(OUTPUT_DIR);
+  ensureDir(RAW_DIR);
+  ensureDir(OUT_DIR);
 
-  const files = fs.readdirSync(INPUT_DIR)
-    .filter((f) => allowedExt.has(path.extname(f).toLowerCase()));
+  const rawFiles = fs.readdirSync(RAW_DIR)
+    .filter((f) => {
+      const p = path.join(RAW_DIR, f);
+      if (!fs.statSync(p).isFile()) return false;
+      return allowedExt.has(path.extname(f).toLowerCase());
+    });
 
-  if (files.length === 0) {
-    console.log(`No images found in ${INPUT_DIR}`);
-    console.log("Drop images there (jpg/png/webp) then re-run: npm run images");
+  if (rawFiles.length === 0) {
+    console.log(`No images found in ${RAW_DIR}`);
+    console.log("Drop photos in raw/ then run: npm run images");
     return;
   }
 
-  console.log(`Optimizing ${files.length} image(s)...`);
+  let nextN = getNextImageNumber(OUT_DIR);
+  console.log(`Found ${rawFiles.length} raw image(s). Next output will start at image${nextN}.webp`);
 
-  for (const file of files) {
-    const inPath = path.join(INPUT_DIR, file);
-    const outName = `${baseNameNoExt(file)}.webp`;
-    const outPath = path.join(OUTPUT_DIR, outName);
+  for (const file of rawFiles) {
+    const inPath = path.join(RAW_DIR, file);
+    const outName = `image${nextN}.webp`;
+    const outPath = path.join(OUT_DIR, outName);
 
-    const image = sharp(inPath, { failOnError: false });
-    const meta = await image.metadata();
+    const buffer = await readAsBufferPossiblyHeic(inPath);
+    await bufferToWebp(buffer, outPath);
 
-    // Avoid upscaling small images
-    const resizeWidth = meta.width && meta.width > MAX_WIDTH ? MAX_WIDTH : meta.width;
+    // DELETE original after successful conversion
+    fs.unlinkSync(inPath);
 
-    await image
-      .resize({ width: resizeWidth, withoutEnlargement: true })
-      .webp({ quality: QUALITY })
-      .toFile(outPath);
-
-    console.log(`✔ ${file} -> optimized/${outName}`);
+    console.log(`✔ ${file} -> optimized/${outName} (deleted raw)`);
+    nextN++;
   }
 
   console.log("Done.");
