@@ -4,28 +4,44 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import StickyHeader from "@/components/StickyHeader";
 import Footer from "@/components/Footer";
-import beforeAfter from "@/assets/before-after.jpg";
-import heroCar from "@/assets/hero-car.jpg";
+import image1 from "@/assets/optimized/image1.webp";
+import image2 from "@/assets/optimized/image2.webp";
+import image3 from "@/assets/optimized/image3.webp";
+import image4 from "@/assets/optimized/image4.webp";
+import image5 from "@/assets/optimized/image5.webp";
+import image6 from "@/assets/optimized/image6.webp";
+import image7 from "@/assets/optimized/image7.webp";
+import image8 from "@/assets/optimized/image8.webp";
+import image9 from "@/assets/optimized/image9.webp";
+import image10 from "@/assets/optimized/image10.webp";
+import image11 from "@/assets/optimized/image11.webp";
+import image12 from "@/assets/optimized/image12.webp";
+import image13 from "@/assets/optimized/image13.webp";
+import image14 from "@/assets/optimized/image14.webp";
+import image15 from "@/assets/optimized/image15.webp";
+import image16 from "@/assets/optimized/image16.webp";
+import image17 from "@/assets/optimized/image17.webp";
+import image18 from "@/assets/optimized/image18.webp";
 
 const allImages = [
-  { src: heroCar, alt: "Ceramic coated SUV", label: "Ceramic Coating" },
-  { src: beforeAfter, alt: "Paint correction result", label: "Paint Correction" },
-  { src: heroCar, alt: "Interior deep clean", label: "Interior Detail" },
-  { src: beforeAfter, alt: "Engine bay detail", label: "Engine Bay" },
-  { src: heroCar, alt: "Full exterior detail", label: "Exterior Detail" },
-  { src: beforeAfter, alt: "Headlight restoration", label: "Headlight Restore" },
-  { src: heroCar, alt: "Sedan full detail", label: "Sedan Detail" },
-  { src: beforeAfter, alt: "SUV correction", label: "SUV Correction" },
-  { src: heroCar, alt: "Truck ceramic coat", label: "Truck Ceramic" },
-  { src: beforeAfter, alt: "Wheel restoration", label: "Wheel Restore" },
-  { src: heroCar, alt: "Paint enhancement", label: "Paint Enhancement" },
-  { src: beforeAfter, alt: "Interior restoration", label: "Interior Restore" },
-  { src: heroCar, alt: "Full correction", label: "Full Correction" },
-  { src: beforeAfter, alt: "Deep clean result", label: "Deep Clean" },
-  { src: heroCar, alt: "Showroom prep", label: "Showroom Prep" },
-  { src: beforeAfter, alt: "Oxidation removal", label: "Oxidation Removal" },
-  { src: heroCar, alt: "Trim restoration", label: "Trim Restore" },
-  { src: beforeAfter, alt: "Swirl removal", label: "Swirl Removal" },
+  { src: image1, alt: "Ceramic coated SUV", label: "Ceramic Coating" },
+  { src: image2, alt: "Paint correction result", label: "Paint Correction" },
+  { src: image3, alt: "Interior deep clean", label: "Interior Detail" },
+  { src: image4, alt: "Engine bay detail", label: "Engine Bay" },
+  { src: image5, alt: "Full exterior detail", label: "Exterior Detail" },
+  { src: image6, alt: "Headlight restoration", label: "Headlight Restore" },
+  { src: image7, alt: "Sedan full detail", label: "Sedan Detail" },
+  { src: image8, alt: "SUV correction", label: "SUV Correction" },
+  { src: image9, alt: "Truck ceramic coat", label: "Truck Ceramic" },
+  { src: image10, alt: "Wheel restoration", label: "Wheel Restore" },
+  { src: image11, alt: "Paint enhancement", label: "Paint Enhancement" },
+  { src: image12, alt: "Interior restoration", label: "Interior Restore" },
+  { src: image13, alt: "Full correction", label: "Full Correction" },
+  { src: image14, alt: "Deep clean result", label: "Deep Clean" },
+  { src: image15, alt: "Showroom prep", label: "Showroom Prep" },
+  { src: image16, alt: "Oxidation removal", label: "Oxidation Removal" },
+  { src: image17, alt: "Trim restoration", label: "Trim Restore" },
+  { src: image18, alt: "Swirl removal", label: "Swirl Removal" },
 ];
 
 const Portfolio = () => {
