@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import StickyHeader from "@/components/StickyHeader";
 import Footer from "@/components/Footer";
-import image1 from "@/assets/optimized/image1.webp";
+import image1 from "@/assets/optimized/image19.webp";
 import image2 from "@/assets/optimized/image2.webp";
 import image3 from "@/assets/optimized/image3.webp";
 import image4 from "@/assets/optimized/image4.webp";
