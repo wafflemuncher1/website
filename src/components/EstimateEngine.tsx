@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Car, Layers, Sparkles, ArrowRight, ArrowLeft, Calculator, Send, Plus } from "lucide-react";
+import { Car, Layers, Sparkles, ArrowRight, ArrowLeft, Calculator, Send, Plus, ThermometerSun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,9 +8,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const steps = [
   { label: "Vehicle", icon: Car },
+  { label: "Condition", icon: ThermometerSun },
   { label: "Service", icon: Layers },
   { label: "Add-Ons", icon: Plus },
   { label: "Quote", icon: Calculator },
+];
+
+const vehicleConditions = [
+  { label: "Clean", desc: "Regular maintenance, light dust", upcharge: 0 },
+  { label: "Dirty", desc: "Noticeable dirt, stains, or buildup", upcharge: 25 },
+  { label: "Extreme", desc: "Heavy soiling, neglected interior/exterior", upcharge: 50 },
 ];
 
 // FLAT upcharges by vehicle size
@@ -51,19 +58,22 @@ const submitToGoogleSheets = async (data: Record<string, string>) => {
   }
   try {
     await fetch(SHEET_ENDPOINT, {
-  method: "POST",
-  headers: { "Content-Type": "text/plain;charset=utf-8" },
-  body: JSON.stringify(data),
-});
-    
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
   } catch (err) {
     console.error("Failed to submit to Google Sheets:", err);
   }
 };
 
+const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const isValidPhone = (phone: string) => /^[\d\s\-\+\(\)]{7,15}$/.test(phone.trim());
+
 const EstimateEngine = () => {
   const [step, setStep] = useState(0);
   const [vehicle, setVehicle] = useState<number | null>(null);
+  const [condition, setCondition] = useState<number | null>(null);
   const [service, setService] = useState<number | null>(null);
   const [selectedAddOns, setSelectedAddOns] = useState<number[]>([]);
   const [showContact, setShowContact] = useState(false);
@@ -73,8 +83,9 @@ const EstimateEngine = () => {
 
   const canNext =
     (step === 0 && vehicle !== null) ||
-    (step === 1 && service !== null) ||
-    step === 2;
+    (step === 1 && condition !== null) ||
+    (step === 2 && service !== null) ||
+    step === 3;
 
   const toggleAddOn = (idx: number) => {
     setSelectedAddOns((prev) =>
@@ -83,11 +94,12 @@ const EstimateEngine = () => {
   };
 
   const getTotal = () => {
-    if (vehicle === null || service === null) return 0;
+    if (vehicle === null || condition === null || service === null) return 0;
     const base = serviceCategories[service].base;
     const sizeUpcharge = vehicleSizes[vehicle].upcharge;
-    const addOnsTotal = selectedAddOns.reduce((sum, idx) => sum + addOns[idx].price, 0);
-    return base + sizeUpcharge + addOnsTotal;
+    const condUpcharge = vehicleConditions[condition].upcharge;
+    const addOnsTot = selectedAddOns.reduce((sum, idx) => sum + addOns[idx].price, 0);
+    return base + sizeUpcharge + condUpcharge + addOnsTot;
   };
 
   const handleSubmit = () => {
@@ -98,6 +110,7 @@ const EstimateEngine = () => {
       email: contact.email,
       phone: contact.phone,
       vehicleSize: vehicle !== null ? vehicleSizes[vehicle].label : "",
+      condition: condition !== null ? vehicleConditions[condition].label : "",
       service: service !== null ? serviceCategories[service].label : "",
       addOns: selectedAddOns.map((idx) => addOns[idx].label).join(", ") || "None",
       total: `$${total}`,
@@ -116,7 +129,10 @@ const EstimateEngine = () => {
   const total = getTotal();
   const basePrice = service !== null ? serviceCategories[service].base : 0;
   const sizeUpcharge = vehicle !== null ? vehicleSizes[vehicle].upcharge : 0;
+  const condUpcharge = condition !== null ? vehicleConditions[condition].upcharge : 0;
   const addOnsTotal = selectedAddOns.reduce((sum, idx) => sum + addOns[idx].price, 0);
+
+  const contactValid = contact.name.trim().length > 0 && isValidEmail(contact.email) && isValidPhone(contact.phone) && consent;
 
   if (submitted) {
     return (
@@ -142,7 +158,6 @@ const EstimateEngine = () => {
 
   return (
     <section id="estimate" className="py-24 md:py-32 relative bg-black overflow-hidden">
-      
       <div className="container relative z-10 mx-auto px-4 md:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -171,7 +186,7 @@ const EstimateEngine = () => {
                 </div>
                 <span className="hidden sm:block text-xs font-medium text-muted-foreground">{s.label}</span>
                 {i < steps.length - 1 && (
-                  <div className={`hidden sm:block w-12 lg:w-20 h-px mx-2 ${i < step ? "bg-primary" : "bg-neutral-700"}`} />
+                  <div className={`hidden sm:block w-12 lg:w-16 h-px mx-1 ${i < step ? "bg-primary" : "bg-neutral-700"}`} />
                 )}
               </div>
             ))}
@@ -207,8 +222,38 @@ const EstimateEngine = () => {
                   </div>
                 )}
 
-                {/* Step 1: Service */}
+                {/* Step 1: Condition */}
                 {step === 1 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-6 text-white">Vehicle Condition</h3>
+                    <div className="space-y-3">
+                      {vehicleConditions.map((c, i) => (
+                        <button
+                          key={c.label}
+                          onClick={() => setCondition(i)}
+                          className={`w-full text-left rounded-lg border p-4 text-sm font-medium transition-all ${
+                            condition === i
+                              ? "border-primary bg-primary/10 text-white"
+                              : "border-neutral-800 bg-neutral-900 text-muted-foreground hover:border-primary/30"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <span className="block">{c.label}</span>
+                              <span className="text-xs text-muted-foreground">{c.desc}</span>
+                            </div>
+                            <span className="text-primary">
+                              {c.upcharge === 0 ? "No upcharge" : `+ $${c.upcharge}`}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 2: Service */}
+                {step === 2 && (
                   <div>
                     <h3 className="text-lg font-semibold mb-6 text-white">Service Category</h3>
                     <div className="space-y-3">
@@ -232,8 +277,8 @@ const EstimateEngine = () => {
                   </div>
                 )}
 
-                {/* Step 2: Add-Ons */}
-                {step === 2 && (
+                {/* Step 3: Add-Ons */}
+                {step === 3 && (
                   <div>
                     <h3 className="text-lg font-semibold mb-2 text-white">Add-Ons (optional)</h3>
                     <p className="text-xs text-muted-foreground mb-5">Select as many as you want. We'll total everything up.</p>
@@ -265,8 +310,8 @@ const EstimateEngine = () => {
                   </div>
                 )}
 
-                {/* Step 3: Quote */}
-                {step === 3 && (
+                {/* Step 4: Quote */}
+                {step === 4 && (
                   <div className="text-center">
                     <h3 className="text-lg font-semibold mb-2 text-white">Your Estimated Investment</h3>
                     <p className="text-5xl md:text-6xl font-bold text-primary my-6">${total}</p>
@@ -278,6 +323,9 @@ const EstimateEngine = () => {
                       </div>
                       <div className="flex justify-between text-muted-foreground">
                         <span>Vehicle size upcharge</span><span>${sizeUpcharge}</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Condition upcharge</span><span>${condUpcharge}</span>
                       </div>
                       <div className="flex justify-between text-muted-foreground">
                         <span>Add-ons total</span><span>${addOnsTotal}</span>
@@ -300,7 +348,7 @@ const EstimateEngine = () => {
                     </div>
 
                     <p className="text-sm text-muted-foreground font-body mb-6">
-                      {vehicle !== null ? vehicleSizes[vehicle].label : ""} · {service !== null ? serviceCategories[service].label : ""}{" "}
+                      {vehicle !== null ? vehicleSizes[vehicle].label : ""} · {condition !== null ? vehicleConditions[condition].label : ""} · {service !== null ? serviceCategories[service].label : ""}{" "}
                       {selectedAddOns.length > 0 ? `· ${selectedAddOns.length} add-on(s)` : "· No add-ons"}
                     </p>
 
@@ -311,8 +359,18 @@ const EstimateEngine = () => {
                     ) : (
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 max-w-sm mx-auto text-left">
                         <Input placeholder="Full Name" value={contact.name} onChange={(e) => setContact({ ...contact, name: e.target.value })} className="bg-neutral-900 border-neutral-800" />
-                        <Input placeholder="Email" type="email" value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} className="bg-neutral-900 border-neutral-800" />
-                        <Input placeholder="Phone" type="tel" value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} className="bg-neutral-900 border-neutral-800" />
+                        <div>
+                          <Input placeholder="Email" type="email" value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} className="bg-neutral-900 border-neutral-800" />
+                          {contact.email && !isValidEmail(contact.email) && (
+                            <p className="text-xs text-red-400 mt-1">Please enter a valid email address</p>
+                          )}
+                        </div>
+                        <div>
+                          <Input placeholder="Phone (e.g. 502-555-1234)" type="tel" value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} className="bg-neutral-900 border-neutral-800" />
+                          {contact.phone && !isValidPhone(contact.phone) && (
+                            <p className="text-xs text-red-400 mt-1">Please enter a valid phone number</p>
+                          )}
+                        </div>
                         <div className="flex items-start gap-3 py-2">
                           <Checkbox
                             id="consent"
@@ -324,7 +382,7 @@ const EstimateEngine = () => {
                             I consent to receive text messages and emails from Glossworks Mobile Detailing regarding my services. Message & data rates may apply.
                           </label>
                         </div>
-                        <Button onClick={handleSubmit} disabled={!contact.name || !contact.email || !consent} className="w-full">
+                        <Button onClick={handleSubmit} disabled={!contactValid} className="w-full">
                           Submit Quote Request <Send className="ml-2 h-4 w-4" />
                         </Button>
                       </motion.div>
@@ -340,7 +398,7 @@ const EstimateEngine = () => {
             <Button variant="outline" onClick={() => { setShowContact(false); setStep(step - 1); }} disabled={step === 0} className="border-neutral-800">
               <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
-            {step < 3 && (
+            {step < 4 && (
               <Button onClick={() => setStep(step + 1)} disabled={!canNext}>
                 Next <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
