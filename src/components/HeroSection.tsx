@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroCar from "@/assets/image1.webp";
+import heroCar from "@/assets/optimized/image19.webp";
 
 const HeroSection = () => {
   return (
