@@ -61,6 +61,11 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden; /* add */
+  }
+
+  body {
+    overflow-x: hidden; /* add */
   }
 }
 
