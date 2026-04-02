@@ -17,7 +17,7 @@ const steps = [
 const vehicleConditions = [
   { label: "Clean", desc: "Regular maintenance, light dust", upcharge: 0 },
   { label: "Dirty", desc: "Noticeable dirt, stains, or buildup", upcharge: 25 },
-  { label: "Extreme", desc: "Heavy soiling, neglected interior/exterior", upcharge: 50 },
+  { label: "Extreme", desc: "Heavy soiling, neglected interior/exterior, Starts at $50", upcharge: 50 },
 ];
 
 // FLAT upcharges by vehicle size
@@ -30,22 +30,15 @@ const vehicleSizes = [
 
 // Base package prices
 const serviceCategories = [
-  { label: "The Baseline", base: 110 },
-  { label: "Interior Only", base: 125 },
-  { label: "The Signature Detail", base: 165 },
-  { label: "The Signature Transformation", base: 240 },
+  { label: "The Baseline", base: 75 },
+  { label: "Interior Only", base: 165 },
 ];
 
 // Multi-select add-ons
 const addOns = [
-  { key: "trim", label: "Trim Restoration", desc: "Restoring faded exterior plastics to deep black — Price varies", price: 60 },
-  { key: "engine", label: "Engine Bay Cleaning", desc: "Pristine engine compartment", price: 85 },
   { key: "pet", label: "Pet Hair Removal", desc: "Thorough fur extraction — Price varies", price: 40 },
-  { key: "hardwax", label: "Hard Wax Upgrade", desc: "Hand-applied Paste Wax for that deep wet look", price: 45 },
-  { key: "machinewax", label: "Machine Liquid Wax", desc: "High quality liquid wax via DA Polisher with soft finishing pad", price: 65 },
-  { key: "stain", label: "Stain Removal", desc: "Price varies by stain type and fabric", price: 50 },
   { key: "iron", label: "Iron Decontamination", desc: "Chemical removal of iron particles rusting into paint", price: 35 },
-  { key: "headlights", label: "Headlight Restoration", desc: "UV-damaged lenses restored to crystal clarity", price: 90 },
+  
 ];
 
 // Google Sheets submission helper — replace SHEET_ENDPOINT with your Apps Script web app URL
