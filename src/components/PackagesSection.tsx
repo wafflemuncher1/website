@@ -25,15 +25,16 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
     packages: [
       {
         name: "The Baseline",
-        tagline: "Express Wash & Protect",
+        tagline: "Express Exterior Wash & Gloss",
         price: "$75",
         interior: [],
-        exterior: [ "Exterior: Multi-stage foam bath & hand wash.",
+        exterior: [ "Multi-Stage Prep: pH-neutral foam bath to safely lift surface grit.",
       "Wheels: Deep barrel cleaning & tire scrub.",
-      "Detailing: Bug & grime removal.",
+      "De-Greasing: Intensive bug removal and cleaning of fuel doors and door jambs.",
       "Protection: Finished with Bead Maker for signature slickness and high gloss.",
-      "Premium tire dressing applied.",],
+      "Tire Finish: Premium tire dressing applied.",],
       },
+
       {
         name: "The Signature Detail",
         badge: "Most Popular",
@@ -41,21 +42,20 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         tagline: "High-Performance Interior & Exterior Deep Clean",
         price: "$165",
         interior: [
-    "High-Power Deep Vacuum (Cabin & Trunk)",
+    "High-Power Deep Vacuum: Complete debris removal from cabin, trunk, and tight crevices.",
     "Full Interior Sanitization & Wipe Down",
     "UV Surface Armor (Prevents Fading & Cracking)",
     "Intricate Detail (Cup Holders, Vents, & Crevices)",
     "Streak-Free Glass & Mirror Restoration",
-    "Deep-Clean Floor Mats (Rubber or Carpet)",
+    "Deep-Clean Floor Mats (Rubber and Carpet)",
     "Hand-Cleaned Door Jambs & Thresholds",
   ],
   
   exterior: [
-    "Multi-Stage Scratch-Free Hand Wash",
+    "Full Baseline Process: Includes everything in the $75 package.",
     "German-Engineered pH-Neutral Foam Bath",
-    "Iron Decontamination (Wheel Barrels & Faces)",
     "Premium High-Gloss Tire Dressing",
-    "Performance Spray Wax (3-Month Durability)",
+    "Glass Clarity: Streak-free restoration of all interior and exterior glass and mirrors.",
     "Fuel Door & Trim De-Greasing",
   ],
       },

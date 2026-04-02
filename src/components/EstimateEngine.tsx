@@ -31,7 +31,7 @@ const vehicleSizes = [
 // Base package prices
 const serviceCategories = [
   { label: "The Baseline", base: 75 },
-  { label: "Interior Only", base: 165 },
+  { label: "The Signature", base: 165 },
 ];
 
 // Multi-select add-ons
