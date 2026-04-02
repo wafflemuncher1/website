@@ -16,7 +16,7 @@ const steps = [
 
 const vehicleConditions = [
   { label: "Clean", desc: "Regular maintenance, light dust", upcharge: 0 },
-  { label: "Dirty", desc: "Noticeable dirt, stains, or buildup", upcharge: 25 },
+  { label: "Dirty", desc: "Noticeable dirt, stains, buildup, or pet hair", upcharge: 25 },
   { label: "Extreme", desc: "Heavy soiling, neglected interior/exterior, Starts at $50", upcharge: 50 },
 ];
 
@@ -36,7 +36,6 @@ const serviceCategories = [
 
 // Multi-select add-ons
 const addOns = [
-  { key: "pet", label: "Pet Hair Removal", desc: "Thorough fur extraction — Price varies", price: 40 },
   { key: "iron", label: "Iron Decontamination", desc: "Chemical removal of iron particles rusting into paint", price: 35 },
   
 ];

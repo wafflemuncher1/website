@@ -2,10 +2,9 @@ import { motion } from "framer-motion";
 import { Lightbulb, Cog, PawPrint, Wind, Droplets, CircleDot, ShieldCheck, Wrench, Car, CircleAlert, Eraser, GlassWater, Container, Droplet } from "lucide-react";
 
 const addOns = [
-  { icon: PawPrint, name: "Pet Hair Removal", desc: "Thorough fur extraction", price: "$40" },
   { icon: Car, name: "Vehicle Size", desc: " +$30 for Small SUVs/Trucks | +$50 for XL SUVs/Duallys", price: "Price Varies" },
-  { icon: CircleAlert, name: "Condition Fee", desc: "Price depends for Pet Hair or Excessive Mud/Dirt", price: "Price Varies" },
-  { icon: Container, name: "Iron Decontamination", desc: "Chemical removal of iron particles that are rusting into the paint. This should be mandatory if they are paying for any machine work or a sealant to ensure the surface is pure.", price: "$35" },
+  { icon: CircleAlert, name: "Condition Fee", desc: "Price depends for Pet Hair or Excessive Mud/Dirt Starting at 25$", price: "Price Varies" },
+  { icon: Container, name: "Iron Decontamination", desc: "Chemical removal of iron particles that are rusting into the paint. This is mandatory if any machine work or a sealant is applyed to ensure the surface is pure.", price: "$35" },
 
 ];
 
