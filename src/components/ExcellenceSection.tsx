@@ -9,8 +9,8 @@ const items = [
   },
   {
     icon: FlaskConical,
-    title: "Zero-Friction Booking",
-    desc: "Automated SMS and email confirmations ensure your appointment is locked in the second you hit submit.",
+    title: "Surface-Specific Chemistry",
+    desc: "We don't believe in All-Purpose cleaners. Every surface from Alcantara and top-grain leather to clear-coated alloys, is treated with pH-balanced chemicals designed to clean without degrading the factory finish.",
   },
   {
     icon: ShieldCheck,
