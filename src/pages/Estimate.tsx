@@ -159,7 +159,7 @@ const addOns = [
 ];
 
 const SHEET_ENDPOINT =
-  "https://script.google.com/macros/s/AKfycbzpti__o1xShC_Kc0kMJ5a_NFl2Uw1yX9FHnkyNGhypzUGd8ROmjGnUi8XFIJ2G5Q6y/exec";
+  "https://script.google.com/macros/s/AKfycbzdxiRLadUk1R3y5uFfB6MUPtGDMDc6qoCVig1_PwmSueUf0e0ubjKRGF68K5wwpQFObw/exec";
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
