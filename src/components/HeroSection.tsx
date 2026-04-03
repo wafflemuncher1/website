@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import heroCar from "@/assets/optimized/logo.png";
 import heroVideoMp4 from "@/assets/hero/hero.mp4";
 
@@ -32,8 +33,6 @@ const HeroSection = () => {
           />
         )}
 
-        {/* OPTIONAL: keep a very light overlay to protect text readability.
-            Delete these two <div>s if you want ZERO overlay. */}
         <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-background/10 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-transparent to-transparent" />
       </div>
@@ -66,10 +65,10 @@ const HeroSection = () => {
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Button size="lg" className="text-base px-8 py-6 group" asChild>
-              <a href="#estimate">
+              <Link to="/estimate">
                 Get Your Estimate
-                <ArrowRight className="ml-2 h--4 w-4 group-hover:translate-x-1 transition-transform" />
-              </a>
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </Button>
 
             <Button
