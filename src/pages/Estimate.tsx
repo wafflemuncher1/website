@@ -81,10 +81,10 @@ const packages: Record<
       ],
     },
     {
-      label: "kenf",
-      price: 10,
+      label: "",
+      price: 0,
       features: [
-        "skadk",
+        "",
       ],
     },
   ],
@@ -164,7 +164,24 @@ const Estimate = () => {
   const [submitted, setSubmitted] = useState(false);
 
   // Default duration for booking slots (later you can map per package)
-  const getDurationMins = () => 180;
+  const getDurationMins = () => {
+  const pkgs = getCategoryPackages();
+  const pkg = selectedPackage !== null ? pkgs[selectedPackage] : null;
+
+  // default if nothing selected yet
+  if (!pkg) return 180;
+
+  // set durations by package name
+  switch (pkg.label) {
+    case "The Baseline":
+      return 120; // 2 hours
+    case "The Signature Detail":
+      return 180; // 3 hours
+    
+    default:
+      return 180;
+  }
+};
 
   // Scroll to top on step change
   useEffect(() => {
