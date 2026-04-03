@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 const StickyHeader = () => {
@@ -40,13 +41,13 @@ const StickyHeader = () => {
       }`}
     >
       <div className="container mx-auto flex items-center justify-between py-2 px-4 md:px-8">
-        <a href="#" className="flex-shrink-0">
+        <Link to="/" className="flex-shrink-0" aria-label="Go to homepage">
           <img
             src={logo}
             alt="Glossworks Detailing"
             className="h-12 sm:h-14 md:h-16 w-auto object-contain"
           />
-        </a>
+        </Link>
 
         <nav className="hidden md:flex items-center gap-6 lg:gap-8">
           {links.map((l) => (
