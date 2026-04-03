@@ -48,9 +48,9 @@ const vehicleConditions = [
 ];
 
 const serviceCategories = [
-  { label: "Full Detail", desc: "Complete interior & exterior" },
-  { label: "Exterior Only", desc: "Wash, clay, polish & protect" },
-  { label: "Interior Only", desc: "Deep clean every surface inside" },
+  { label: "Details", desc: "All bundles" },
+  { label: "Sorry this does not exsist yet", desc: "" },
+  { label: "Sorry this does not exsist yet", desc: "" },
 ];
 
 const packages: Record<
@@ -60,13 +60,13 @@ const packages: Record<
   "Full Detail": [
     {
       label: "The Baseline",
-      price: 110,
+      price: 75,
       features: [
-        "Multi-stage foam bath & hand wash",
-        "Deep barrel cleaning & tire scrub",
-        "Bug & grime removal",
-        "Bead Maker finish",
-        "Premium tire dressing",
+        "Multi-Stage Prep: pH-neutral foam bath to safely lift surface grit.",
+        "Wheels: Deep barrel cleaning & tire scrub.",
+        "De-Greasing: Intensive bug removal and cleaning of fuel doors and door jambs.",
+        "Protection: Finished with Bead Maker for signature slickness and high gloss.",
+        "Tire Finish: Premium tire dressing applied.",
       ],
     },
     {
@@ -74,88 +74,61 @@ const packages: Record<
       price: 165,
       popular: true,
       features: [
-        "Full hand wash & decontamination",
-        "Interior vacuum & wipe-down",
-        "Leather conditioning",
-        "Windows & mirrors",
-        "Tire dressing & door jambs",
+        "Full Baseline Process: Includes everything in the $75 package.",
+        "High-Power Deep Vacuum: Complete debris removal from cabin, trunk, and tight crevices.",
+        "Full Interior Sanitization & Wipe Down",
+        "Deep-Clean Floor Mats Rubber and Carpet",
+        "UV Surface Armor (Prevents Fading & Cracking)",
       ],
     },
     {
-      label: "The Signature Transformation",
-      price: 240,
+      label: "",
+      price: 0,
       features: [
-        "Everything in Signature Detail",
-        "Clay bar treatment",
-        "Machine wax application",
-        "Engine bay wipe",
-        "Full trunk detail",
+        "",
       ],
     },
   ],
   "Exterior Only": [
     {
-      label: "Express Wash",
-      price: 80,
+      label: "",
+      price: 0,
       features: [
-        "Foam bath & hand wash",
-        "Wheel & tire cleaning",
-        "Spray wax finish",
-        "Tire dressing",
+        "",
       ],
     },
     {
-      label: "Full Exterior",
-      price: 130,
+      label: "",
+      price:0,
       popular: true,
       features: [
-        "Everything in Express Wash",
-        "Clay bar decontamination",
-        "Machine polish",
-        "Sealant protection",
+        "",
       ],
     },
   ],
   "Interior Only": [
     {
-      label: "Interior Refresh",
-      price: 90,
+      label: "",
+      price: 0,
       features: [
-        "Full vacuum",
-        "Surface wipe-down",
-        "Windows & mirrors",
-        "Floor mat cleaning",
+        "",
       ],
     },
     {
-      label: "Deep Interior",
-      price: 150,
+      label: "",
+      price: 0,
       popular: true,
       features: [
-        "Everything in Interior Refresh",
-        "Steam cleaning",
-        "Leather conditioning",
-        "Stain treatment",
-        "Odor elimination",
+        "",
       ],
     },
   ],
 };
 
 const addOns = [
-  {
-    key: "trim",
-    label: "Trim Restoration",
-    desc: "Restoring faded exterior plastics",
-    price: 60,
-  },
-  { key: "engine", label: "Engine Bay Cleaning", desc: "Pristine engine compartment", price: 85 },
-  { key: "pet", label: "Pet Hair Removal", desc: "Thorough fur extraction", price: 40 },
-  { key: "hardwax", label: "Hard Wax Upgrade", desc: "Hand-applied paste wax for that deep wet look", price: 45 },
-  { key: "machinewax", label: "Machine Liquid Wax", desc: "Liquid wax via DA Polisher", price: 65 },
-  { key: "stain", label: "Stain Removal", desc: "Price varies by stain type", price: 50 },
+ 
   { key: "iron", label: "Iron Decontamination", desc: "Chemical removal of iron particles", price: 35 },
-  { key: "headlights", label: "Headlight Restoration", desc: "UV-damaged lenses restored", price: 90 },
+
 ];
 
 const SHEET_ENDPOINT =
