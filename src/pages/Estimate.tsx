@@ -1,8 +1,19 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Car, Layers, Sparkles, ArrowRight, ArrowLeft, Send, Plus,
-  Calendar, MapPin, User, ClipboardList, Check, ShieldCheck
+  Car,
+  Layers,
+  Sparkles,
+  ArrowRight,
+  ArrowLeft,
+  Send,
+  Plus,
+  Calendar,
+  MapPin,
+  User,
+  ClipboardList,
+  Check,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,24 +53,102 @@ const serviceCategories = [
   { label: "Interior Only", desc: "Deep clean every surface inside" },
 ];
 
-const packages: Record<string, { label: string; price: number; popular?: boolean; features: string[] }[]> = {
+const packages: Record<
+  string,
+  { label: string; price: number; popular?: boolean; features: string[] }[]
+> = {
   "Full Detail": [
-    { label: "The Baseline", price: 110, features: ["Multi-stage foam bath & hand wash", "Deep barrel cleaning & tire scrub", "Bug & grime removal", "Bead Maker finish", "Premium tire dressing"] },
-    { label: "The Signature Detail", price: 165, popular: true, features: ["Full hand wash & decontamination", "Interior vacuum & wipe-down", "Leather conditioning", "Windows & mirrors", "Tire dressing & door jambs"] },
-    { label: "The Signature Transformation", price: 240, features: ["Everything in Signature Detail", "Clay bar treatment", "Machine wax application", "Engine bay wipe", "Full trunk detail"] },
+    {
+      label: "The Baseline",
+      price: 110,
+      features: [
+        "Multi-stage foam bath & hand wash",
+        "Deep barrel cleaning & tire scrub",
+        "Bug & grime removal",
+        "Bead Maker finish",
+        "Premium tire dressing",
+      ],
+    },
+    {
+      label: "The Signature Detail",
+      price: 165,
+      popular: true,
+      features: [
+        "Full hand wash & decontamination",
+        "Interior vacuum & wipe-down",
+        "Leather conditioning",
+        "Windows & mirrors",
+        "Tire dressing & door jambs",
+      ],
+    },
+    {
+      label: "The Signature Transformation",
+      price: 240,
+      features: [
+        "Everything in Signature Detail",
+        "Clay bar treatment",
+        "Machine wax application",
+        "Engine bay wipe",
+        "Full trunk detail",
+      ],
+    },
   ],
   "Exterior Only": [
-    { label: "Express Wash", price: 80, features: ["Foam bath & hand wash", "Wheel & tire cleaning", "Spray wax finish", "Tire dressing"] },
-    { label: "Full Exterior", price: 130, popular: true, features: ["Everything in Express Wash", "Clay bar decontamination", "Machine polish", "Sealant protection"] },
+    {
+      label: "Express Wash",
+      price: 80,
+      features: [
+        "Foam bath & hand wash",
+        "Wheel & tire cleaning",
+        "Spray wax finish",
+        "Tire dressing",
+      ],
+    },
+    {
+      label: "Full Exterior",
+      price: 130,
+      popular: true,
+      features: [
+        "Everything in Express Wash",
+        "Clay bar decontamination",
+        "Machine polish",
+        "Sealant protection",
+      ],
+    },
   ],
   "Interior Only": [
-    { label: "Interior Refresh", price: 90, features: ["Full vacuum", "Surface wipe-down", "Windows & mirrors", "Floor mat cleaning"] },
-    { label: "Deep Interior", price: 150, popular: true, features: ["Everything in Interior Refresh", "Steam cleaning", "Leather conditioning", "Stain treatment", "Odor elimination"] },
+    {
+      label: "Interior Refresh",
+      price: 90,
+      features: [
+        "Full vacuum",
+        "Surface wipe-down",
+        "Windows & mirrors",
+        "Floor mat cleaning",
+      ],
+    },
+    {
+      label: "Deep Interior",
+      price: 150,
+      popular: true,
+      features: [
+        "Everything in Interior Refresh",
+        "Steam cleaning",
+        "Leather conditioning",
+        "Stain treatment",
+        "Odor elimination",
+      ],
+    },
   ],
 };
 
 const addOns = [
-  { key: "trim", label: "Trim Restoration", desc: "Restoring faded exterior plastics", price: 60 },
+  {
+    key: "trim",
+    label: "Trim Restoration",
+    desc: "Restoring faded exterior plastics",
+    price: 60,
+  },
   { key: "engine", label: "Engine Bay Cleaning", desc: "Pristine engine compartment", price: 85 },
   { key: "pet", label: "Pet Hair Removal", desc: "Thorough fur extraction", price: 40 },
   { key: "hardwax", label: "Hard Wax Upgrade", desc: "Hand-applied paste wax for that deep wet look", price: 45 },
@@ -69,28 +158,14 @@ const addOns = [
   { key: "headlights", label: "Headlight Restoration", desc: "UV-damaged lenses restored", price: 90 },
 ];
 
+const SHEET_ENDPOINT =
+  "https://script.google.com/macros/s/AKfycbzpti__o1xShC_Kc0kMJ5a_NFl2Uw1yX9FHnkyNGhypzUGd8ROmjGnUi8XFIJ2G5Q6y/exec";
 
+const isValidEmail = (email: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbzpti__o1xShC_Kc0kMJ5a_NFl2Uw1yX9FHnkyNGhypzUGd8ROmjGnUi8XFIJ2G5Q6y/exec";
-
-const submitToGoogleSheets = async (data: Record<string, string>) => {
-  if (!SHEET_ENDPOINT) {
-    console.log("Google Sheets endpoint not configured. Payload:", data);
-    return;
-  }
-  try {
-    await fetch(SHEET_ENDPOINT, {
-  method: "POST",
-  headers: { "Content-Type": "text/plain;charset=utf-8" },
-  body: JSON.stringify(data),
-});
-  } catch (err) {
-    console.error("Failed to submit to Google Sheets:", err);
-  }
-};
-
-const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const isValidPhone = (phone: string) => /^[\d\s\-\+\(\)]{7,15}$/.test(phone.trim());
+const isValidPhone = (phone: string) =>
+  /^[\d\s\-\+\(\)]{7,15}$/.test(phone.trim());
 
 const Estimate = () => {
   const [step, setStep] = useState(0);
@@ -99,156 +174,170 @@ const Estimate = () => {
   const [category, setCategory] = useState<number | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
   const [selectedAddOns, setSelectedAddOns] = useState<number[]>([]);
+
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
-const [loadingSlots, setLoadingSlots] = useState(false);
-const [slotError, setSlotError] = useState<string | null>(null);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [slotError, setSlotError] = useState<string | null>(null);
+
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [notes, setNotes] = useState("");
+
   const [contact, setContact] = useState({ name: "", email: "", phone: "" });
   const [consent, setConsent] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-
-  useEffect(() => {
-  const loadAvailability = async () => {
-    if (!selectedDate || !SHEET_ENDPOINT) return;
-
-    setLoadingSlots(true);
-    setSlotError(null);
-    setAvailableSlots([]);
-    setSelectedTime("");
-
-    const getDurationMins = () => 180;
-
-useEffect(() => {
-  // uses getDurationMins safely now
-}, [selectedDate]);
-
-    try {
-      const res = await fetch(SHEET_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          action: "getAvailability",
-          date: selectedDate,
-          durationMins: getDurationMins(),
-        }),
-      });
-
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || "Failed to load availability");
-
-      setAvailableSlots(json.slots || []);
-    } catch (e: any) {
-      setSlotError(e?.message || "Failed to load availability");
-    } finally {
-      setLoadingSlots(false);
-    }
-  };
-
-  loadAvailability();
-}, [selectedDate]);
-
+  // Default duration for booking slots (later you can map per package)
+  const getDurationMins = () => 180;
 
   // Scroll to top on step change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [step]);
 
+  // Load availability when date changes
+  useEffect(() => {
+    const loadAvailability = async () => {
+      if (!selectedDate) return;
+
+      setLoadingSlots(true);
+      setSlotError(null);
+      setAvailableSlots([]);
+      setSelectedTime("");
+
+      try {
+        const res = await fetch(SHEET_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "getAvailability",
+            date: selectedDate,
+            durationMins: getDurationMins(),
+          }),
+        });
+
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error || "Failed to load availability");
+
+        setAvailableSlots(json.slots || []);
+      } catch (e: any) {
+        setSlotError(e?.message || "Failed to load availability");
+      } finally {
+        setLoadingSlots(false);
+      }
+    };
+
+    loadAvailability();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate]);
+
   const canNext = (() => {
     switch (step) {
-      case 0: return vehicle !== null;
-      case 1: return condition !== null;
-      case 2: return category !== null;
-      case 3: return selectedPackage !== null;
-      case 4: return true; // add-ons optional
-      case 5: return selectedDate !== "" && selectedTime !== "";
-      case 6: return address.trim() !== "" && city.trim() !== "" && zipCode.trim() !== "";
-      case 7: return contact.name.trim() !== "" && isValidEmail(contact.email) && isValidPhone(contact.phone) && consent;
-      default: return false;
+      case 0:
+        return vehicle !== null;
+      case 1:
+        return condition !== null;
+      case 2:
+        return category !== null;
+      case 3:
+        return selectedPackage !== null;
+      case 4:
+        return true; // add-ons optional
+      case 5:
+        return selectedDate !== "" && selectedTime !== "";
+      case 6:
+        return address.trim() !== "" && city.trim() !== "" && zipCode.trim() !== "";
+      case 7:
+        return (
+          contact.name.trim() !== "" &&
+          isValidEmail(contact.email) &&
+          isValidPhone(contact.phone) &&
+          consent
+        );
+      default:
+        return false;
     }
   })();
 
   const toggleAddOn = (idx: number) => {
     setSelectedAddOns((prev) =>
-      prev.includes(idx) ? prev.filter((x) => x !== idx) : [...prev, idx]
+      prev.includes(idx) ? prev.filter((x) => x !== idx) : [...prev, idx],
     );
   };
-
-  const getCategoryLabel = () => category !== null ? serviceCategories[category].label : "";
-  const getCategoryPackages = () => category !== null ? (packages[serviceCategories[category].label] || []) : [];
-
-  const getTotal = () => {
-    const pkgs = getCategoryPackages();
-    const pkgPrice = selectedPackage !== null && pkgs[selectedPackage] ? pkgs[selectedPackage].price : 0;
-    const sizeUpcharge = vehicle !== null ? vehicleSizes[vehicle].upcharge : 0;
-    const conditionUpcharge = condition !== null ? vehicleConditions[condition].upcharge : 0;
-    const addOnsTotal = selectedAddOns.reduce((sum, idx) => sum + addOns[idx].price, 0);
-    return pkgPrice + sizeUpcharge + conditionUpcharge + addOnsTotal;
-  };
-
-  const getDurationMins = () => {
-  // Default duration for booking slots (change later per package)
-  return 180; // 3 hours
-};
-  const handleSubmit = async () => {
-  const pkgs = getCategoryPackages();
-  const packageLabel =
-    selectedPackage !== null && pkgs[selectedPackage] ? pkgs[selectedPackage].label : "";
-
-  const payload = {
-    action: "createBooking",
-
-    // Booking
-    date: selectedDate,
-    timeLabel: selectedTime,
-    durationMins: getDurationMins(),
-
-    // Contact
-    name: contact.name,
-    email: contact.email,
-    phone: contact.phone,
-
-    // Location
-    address,
-    city,
-    zipCode,
-    notes,
-
-    // Selections
-    vehicleSize: vehicle !== null ? vehicleSizes[vehicle].label : "",
-    vehicleCondition: condition !== null ? vehicleConditions[condition].label : "",
-    category: getCategoryLabel(),
-    packageLabel,
-    addOns: selectedAddOns.map((idx) => addOns[idx].label).join(", ") || "None",
-    total: `$${getTotal()}`,
-
-    consent: consent ? "Yes" : "No",
-  };
-
-  try {
-    const res = await fetch(SHEET_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload),
-    });
-
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "Booking failed");
-
-    setSubmitted(true);
-  } catch (e: any) {
-    alert(e?.message || "Booking failed. Please try another time.");
-  }
-};
 
   const handleCategoryChange = (idx: number) => {
     setCategory(idx);
     setSelectedPackage(null);
+  };
+
+  const getCategoryLabel = () =>
+    category !== null ? serviceCategories[category].label : "";
+
+  const getCategoryPackages = () =>
+    category !== null ? packages[serviceCategories[category].label] || [] : [];
+
+  const getTotal = () => {
+    const pkgs = getCategoryPackages();
+    const pkgPrice =
+      selectedPackage !== null && pkgs[selectedPackage]
+        ? pkgs[selectedPackage].price
+        : 0;
+    const sizeUpcharge = vehicle !== null ? vehicleSizes[vehicle].upcharge : 0;
+    const conditionUpcharge =
+      condition !== null ? vehicleConditions[condition].upcharge : 0;
+    const addOnsTotal = selectedAddOns.reduce((sum, idx) => sum + addOns[idx].price, 0);
+    return pkgPrice + sizeUpcharge + conditionUpcharge + addOnsTotal;
+  };
+
+  const handleSubmit = async () => {
+    const pkgs = getCategoryPackages();
+    const packageLabel =
+      selectedPackage !== null && pkgs[selectedPackage] ? pkgs[selectedPackage].label : "";
+
+    const payload = {
+      action: "createBooking",
+
+      date: selectedDate,
+      timeLabel: selectedTime,
+      durationMins: getDurationMins(),
+
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone,
+
+      address,
+      city,
+      zipCode,
+      notes,
+
+      vehicleSize: vehicle !== null ? vehicleSizes[vehicle].label : "",
+      vehicleCondition: condition !== null ? vehicleConditions[condition].label : "",
+      category: getCategoryLabel(),
+      packageLabel,
+      addOns: selectedAddOns.map((idx) => addOns[idx].label).join(", ") || "None",
+      total: `$${getTotal()}`,
+
+      consent: consent ? "Yes" : "No",
+    };
+
+    try {
+      const res = await fetch(SHEET_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || "Booking failed");
+
+      setSubmitted(true);
+    } catch (e: any) {
+      alert(e?.message || "Booking failed. Please try another time.");
+    }
   };
 
   const goToStep = (s: number) => setStep(s);
@@ -275,9 +364,9 @@ useEffect(() => {
             <div className="mx-auto w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-6">
               <Send className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-2xl font-bold mb-2 text-white">Booking Request Sent!</h3>
+            <h3 className="text-2xl font-bold mb-2 text-white">Booking Confirmed!</h3>
             <p className="text-muted-foreground font-body">
-              We'll reach out within 24 hours to confirm your appointment. Thank you for choosing Glossworks.
+              You’re on the schedule. We’ll reach out soon to confirm details. Thank you for choosing Glossworks.
             </p>
           </motion.div>
         </div>
@@ -301,31 +390,42 @@ useEffect(() => {
         </div>
         <div className="flex justify-between">
           <span>Package</span>
-          <span className="text-white">{selectedPackage !== null && pkgs[selectedPackage] ? `${pkgs[selectedPackage].label} — $${pkgs[selectedPackage].price}` : "—"}</span>
+          <span className="text-white">
+            {selectedPackage !== null && pkgs[selectedPackage]
+              ? `${pkgs[selectedPackage].label} — $${pkgs[selectedPackage].price}`
+              : "—"}
+          </span>
         </div>
+
         {vehicle !== null && vehicleSizes[vehicle].upcharge > 0 && (
           <div className="flex justify-between">
             <span>Size upcharge</span>
             <span className="text-white">+ ${vehicleSizes[vehicle].upcharge}</span>
           </div>
         )}
+
         {condition !== null && vehicleConditions[condition].upcharge > 0 && (
           <div className="flex justify-between">
             <span>Condition upcharge</span>
             <span className="text-white">+ ${vehicleConditions[condition].upcharge}</span>
           </div>
         )}
+
         {selectedAddOns.length > 0 && (
           <div className="flex justify-between">
             <span>Add-ons ({selectedAddOns.length})</span>
-            <span className="text-white">+ ${selectedAddOns.reduce((s, i) => s + addOns[i].price, 0)}</span>
+            <span className="text-white">
+              + ${selectedAddOns.reduce((s, i) => s + addOns[i].price, 0)}
+            </span>
           </div>
         )}
+
         <div className="flex justify-between font-bold text-white pt-2 border-t border-neutral-800">
           <span>Estimated Total</span>
           <span className="text-primary">${total}</span>
         </div>
       </div>
+
       <Button onClick={() => goToStep(5)} className="w-full mt-4" size="lg">
         Book Now <ArrowRight className="ml-2 h-4 w-4" />
       </Button>
@@ -344,11 +444,16 @@ useEffect(() => {
             className="text-center mb-10"
           >
             <h1 className="text-3xl md:text-4xl font-bold text-white">Book Your Detail</h1>
-            <p className="text-muted-foreground mt-2 font-body">Complete each step to get your personalized quote.</p>
+            <p className="text-muted-foreground mt-2 font-body">
+              Complete each step to get your personalized quote.
+            </p>
           </motion.div>
 
-          {/* Step indicator - no scrollbar */}
-          <div className="mb-10 overflow-x-auto scrollbar-hide -mx-4 px-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+          {/* Step indicator */}
+          <div
+            className="mb-10 overflow-x-auto scrollbar-hide -mx-4 px-4"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
             <style>{`.scrollbar-hide::-webkit-scrollbar { display: none; }`}</style>
             <div className="flex items-center gap-1 min-w-max mx-auto justify-center">
               {steps.map((s, i) => (
@@ -359,16 +464,22 @@ useEffect(() => {
                         i < step
                           ? "bg-primary text-primary-foreground"
                           : i === step
-                          ? "bg-primary text-primary-foreground ring-2 ring-primary/40 ring-offset-2 ring-offset-black"
-                          : "bg-neutral-800 text-muted-foreground"
+                            ? "bg-primary text-primary-foreground ring-2 ring-primary/40 ring-offset-2 ring-offset-black"
+                            : "bg-neutral-800 text-muted-foreground"
                       }`}
                     >
                       {i < step ? <Check className="h-3 w-3" /> : <s.icon className="h-3 w-3" />}
                     </div>
-                    <span className="text-[9px] md:text-xs text-muted-foreground whitespace-nowrap">{s.label}</span>
+                    <span className="text-[9px] md:text-xs text-muted-foreground whitespace-nowrap">
+                      {s.label}
+                    </span>
                   </div>
                   {i < steps.length - 1 && (
-                    <div className={`w-4 md:w-10 h-px mx-0.5 mt-[-16px] ${i < step ? "bg-primary" : "bg-neutral-700"}`} />
+                    <div
+                      className={`w-4 md:w-10 h-px mx-0.5 mt-[-16px] ${
+                        i < step ? "bg-primary" : "bg-neutral-700"
+                      }`}
+                    />
                   )}
                 </div>
               ))}
@@ -378,8 +489,14 @@ useEffect(() => {
           {/* Step content */}
           <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-6 md:p-8 min-h-[320px]">
             <AnimatePresence mode="wait">
-              <motion.div key={step} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }}>
-
+              <motion.div
+                key={step}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.25 }}
+              >
                 {/* Step 0: Vehicle */}
                 {step === 0 && (
                   <div>
@@ -519,7 +636,9 @@ useEffect(() => {
                               </div>
                               <span className="text-primary font-semibold text-sm">${a.price}</span>
                             </div>
-                            <span className="text-[10px] text-primary/60 mt-1 block">{active ? "✓ Selected" : "Click to add"}</span>
+                            <span className="text-[10px] text-primary/60 mt-1 block">
+                              {active ? "✓ Selected" : "Click to add"}
+                            </span>
                           </button>
                         );
                       })}
@@ -543,31 +662,35 @@ useEffect(() => {
                           min={new Date().toISOString().split("T")[0]}
                         />
                       </div>
+
                       <div>
                         <label className="text-sm text-muted-foreground mb-2 block">Time Slot</label>
+
                         {loadingSlots ? (
-  <p className="text-sm text-muted-foreground">Loading available times...</p>
-) : slotError ? (
-  <p className="text-sm text-red-400">{slotError}</p>
-) : availableSlots.length === 0 ? (
-  <p className="text-sm text-muted-foreground">No availability for this date. Try another day.</p>
-) : (
-  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-    {availableSlots.map((t) => (
-      <button
-        key={t}
-        onClick={() => setSelectedTime(t)}
-        className={`rounded-lg border px-3 py-2.5 text-sm transition-all ${
-          selectedTime === t
-            ? "border-primary bg-primary/10 text-white"
-            : "border-neutral-800 bg-neutral-900 text-muted-foreground hover:border-primary/30"
-        }`}
-      >
-        {t}
-      </button>
-    ))}
-  </div>
-)}
+                          <p className="text-sm text-muted-foreground">Loading available times...</p>
+                        ) : slotError ? (
+                          <p className="text-sm text-red-400">{slotError}</p>
+                        ) : availableSlots.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">
+                            No availability for this date. Try another day.
+                          </p>
+                        ) : (
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {availableSlots.map((t) => (
+                              <button
+                                key={t}
+                                onClick={() => setSelectedTime(t)}
+                                className={`rounded-lg border px-3 py-2.5 text-sm transition-all ${
+                                  selectedTime === t
+                                    ? "border-primary bg-primary/10 text-white"
+                                    : "border-neutral-800 bg-neutral-900 text-muted-foreground hover:border-primary/30"
+                                }`}
+                              >
+                                {t}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -653,15 +776,19 @@ useEffect(() => {
                           onCheckedChange={(v) => setConsent(v === true)}
                           className="mt-0.5 border-neutral-600"
                         />
-                        <label htmlFor="consent-page" className="text-xs text-muted-foreground leading-snug cursor-pointer">
-                          I consent to receive text messages and emails from Glossworks Mobile Detailing regarding my services. Message & data rates may apply.
+                        <label
+                          htmlFor="consent-page"
+                          className="text-xs text-muted-foreground leading-snug cursor-pointer"
+                        >
+                          I consent to receive text messages and emails from Glossworks Mobile Detailing regarding my
+                          services. Message & data rates may apply.
                         </label>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Step 8: Full Summary */}
+                {/* Step 8: Summary */}
                 {step === 8 && (
                   <div>
                     <h3 className="text-lg font-semibold mb-4 text-white text-center">Booking Summary</h3>
@@ -670,34 +797,44 @@ useEffect(() => {
                     <div className="text-sm space-y-2 border border-neutral-800 rounded-lg p-4 bg-neutral-900 mb-6">
                       <div className="flex justify-between text-muted-foreground">
                         <span>Vehicle</span>
-                        <span className="text-white">{vehicle !== null ? `${vehicleSizes[vehicle].label} (${vehicleSizes[vehicle].desc})` : "—"}</span>
+                        <span className="text-white">
+                          {vehicle !== null ? `${vehicleSizes[vehicle].label} (${vehicleSizes[vehicle].desc})` : "—"}
+                        </span>
                       </div>
+
                       <div className="flex justify-between text-muted-foreground">
                         <span>Condition</span>
                         <span className="text-white">{condition !== null ? vehicleConditions[condition].label : "—"}</span>
                       </div>
+
                       <div className="flex justify-between text-muted-foreground">
                         <span>Category</span>
                         <span className="text-white">{getCategoryLabel() || "—"}</span>
                       </div>
+
                       <div className="flex justify-between text-muted-foreground">
                         <span>Package</span>
                         <span className="text-white">
-                          {selectedPackage !== null && pkgs[selectedPackage] ? `${pkgs[selectedPackage].label} — $${pkgs[selectedPackage].price}` : "—"}
+                          {selectedPackage !== null && pkgs[selectedPackage]
+                            ? `${pkgs[selectedPackage].label} — $${pkgs[selectedPackage].price}`
+                            : "—"}
                         </span>
                       </div>
+
                       {vehicle !== null && vehicleSizes[vehicle].upcharge > 0 && (
                         <div className="flex justify-between text-muted-foreground">
                           <span>Size upcharge</span>
                           <span className="text-white">+ ${vehicleSizes[vehicle].upcharge}</span>
                         </div>
                       )}
+
                       {condition !== null && vehicleConditions[condition].upcharge > 0 && (
                         <div className="flex justify-between text-muted-foreground">
                           <span>Condition upcharge</span>
                           <span className="text-white">+ ${vehicleConditions[condition].upcharge}</span>
                         </div>
                       )}
+
                       <div className="flex justify-between text-muted-foreground">
                         <span>Add-ons</span>
                         <span className="text-white">
@@ -706,24 +843,33 @@ useEffect(() => {
                             : "None"}
                         </span>
                       </div>
+
                       {selectedAddOns.length > 0 && (
                         <div className="pl-4 space-y-1 pt-1">
                           {selectedAddOns.map((idx) => (
                             <div key={addOns[idx].key} className="flex justify-between text-xs text-muted-foreground">
-                              <span>{addOns[idx].label}</span><span>${addOns[idx].price}</span>
+                              <span>{addOns[idx].label}</span>
+                              <span>${addOns[idx].price}</span>
                             </div>
                           ))}
                         </div>
                       )}
+
                       <div className="border-t border-neutral-800 pt-2 mt-2">
                         <div className="flex justify-between text-muted-foreground">
                           <span>Date & Time</span>
-                          <span className="text-white">{selectedDate} at {selectedTime}</span>
+                          <span className="text-white">
+                            {selectedDate} at {selectedTime}
+                          </span>
                         </div>
+
                         <div className="flex justify-between text-muted-foreground mt-1">
                           <span>Location</span>
-                          <span className="text-white text-right max-w-[200px]">{address}, {city} {zipCode}</span>
+                          <span className="text-white text-right max-w-[200px]">
+                            {address}, {city} {zipCode}
+                          </span>
                         </div>
+
                         {notes && (
                           <div className="flex justify-between text-muted-foreground mt-1">
                             <span>Notes</span>
@@ -731,19 +877,25 @@ useEffect(() => {
                           </div>
                         )}
                       </div>
+
                       <div className="border-t border-neutral-800 pt-2 mt-2">
                         <div className="flex justify-between text-muted-foreground">
-                          <span>Name</span><span className="text-white">{contact.name}</span>
+                          <span>Name</span>
+                          <span className="text-white">{contact.name}</span>
                         </div>
                         <div className="flex justify-between text-muted-foreground mt-1">
-                          <span>Email</span><span className="text-white">{contact.email}</span>
+                          <span>Email</span>
+                          <span className="text-white">{contact.email}</span>
                         </div>
                         <div className="flex justify-between text-muted-foreground mt-1">
-                          <span>Phone</span><span className="text-white">{contact.phone}</span>
+                          <span>Phone</span>
+                          <span className="text-white">{contact.phone}</span>
                         </div>
                       </div>
+
                       <div className="flex justify-between font-bold text-white pt-2 border-t border-neutral-800">
-                        <span>Total Estimate</span><span>${total}</span>
+                        <span>Total Estimate</span>
+                        <span>${total}</span>
                       </div>
                     </div>
 
@@ -756,7 +908,7 @@ useEffect(() => {
             </AnimatePresence>
           </div>
 
-          {/* Navigation - hide on add-ons step's "Book Now" and on summary */}
+          {/* Navigation */}
           <div className="flex justify-between mt-6">
             <Button
               variant="outline"
@@ -766,7 +918,8 @@ useEffect(() => {
             >
               <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
-            {step < 8 && !(step === 4) && (
+
+            {step < 8 && step !== 4 && (
               <Button onClick={() => setStep(step + 1)} disabled={!canNext}>
                 Next <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
