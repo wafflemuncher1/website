@@ -35,18 +35,22 @@ const StickyHeader = () => {
   ];
 
   const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    setMobileOpen(false);
+  e.preventDefault();
+  setMobileOpen(false);
 
-    // If already on homepage, just scroll to top
-    if (location.pathname === "/") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
+  if (location.pathname === "/") {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
 
-    // Otherwise go home
-    navigate("/");
-  };
+  // Navigate home, then scroll to top after the route renders
+  navigate("/");
+
+  // Use requestAnimationFrame to run after navigation paint
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  });
+};
 
   return (
     <motion.header
