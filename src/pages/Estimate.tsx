@@ -82,10 +82,10 @@ const packages: Record<
       ],
     },
     {
-      label: "",
-      price: 0,
+      label: "kenf",
+      price: 10,
       features: [
-        "",
+        "skadk",
       ],
     },
   ],
