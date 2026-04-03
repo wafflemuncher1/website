@@ -80,13 +80,7 @@ const packages: Record<
         "UV Surface Armor (Prevents Fading & Cracking)",
       ],
     },
-    {
-      label: "",
-      price: 0,
-      features: [
-        "",
-      ],
-    },
+   
   ],
   "Sorry this does not exsist yet": [
     {
