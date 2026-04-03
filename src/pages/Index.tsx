@@ -31,7 +31,7 @@ const Index = () => {
       <PremiumAddOns />
       <WashComparison />
       <GalleryGrid />
-      <ReviewsGrid />
+      "ReviewsGrid"
       <AboutSection />
       <ServiceAgreement />
       <ServiceArea />
