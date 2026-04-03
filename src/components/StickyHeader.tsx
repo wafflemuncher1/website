@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 const StickyHeader = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -31,6 +34,20 @@ const StickyHeader = () => {
     { label: "Get Estimate", href: "#estimate" },
   ];
 
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setMobileOpen(false);
+
+    // If already on homepage, just scroll to top
+    if (location.pathname === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    // Otherwise go home
+    navigate("/");
+  };
+
   return (
     <motion.header
       initial={{ y: -100 }}
@@ -41,13 +58,18 @@ const StickyHeader = () => {
       }`}
     >
       <div className="container mx-auto flex items-center justify-between py-2 px-4 md:px-8">
-        <Link to="/" className="flex-shrink-0" aria-label="Go to homepage">
+        <a
+          href="/"
+          onClick={handleLogoClick}
+          className="flex-shrink-0"
+          aria-label="Go to homepage"
+        >
           <img
             src={logo}
             alt="Glossworks Detailing"
             className="h-12 sm:h-14 md:h-16 w-auto object-contain"
           />
-        </Link>
+        </a>
 
         <nav className="hidden md:flex items-center gap-6 lg:gap-8">
           {links.map((l) => (
