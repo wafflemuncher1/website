@@ -31,12 +31,10 @@ const Index = () => {
       <PremiumAddOns />
       <WashComparison />
       <GalleryGrid />
-      "ReviewsGrid"
       <AboutSection />
       <ServiceAgreement />
       <ServiceArea />
       <FAQSection />
-      <EstimateEngine />
       <CTABanner />
       <InstagramGallery />
       <FullWidthParagraph />
