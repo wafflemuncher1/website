@@ -2,12 +2,12 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import image1 from "@/assets/optimized/image19.webp";
-import image2 from "@/assets/optimized/image19.webp";
-import image3 from "@/assets/optimized/image3.webp";
-import image4 from "@/assets/optimized/image4.webp";
-import image5 from "@/assets/optimized/image5.webp";
-import image6 from "@/assets/optimized/image6.webp";
+import image1 from "@/assets/optimized/image12.webp";
+import image2 from "@/assets/optimized/image17.webp";
+import image3 from "@/assets/optimized/image10.webp";
+import image4 from "@/assets/optimized/image14.webp";
+import image5 from "@/assets/optimized/image19.webp";
+import image6 from "@/assets/optimized/image18.webp";
 
 const images = [
   { src: image1, alt: "Ceramic coated SUV", label: "Ceramic Coating" },
