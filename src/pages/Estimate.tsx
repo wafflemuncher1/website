@@ -49,15 +49,14 @@ const vehicleConditions = [
 
 const serviceCategories = [
   { label: "Details", desc: "All bundles" },
-  { label: "Sorry this does not exsist yet", desc: "" },
-  { label: "Sorry this does not exsist yet 2", desc: "" },
+
 ];
 
 const packages: Record<
   string,
   { label: string; price: number; popular?: boolean; features: string[] }[]
 > = {
-  "Detail": [
+  "Details": [
     {
       label: "The Baseline",
       price: 75,
