@@ -2,19 +2,35 @@ import { motion } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroCar from "@/assets/optimized/logo.png";
+import heroVideoMp4 from "@/assets/hero/hero.mp4";
+
+const USE_HERO_VIDEO = true; // set to false to use the image instead
 
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0">
-        <img
-          src={heroCar}
-          alt="Luxury ceramic coated vehicle"
-          className="w-full h-full object-cover"
-          decoding="async"
-          fetchPriority="high"
-        />
+        {USE_HERO_VIDEO ? (
+          <video
+            src={heroVideoMp4}
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster={heroCar}
+          />
+        ) : (
+          <img
+            src={heroCar}
+            alt="Luxury ceramic coated vehicle"
+            className="w-full h-full object-cover"
+            decoding="async"
+            fetchPriority="high"
+          />
+        )}
 
         {/* OPTIONAL: keep a very light overlay to protect text readability.
             Delete these two <div>s if you want ZERO overlay. */}
@@ -52,7 +68,7 @@ const HeroSection = () => {
             <Button size="lg" className="text-base px-8 py-6 group" asChild>
               <a href="#estimate">
                 Get Your Estimate
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="ml-2 h--4 w-4 group-hover:translate-x-1 transition-transform" />
               </a>
             </Button>
 
