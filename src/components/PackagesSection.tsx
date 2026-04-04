@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Sparkles, Crown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 type ServiceCategory = "full" | "exterior" | "interior";
 
@@ -288,14 +289,14 @@ const PackagesSection = () => {
 
                   <div className="mt-auto">
                     <Button
-                      variant={pkg.badgeVariant ? "default" : "outline"}
-                      className="w-full py-5"
-                      asChild
-                    >
-                      <a href="#estimate">
-                        Get Estimate <ArrowRight className="ml-2 h-4 w-4" />
-                      </a>
-                    </Button>
+  variant={pkg.badgeVariant ? "default" : "outline"}
+  className="w-full py-5"
+  asChild
+>
+  <Link to="/estimate">
+    Get Estimate <ArrowRight className="ml-2 h-4 w-4" />
+  </Link>
+</Button>
                   </div>
                 </div>
               </motion.div>
