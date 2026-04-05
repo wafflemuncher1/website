@@ -10,7 +10,7 @@ import ig6 from "@/assets/ig/image6.webp";
 
 const posts = [
   {
-    image: "ig1",
+    image: "@/assets/ig/image4.webp",
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
   {
