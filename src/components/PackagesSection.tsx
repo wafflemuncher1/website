@@ -66,7 +66,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         tagline: "",
         price: "$",
         interior: [
-    "Sorry this is not availble yet",
+    "Coming Soon",
   ],
   
   exterior: [
@@ -84,7 +84,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         badgeVariant: "vip",
         tagline: "",
         price: "$",
-        interior: ["Sorry but we do not offer this service at this time please try again later, thank you"],
+        interior: ["Coming Soon"],
         exterior: [
           "",
         ],
@@ -95,7 +95,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         badgeVariant: "vip",
         tagline: "",
         price: "$",
-        interior: ["Sorry but we do not offer this service at this time please try again later, thank you"],
+        interior: ["Coming Soon"],
         exterior: [
           "",
         ],
@@ -106,7 +106,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         badgeVariant: "vip",
         tagline: "",
         price: "$",
-        interior: ["Sorry but we do not offer this service at this time please try again later, thank you"],
+        interior: ["Coming Soon"],
         exterior: [
           "",
         ],
@@ -120,7 +120,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         name: "",
         tagline: "",
         price: "$",
-        interior: ["Sorry but we do not offer this service at this time please try again later, thank you"],
+        interior: ["Coming Soon"],
         exterior: [],
       },
       {
@@ -130,7 +130,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         tagline: "",
         price: "$",
         interior: [
-          "Sorry but we do not offer this service at this time please try again later, thank you",
+          "Coming Soon",
         ],
         exterior: [],
       },
@@ -141,7 +141,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         tagline: "",
         price: "$",
         interior: [
-          "Sorry but we do not offer this service at this time please try again later, thank you",
+          "Coming Soon",
         ],
         exterior: [],
       },

@@ -43,9 +43,11 @@ const Footer = () => {
             <ul className="space-y-2 text-sm text-muted-foreground font-body">
               <li>Southern Louisville, KY</li>
               <li>Bullitt County, KY</li>
-              <li>Prospect, KY</li>
-              <li>MiddleTown, KY</li>
               <li>Shepherdsville, KY</li>
+              <li>Bardstown, KY</li>
+              <li>Hillview, KY</li>
+              <li>Jeffersontown, KY</li>
+              <li>Mount Washington, KY</li>
             </ul>
           </div>
 
