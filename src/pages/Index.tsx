@@ -30,8 +30,8 @@ const Index = () => {
       <PackagesSection />
       <PremiumAddOns /> {/* Text left / Image right — blob shape */}
       <TextImageSection
-        heading="Precision Detailing, Perfected"
-        text="Every vehicle we touch receives the meticulous care it deserves. From paint correction to ceramic coatings, our trained specialists use cutting-edge techniques to deliver results that speak for themselves."
+        heading="The Science of Surface Care"
+        text="We don't just wash; we perform a chemical restoration. Using a multi-stage, pH-balanced workflow and German-engineered preservatives, we ensure a swirl-free finish and deep, mirror-like gloss that respects your vehicle’s delicate surfaces."
         imageUrl="https://res.cloudinary.com/drlyt63cm/image/upload/f_webp/q_auto/logo_n2ruxu.png"
         shape="blob"
       />
@@ -39,15 +39,15 @@ const Index = () => {
       {/* Text left / Image right — diamond shape */}
       <TextImageSection
         heading="Mobile Convenience, Studio Quality"
-        text="We bring the full detailing studio to your location. No need to drop off your car — our self-contained mobile units carry everything needed for a flawless finish, right in your driveway."
+        text="Glossworks brings a high-end detailing studio directly to you. Our self-contained mobile units are equipped with industrial-grade extraction and touchless pre-wash systems, delivering a flawless, showroom-ready finish without you ever leaving your home."
         imageUrl="https://res.cloudinary.com/drlyt63cm/image/upload/f_webp/q_auto/image23_soauqv.webp"
         shape="diamond"
       />
 
       {/* Image left / Text right — rounded shape */}
       <TextImageSection
-        heading="Protection That Lasts"
-        text="Our ceramic coating and paint protection packages don't just make your car look incredible — they shield it from UV damage, chemical stains, and everyday wear for years to come."
+        heading="A Lasting First Impression"
+        text="A truly clean vehicle is about more than just appearance; it’s about the feeling of stepping into a pristine environment. Our interior and exterior processes are designed to restore that day one sensation, providing a sharp, professional look that stands out in any setting."
         imageUrl="https://res.cloudinary.com/drlyt63cm/image/upload/f_avif/q_auto/image21_isesm4.webp"
         reverse
         shape="rounded"
