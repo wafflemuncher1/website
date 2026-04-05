@@ -40,7 +40,7 @@ const Index = () => {
       <TextImageSection
         heading="Mobile Convenience, Studio Quality"
         text="We bring the full detailing studio to your location. No need to drop off your car — our self-contained mobile units carry everything needed for a flawless finish, right in your driveway."
-        imageUrl="https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&h=600&fit=crop"
+        imageUrl="https://res.cloudinary.com/drlyt63cm/image/upload/f_webp/q_auto/image23_soauqv.webp"
         shape="diamond"
       />
 
@@ -48,7 +48,7 @@ const Index = () => {
       <TextImageSection
         heading="Protection That Lasts"
         text="Our ceramic coating and paint protection packages don't just make your car look incredible — they shield it from UV damage, chemical stains, and everyday wear for years to come."
-        imageUrl="https://images.unsplash.com/photo-1619405399517-d7fce0f13302?w=800&h=600&fit=crop"
+        imageUrl="https://res.cloudinary.com/drlyt63cm/image/upload/f_avif/q_auto/image21_isesm4.webp"
         reverse
         shape="rounded"
       />
