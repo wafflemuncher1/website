@@ -10,27 +10,27 @@ import ig6 from "@/assets/ig/image6.webp";
 
 const posts = [
   {
-    image: "@/assets/ig/image4.webp",
+    image: ig1,
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
   {
-    image: "ig2",
+    image: ig2,
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
   {
-    image: "ig3",
+    image: ig3,
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
   {
-    image: "ig4",
+    image: ig4,
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
   {
-    image: "ig5",
+    image: ig5,
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
   {
-    image: "ig6",
+    image: ig6,
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
 ];
