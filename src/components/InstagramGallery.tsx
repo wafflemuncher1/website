@@ -1,29 +1,36 @@
 import { motion } from "framer-motion";
 import { Instagram } from "lucide-react";
 
+import ig1 from "@/assets/ig/image1.webp";
+import ig2 from "@/assets/ig/image2.webp";
+import ig3 from "@/assets/ig/image3.webp";
+import ig4 from "@/assets/ig/image4.webp";
+import ig5 from "@/assets/ig/image5.webp";
+import ig6 from "@/assets/ig/image6.webp";
+
 const posts = [
   {
-    image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=400&fit=crop",
+    image: "ig1",
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
   {
-    image: "https://images.unsplash.com/photo-1542362567-b07e54358753?w=400&h=400&fit=crop",
+    image: "ig2",
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
   {
-    image: "https://images.unsplash.com/photo-1619405399517-d7fce0f13302?w=400&h=400&fit=crop",
+    image: "ig3",
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
   {
-    image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=400&fit=crop",
+    image: "ig4",
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
   {
-    image: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400&h=400&fit=crop",
+    image: "ig5",
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
   {
-    image: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&h=400&fit=crop",
+    image: "ig6",
     url: "https://www.instagram.com/glossworksky?igsh=MXMxeWFsZ2Rnc3R6bA%3D%3D&utm_source=qr",
   },
 ];
