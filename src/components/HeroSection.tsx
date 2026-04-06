@@ -3,7 +3,7 @@ import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import heroCar from "@/assets/optimized/logo.png";
-import heroVideoMp4 from "@/assets/hero/hero.mp4";
+import heroVideoMp4 from "@/assets/hero/hero1.mp4";
 
 const USE_HERO_VIDEO = true; // set to false to use the image instead
 
