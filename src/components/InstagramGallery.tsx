@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Instagram } from "lucide-react";
 
 import ig1 from "@/assets/ig/image1.webp";
-import ig2 from "@/assets/ig/image2.webp";
+import ig2 from "@/assets/ig/image24.webp";
 import ig3 from "@/assets/ig/image3.webp";
 import ig4 from "@/assets/ig/image4.webp";
 import ig5 from "@/assets/ig/image5.webp";

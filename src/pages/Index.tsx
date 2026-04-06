@@ -32,7 +32,7 @@ const Index = () => {
       <TextImageSection
         heading="The Science of Surface Care"
         text="We don't just wash; we perform a chemical restoration. Using a multi-stage, pH-balanced workflow and German-engineered preservatives, we ensure a swirl-free finish and deep, mirror-like gloss that respects your vehicle’s delicate surfaces."
-        imageUrl="https://res.cloudinary.com/drlyt63cm/image/upload/f_webp/q_auto/logo_n2ruxu.png"
+        imageUrl="https://res.cloudinary.com/drlyt63cm/image/upload/f_avif/q_auto/image29_g29drt.webp"
         shape="blob"
       />
 

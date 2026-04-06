@@ -5,9 +5,9 @@ import { Link } from "react-router-dom";
 import image1 from "@/assets/optimized/image12.webp";
 import image2 from "@/assets/optimized/image17.webp";
 import image3 from "@/assets/optimized/image10.webp";
-import image4 from "@/assets/optimized/image14.webp";
-import image5 from "@/assets/optimized/image19.webp";
-import image6 from "@/assets/optimized/image18.webp";
+import image4 from "@/assets/optimized/image24.webp";
+import image5 from "@/assets/optimized/image28.webp";
+import image6 from "@/assets/optimized/image21.webp";
 
 const images = [
   { src: image1, alt: "Ceramic coated SUV", label: "Ceramic Coating" },
