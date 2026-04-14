@@ -887,7 +887,7 @@ const Estimate = () => {
                         <span>${total}</span>
                       </div>
                     </div>
-                    
+
 <div className="flex items-start gap-3 py-3 mt-2 border border-neutral-800 bg-neutral-900 rounded-lg px-4 mb-4">
   <Checkbox
     id="service-contract"
@@ -901,7 +901,7 @@ const Estimate = () => {
   >
     I agree to the{" "}
     <a
-      href="PASTE_YOUR_CONTRACT_URL_HERE"
+      href="https://docs.google.com/document/d/1THUKnhmFFCmNiYjJ_WNiwbss3F8MPF-NoSL00hKulnw/edit?usp=sharing"
       target="_blank"
       rel="noopener noreferrer"
       className="text-primary underline underline-offset-4 hover:text-primary/80"
