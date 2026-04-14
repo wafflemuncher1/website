@@ -156,6 +156,7 @@ const Estimate = () => {
   const [contact, setContact] = useState({ name: "", email: "", phone: "" });
   const [consent, setConsent] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [agreedToServiceContract, setAgreedToServiceContract] = useState(false);
 
   // Default duration for booking slots (later you can map per package)
   const getDurationMins = () => {
@@ -274,9 +275,15 @@ const Estimate = () => {
       condition !== null ? vehicleConditions[condition].upcharge : 0;
     const addOnsTotal = selectedAddOns.reduce((sum, idx) => sum + addOns[idx].price, 0);
     return pkgPrice + sizeUpcharge + conditionUpcharge + addOnsTotal;
+    
   };
+  
 
   const handleSubmit = async () => {
+      if (!agreedToServiceContract) {
+    alert("Please agree to the Service Contract before submitting.");
+    return;
+  }
     const pkgs = getCategoryPackages();
     const packageLabel =
       selectedPackage !== null && pkgs[selectedPackage] ? pkgs[selectedPackage].label : "";
@@ -875,14 +882,43 @@ const Estimate = () => {
                           <span className="text-white">{contact.phone}</span>
                         </div>
                       </div>
-
                       <div className="flex justify-between font-bold text-white pt-2 border-t border-neutral-800">
                         <span>Total Estimate</span>
                         <span>${total}</span>
                       </div>
                     </div>
+                    
+<div className="flex items-start gap-3 py-3 mt-2 border border-neutral-800 bg-neutral-900 rounded-lg px-4 mb-4">
+  <Checkbox
+    id="service-contract"
+    checked={agreedToServiceContract}
+    onCheckedChange={(v) => setAgreedToServiceContract(v === true)}
+    className="mt-0.5 border-neutral-600"
+  />
+  <label
+    htmlFor="service-contract"
+    className="text-xs text-muted-foreground leading-snug cursor-pointer"
+  >
+    I agree to the{" "}
+    <a
+      href="PASTE_YOUR_CONTRACT_URL_HERE"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-primary underline underline-offset-4 hover:text-primary/80"
+      onClick={(e) => e.stopPropagation()}
+    >
+      Service Contract
+    </a>
+    .
+  </label>
+</div>
 
-                    <Button onClick={handleSubmit} className="w-full" size="lg">
+                    <Button
+  onClick={handleSubmit}
+  className="w-full"
+  size="lg"
+  disabled={!agreedToServiceContract}
+>
                       Confirm & Submit <Send className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
