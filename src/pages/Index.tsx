@@ -54,6 +54,7 @@ const Index = () => {
       />
       <WashComparison />
       <GalleryGrid />
+      <ReviewsGrid />
       <AboutSection />
       <ServiceAgreement />
       <ServiceArea />
