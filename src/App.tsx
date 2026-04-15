@@ -7,6 +7,8 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Portfolio from "./pages/Portfolio.tsx";
 import Estimate from "./pages/Estimate.tsx"; // <-- add this
+import Login from "./pages/Login.tsx";
+import Admin from "./pages/Admin.tsx";
 
 
 const queryClient = new QueryClient();
@@ -20,6 +22,8 @@ const App = () => (
         <Routes>
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/estimate" element={<Estimate />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/" element={<Index />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
