@@ -8,6 +8,8 @@ import NotFound from "./pages/NotFound.tsx";
 import Portfolio from "./pages/Portfolio.tsx";
 import Estimate from "./pages/Estimate.tsx"; // <-- add this
 import Login from "./pages/Login.tsx";
+import AdminLayout from "./admin/AdminLayout";
+import AdminDashboard from "./admin/components/AdminDashboard";
 
 
 
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/estimate" element={<Estimate />} />
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Index />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
