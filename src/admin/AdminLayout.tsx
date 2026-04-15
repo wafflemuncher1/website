@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AdminHeader from "./components/AdminHeader";
+
+const ADMIN_EMAIL = "zanerisinger@gmail.com"; // <-- change if needed
 
 const AdminLayout = () => {
   const [loading, setLoading] = useState(true);
@@ -9,19 +11,14 @@ const AdminLayout = () => {
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { user }, error } = await supabase.auth.getUser();
+
+      if (error || !user) {
         navigate("/login", { replace: true });
         return;
       }
 
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin");
-
-      if (!roles || roles.length === 0) {
+      if (user.email !== ADMIN_EMAIL) {
         await supabase.auth.signOut();
         navigate("/login", { replace: true });
         return;
