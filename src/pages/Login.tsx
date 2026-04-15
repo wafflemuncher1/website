@@ -18,25 +18,71 @@ const Login = () => {
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      toast({
-        title: "Login failed",
-        description: "Invalid email or password.",
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
-    }
-
-    // (Keep your existing post-login logic here)
-    navigate("/admin");
+  if (error) {
+    toast({
+      title: "Login failed",
+      description: "Invalid email or password.",
+      variant: "destructive",
+    });
     setLoading(false);
-  };
+    return;
+  }
+
+  // Get logged-in user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    await supabase.auth.signOut();
+    toast({
+      title: "Error",
+      description: "Could not verify user after login.",
+      variant: "destructive",
+    });
+    setLoading(false);
+    return;
+  }
+
+  // Check if user has admin role
+  const { data: roles, error: rolesError } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("role", "admin");
+
+  if (rolesError) {
+    await supabase.auth.signOut();
+    toast({
+      title: "Admin check failed",
+      description: rolesError.message,
+      variant: "destructive",
+    });
+    setLoading(false);
+    return;
+  }
+
+  if (roles && roles.length > 0) {
+    navigate("/admin", { replace: true });
+    setLoading(false);
+    return;
+  }
+
+  // Logged in but not admin
+  await supabase.auth.signOut();
+  toast({
+    title: "Access denied",
+    description: "You do not have admin privileges.",
+    variant: "destructive",
+  });
+  setLoading(false);
+};
 
   return (
     <div className="min-h-screen bg-black flex flex-col">
