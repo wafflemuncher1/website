@@ -1,5 +1,6 @@
 import { Instagram, Facebook, Phone, Mail, MapPin } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -25,6 +26,11 @@ const Footer = () => {
               <li><a href="#" className="hover:text-foreground transition-colors">Home</a></li>
               <li><a href="#estimate" className="hover:text-foreground transition-colors">Estimates</a></li>
               <li><a href="#reviews" className="hover:text-foreground transition-colors">Reviews</a></li>
+              <li>
+  <Link to="/login" className="hover:text-foreground transition-colors">
+    Admin Login
+  </Link>
+</li>
             </ul>
             <h4 className="text-sm font-bold tracking-wider uppercase mt-6 mb-3">Social Media</h4>
             <div className="flex gap-3">
@@ -58,7 +64,7 @@ const Footer = () => {
               <p className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <span>
-                  Lousville, Kentucky<br />
+                  Louisville, Kentucky<br />
                   United States
                 </span>
               </p>
