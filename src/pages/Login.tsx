@@ -28,30 +28,29 @@ const Login = () => {
         variant: "destructive",
       });
     } else {
-      // Check if user has admin role
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({ title: "Error", description: "Could not verify user.", variant: "destructive" });
-        setLoading(false);
-        return;
-      }
+   // after successful sign-in
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin");
+if (!user) {
+  toast({ title: "Error", description: "Could not verify user.", variant: "destructive" });
+  setLoading(false);
+  return;
+}
 
-      if (roles && roles.length > 0) {
-        navigate("/admin");
-      } else {
-        await supabase.auth.signOut();
-        toast({
-          title: "Access denied",
-          description: "You do not have admin privileges.",
-          variant: "destructive",
-        });
-      }
+const ADMIN_EMAIL = "zanerisinger@gmail.com";
+
+if (user.email === ADMIN_EMAIL) {
+  navigate("/admin");
+} else {
+  await supabase.auth.signOut();
+  toast({
+    title: "Access denied",
+    description: "You do not have admin privileges.",
+    variant: "destructive",
+  });
+}
     }
     setLoading(false);
   };

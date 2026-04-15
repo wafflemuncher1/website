@@ -16,17 +16,15 @@ const Admin = () => {
         return;
       }
 
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin");
+      const ADMIN_EMAIL = "zanerisinger@gmail.com";
 
-      if (!roles || roles.length === 0) {
-        await supabase.auth.signOut();
-        navigate("/login", { replace: true });
-        return;
-      }
+if (user.email !== ADMIN_EMAIL) {
+  await supabase.auth.signOut();
+  navigate("/login", { replace: true });
+  return;
+}
+
+setLoading(false);
 
       setLoading(false);
     };
