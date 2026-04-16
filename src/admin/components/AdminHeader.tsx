@@ -43,6 +43,9 @@ const AdminHeader = () => {
           <DropdownMenuItem disabled className="text-muted-foreground">
             Settings (coming soon)
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate("/admin/database")}>
+  Database
+</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} className="text-destructive">
             <LogOut className="mr-2 h-4 w-4" />

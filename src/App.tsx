@@ -9,6 +9,8 @@ import Portfolio from "./pages/Portfolio.tsx";
 import Estimate from "./pages/Estimate.tsx"; // <-- add this
 import Login from "./pages/Login.tsx";
 import AdminLayout from "./admin/AdminLayout";
+import DashboardPage from "./admin/pages/DashboardPage/DashboardPage";
+import DatabasePage from "./admin/pages/DatabasePage/DatabasePage";
 
 
 
@@ -26,7 +28,10 @@ const App = () => (
           <Route path="/estimate" element={<Estimate />} />
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Index />} />
-          <Route path="/admin" element={<AdminLayout />}/>
+         <Route path="/admin" element={<AdminLayout />}>
+  <Route index element={<DashboardPage />} />
+  <Route path="database" element={<DatabasePage />} />
+</Route>
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

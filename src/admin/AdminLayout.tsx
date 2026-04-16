@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Outlet,  } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AdminHeader from "./components/AdminHeader";
-import AdminDashboard from "./components/AdminDashboard";
+
 
 const ADMIN_EMAIL = "zanerisinger@gmail.com"; // change if needed
 
@@ -43,13 +44,14 @@ const AdminLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <AdminHeader />
-      <main className="flex-1">
-        <AdminDashboard />
-      </main>
-    </div>
-  );
+  <div className="min-h-screen bg-background flex flex-col">
+    <AdminHeader />
+    <main className="flex-1">
+      <Outlet />
+    </main>
+  </div>
+);
+
 };
 
 export default AdminLayout;
