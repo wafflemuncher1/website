@@ -1,8 +1,17 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, CalendarDays, Ban, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import BlockTimeDialog, { BlockRequest } from "./components/BlockTimeDialog";
 import RescheduleDayDialog from "./components/RescheduleDayDialog";
+
+type CalendarBlockRow = {
+  id: string;
+  start_at: string; // ISO
+  end_at: string;   // ISO
+  all_day: boolean;
+  note: string | null;
+};
 
 type Booking = {
   id: string;
@@ -17,7 +26,7 @@ type Booking = {
 };
 
 const startOfMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1);
-const endOfMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth() + 1, 0);
+const startOfNextMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth() + 1, 1);
 const startOfWeekSunday = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay());
 
 const ymd = (d: Date) =>
@@ -34,10 +43,11 @@ const CalenderPage = () => {
 
   const [selected, setSelected] = useState<Booking | null>(null);
 
-  // local “blocked” items (UI-only for now; later we’ll write these to Google Calendar)
-  const [blocked, setBlocked] = useState<Booking[]>([]);
+  const [blocks, setBlocks] = useState<CalendarBlockRow[]>([]);
+  const [loadingBlocks, setLoadingBlocks] = useState(false);
+  const [blockError, setBlockError] = useState<string | null>(null);
 
-  // Placeholder bookings (replace with Google Calendar events later)
+  // Placeholder bookings (replace with Google Calendar later)
   const bookings: Booking[] = [
     {
       id: "1",
@@ -46,21 +56,21 @@ const CalenderPage = () => {
       start: new Date(cursor.getFullYear(), cursor.getMonth(), 7, 10, 0).toISOString(),
       end: new Date(cursor.getFullYear(), cursor.getMonth(), 7, 12, 0).toISOString(),
       name: "Test Customer",
-      email: "test@example.com",
-      phone: "(502) 555-1234",
-      notes: "Placeholder until Google Calendar is connected.",
-    },
-    {
-      id: "2",
-      title: "Baseline",
-      kind: "booking",
-      start: new Date(cursor.getFullYear(), cursor.getMonth(), 14, 9, 0).toISOString(),
-      end: new Date(cursor.getFullYear(), cursor.getMonth(), 14, 10, 30).toISOString(),
-      name: "Second Customer",
     },
   ];
 
-  const allEvents = useMemo(() => [...bookings, ...blocked], [bookings, blocked]);
+  const blockedEvents: Booking[] = useMemo(() => {
+    return blocks.map((b) => ({
+      id: b.id,
+      kind: "blocked",
+      title: b.note ? `Blocked: ${b.note}` : b.all_day ? "Blocked (All Day)" : "Blocked",
+      start: b.start_at,
+      end: b.end_at,
+      notes: b.note ?? undefined,
+    }));
+  }, [blocks]);
+
+  const allEvents = useMemo(() => [...bookings, ...blockedEvents], [bookings, blockedEvents]);
 
   const days = useMemo(() => {
     const first = startOfMonth(cursor);
@@ -101,11 +111,39 @@ const CalenderPage = () => {
     return `${s}–${e}`;
   };
 
-  const onAddBlock = (req: BlockRequest) => {
-    // UI-only: convert request into “blocked” events.
-    // For multi-day: we create one blocked item per day.
-    const makeIso = (day: string, time: string) => new Date(`${day}T${time}:00`).toISOString();
+  // Load blocks for the current month
+  useEffect(() => {
+    const loadBlocks = async () => {
+      setLoadingBlocks(true);
+      setBlockError(null);
 
+      const monthStart = startOfMonth(cursor).toISOString();
+      const monthEnd = startOfNextMonth(cursor).toISOString();
+
+      const { data, error } = await supabase
+        .from("calendar_blocks")
+        .select("id,start_at,end_at,all_day,note")
+        .gte("start_at", monthStart)
+        .lt("start_at", monthEnd)
+        .order("start_at", { ascending: true })
+        .returns<CalendarBlockRow[]>();
+
+      if (error) {
+        setBlockError(error.message);
+        setBlocks([]);
+        setLoadingBlocks(false);
+        return;
+      }
+
+      setBlocks(data ?? []);
+      setLoadingBlocks(false);
+    };
+
+    loadBlocks();
+  }, [cursor]);
+
+  const onAddBlock = async (req: BlockRequest) => {
+    // convert to rows, one per day
     const daysToAdd: string[] = [];
     const start = new Date(req.startDate + "T00:00:00");
     const end = new Date(req.endDate + "T00:00:00");
@@ -113,37 +151,58 @@ const CalenderPage = () => {
       daysToAdd.push(ymd(d));
     }
 
-    const newBlocks: Booking[] = daysToAdd.map((day) => {
-      const id = `block-${day}-${Math.random().toString(16).slice(2)}`;
+    const makeIso = (day: string, time: string) => new Date(`${day}T${time}:00`).toISOString();
 
+    const inserts = daysToAdd.map((day) => {
       if (req.allDay) {
-        // all-day block -> represent as 00:00 to 23:59 for UI
         return {
-          id,
-          kind: "blocked",
-          title: req.note ? `Blocked: ${req.note}` : "Blocked (All Day)",
-          start: makeIso(day, "00:00"),
-          end: makeIso(day, "23:59"),
-          notes: req.note,
+          start_at: makeIso(day, "00:00"),
+          end_at: makeIso(day, "23:59"),
+          all_day: true,
+          note: req.note ?? null,
         };
       }
 
       return {
-        id,
-        kind: "blocked",
-        title: req.note ? `Blocked: ${req.note}` : "Blocked",
-        start: makeIso(day, req.startTime || "09:00"),
-        end: makeIso(day, req.endTime || "17:00"),
-        notes: req.note,
+        start_at: makeIso(day, req.startTime || "09:00"),
+        end_at: makeIso(day, req.endTime || "17:00"),
+        all_day: false,
+        note: req.note ?? null,
       };
     });
 
-    setBlocked((prev) => [...newBlocks, ...prev]);
+    const { error } = await supabase.from("calendar_blocks").insert(inserts);
+
+    if (error) {
+      alert(`Failed to save block: ${error.message}`);
+      return;
+    }
+
+    // refresh blocks
+    const monthStart = startOfMonth(cursor).toISOString();
+    const monthEnd = startOfNextMonth(cursor).toISOString();
+
+    const { data } = await supabase
+      .from("calendar_blocks")
+      .select("id,start_at,end_at,all_day,note")
+      .gte("start_at", monthStart)
+      .lt("start_at", monthEnd)
+      .order("start_at", { ascending: true })
+      .returns<CalendarBlockRow[]>();
+
+    setBlocks(data ?? []);
   };
 
-  const onRescheduleDay = (day: string) => {
-    // UI-only placeholder
-    alert(`Reschedule requested for ${day}. Next step: server moves bookings to next open slots.`);
+  const onRescheduleDay = async (day: string) => {
+    // log request (actual rescheduling comes later when Google Calendar is connected)
+    const { error } = await supabase.from("reschedule_requests").insert([{ day }]);
+
+    if (error) {
+      alert(`Failed to log reschedule request: ${error.message}`);
+      return;
+    }
+
+    alert(`Reschedule request logged for ${day}. Next step: implement server-side rescheduling.`);
   };
 
   return (
@@ -154,7 +213,11 @@ const CalenderPage = () => {
             <CalendarDays className="h-5 w-5" />
             Calender
           </h1>
-          <p className="text-muted-foreground">Month view (UI-first).</p>
+          <p className="text-muted-foreground">
+            Month view. Blocks are stored in Supabase (admin-only).
+          </p>
+          {loadingBlocks && <p className="text-xs text-muted-foreground">Loading blocks…</p>}
+          {blockError && <p className="text-xs text-destructive">Blocks error: {blockError}</p>}
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -242,11 +305,9 @@ const CalenderPage = () => {
         </div>
       </div>
 
-      {/* Dialogs */}
       <BlockTimeDialog open={blockOpen} onOpenChange={setBlockOpen} onSubmit={onAddBlock} />
       <RescheduleDayDialog open={rescheduleOpen} onOpenChange={setRescheduleOpen} onSubmit={onRescheduleDay} />
 
-      {/* Simple details (we can convert this to a Dialog next) */}
       {selected && (
         <div className="rounded-lg border border-border bg-card p-4">
           <div className="flex items-center justify-between">
@@ -269,24 +330,6 @@ const CalenderPage = () => {
                 {new Date(selected.start).toLocaleString()} → {new Date(selected.end).toLocaleString()}
               </div>
             </div>
-
-            {selected.kind !== "blocked" && (
-              <>
-                <div>
-                  <div className="text-muted-foreground text-xs">Name</div>
-                  <div className="text-foreground font-medium">{selected.name ?? "—"}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground text-xs">Email</div>
-                  <div className="text-foreground font-medium">{selected.email ?? "—"}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground text-xs">Phone</div>
-                  <div className="text-foreground font-medium">{selected.phone ?? "—"}</div>
-                </div>
-              </>
-            )}
-
             <div>
               <div className="text-muted-foreground text-xs">Notes</div>
               <div className="text-foreground font-medium">{selected.notes ?? "—"}</div>
