@@ -11,6 +11,7 @@ import Login from "./pages/Login.tsx";
 import AdminLayout from "./admin/AdminLayout";
 import DashboardPage from "./admin/pages/DashboardPage/DashboardPage";
 import DatabasePage from "./admin/pages/DatabasePage/DatabasePage";
+import CalenderPage from "./admin/pages/CalendarPage/CalendarPage";
 
 
 
@@ -31,6 +32,7 @@ const App = () => (
          <Route path="/admin" element={<AdminLayout />}>
   <Route index element={<DashboardPage />} />
   <Route path="database" element={<DatabasePage />} />
+  <Route path="calender" element={<CalenderPage />} />
 </Route>
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -34,6 +34,9 @@ const AdminHeader = () => {
           <DropdownMenuItem onClick={() => navigate("/admin")}>
             Dashboard
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate("/admin/calender")}>
+  Calender
+</DropdownMenuItem>
           <DropdownMenuItem disabled className="text-muted-foreground">
             Bookings (coming soon)
           </DropdownMenuItem>
