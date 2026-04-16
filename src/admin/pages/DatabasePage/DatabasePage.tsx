@@ -27,15 +27,22 @@ type EstimateRow = {
 };
 
 const formatMoney = (cents: number) =>
-  (cents / 100).toLocaleString(undefined, { style: "currency", currency: "USD" });
+  (cents / 100).toLocaleString(undefined, {
+    style: "currency",
+    currency: "USD",
+  });
 
 const DatabasePage = () => {
   const [rows, setRows] = useState<EstimateRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // search
+  const [search, setSearch] = useState("");
+
   const columns = useMemo(
     () => [
+      "id",
       "created_at",
       "name",
       "email",
@@ -56,6 +63,30 @@ const DatabasePage = () => {
     []
   );
 
+  const filteredRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+
+    return rows.filter((r) => {
+      const haystack = [
+        r.name,
+        r.email,
+        r.phone,
+        r.vehicle_size ?? "",
+        r.condition ?? "",
+        r.service ?? "",
+        r.ticket_number ?? "",
+        r.notify_status ?? "",
+        r.notify_error ?? "",
+        typeof r.add_ons === "string" ? r.add_ons : JSON.stringify(r.add_ons),
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(q);
+    });
+  }, [rows, search]);
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -65,7 +96,8 @@ const DatabasePage = () => {
         .from("estimate_requests")
         .select(columns.join(","))
         .order("created_at", { ascending: false })
-        .limit(200);
+        .limit(200)
+        .returns<EstimateRow[]>();
 
       if (error) {
         setError(error.message);
@@ -74,7 +106,7 @@ const DatabasePage = () => {
         return;
       }
 
-      setRows((data as EstimateRow[]) ?? []);
+      setRows(data ?? []);
       setLoading(false);
     };
 
@@ -90,6 +122,22 @@ const DatabasePage = () => {
         </p>
       </div>
 
+      {/* Search bar */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+        <div className="relative w-full sm:max-w-md">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name, email, phone, service, ticket…"
+            className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        </div>
+
+        <p className="text-sm text-muted-foreground">
+          Showing {filteredRows.length} / {rows.length}
+        </p>
+      </div>
+
       {loading && (
         <div className="rounded-lg border border-border bg-card p-6">
           <p className="text-muted-foreground">Loading…</p>
@@ -101,8 +149,8 @@ const DatabasePage = () => {
           <p className="font-semibold text-destructive">Failed to load</p>
           <p className="text-sm text-muted-foreground mt-1">{error}</p>
           <p className="text-sm text-muted-foreground mt-2">
-            If you just enabled RLS, confirm your logged-in user has the admin role and that
-            the RLS policy allows admin SELECT.
+            If you just enabled RLS, confirm your logged-in user has the admin
+            role and that the RLS policy allows admin SELECT.
           </p>
         </div>
       )}
@@ -132,14 +180,16 @@ const DatabasePage = () => {
             </thead>
 
             <tbody>
-              {rows.length === 0 ? (
+              {filteredRows.length === 0 ? (
                 <tr>
                   <td className="p-4 text-muted-foreground" colSpan={16}>
-                    No rows yet.
+                    {rows.length === 0
+                      ? "No rows yet."
+                      : "No results match your search."}
                   </td>
                 </tr>
               ) : (
-                rows.map((r) => (
+                filteredRows.map((r) => (
                   <tr key={r.id} className="border-t border-border/60">
                     <td className="p-3 whitespace-nowrap">
                       {new Date(r.created_at).toLocaleString()}
@@ -147,8 +197,12 @@ const DatabasePage = () => {
                     <td className="p-3 whitespace-nowrap">{r.name}</td>
                     <td className="p-3 whitespace-nowrap">{r.email}</td>
                     <td className="p-3 whitespace-nowrap">{r.phone}</td>
-                    <td className="p-3 whitespace-nowrap">{r.vehicle_size ?? "—"}</td>
-                    <td className="p-3 whitespace-nowrap">{r.condition ?? "—"}</td>
+                    <td className="p-3 whitespace-nowrap">
+                      {r.vehicle_size ?? "—"}
+                    </td>
+                    <td className="p-3 whitespace-nowrap">
+                      {r.condition ?? "—"}
+                    </td>
                     <td className="p-3 whitespace-nowrap">{r.service ?? "—"}</td>
                     <td className="p-3 whitespace-nowrap">
                       <span className="text-muted-foreground">
@@ -157,8 +211,12 @@ const DatabasePage = () => {
                           : JSON.stringify(r.add_ons)}
                       </span>
                     </td>
-                    <td className="p-3 whitespace-nowrap">{formatMoney(r.total_cents)}</td>
-                    <td className="p-3 whitespace-nowrap">{r.consent ? "Yes" : "No"}</td>
+                    <td className="p-3 whitespace-nowrap">
+                      {formatMoney(r.total_cents)}
+                    </td>
+                    <td className="p-3 whitespace-nowrap">
+                      {r.consent ? "Yes" : "No"}
+                    </td>
                     <td className="p-3 whitespace-nowrap">
                       {r.service_agreement_url ? (
                         <a
@@ -173,11 +231,17 @@ const DatabasePage = () => {
                         "—"
                       )}
                     </td>
-                    <td className="p-3 whitespace-nowrap">{r.completed ? "Yes" : "No"}</td>
-                    <td className="p-3 whitespace-nowrap">{r.ticket_number ?? "—"}</td>
+                    <td className="p-3 whitespace-nowrap">
+                      {r.completed ? "Yes" : "No"}
+                    </td>
+                    <td className="p-3 whitespace-nowrap">
+                      {r.ticket_number ?? "—"}
+                    </td>
                     <td className="p-3 whitespace-nowrap">{r.notify_status}</td>
                     <td className="p-3 whitespace-nowrap">
-                      {r.notified_at ? new Date(r.notified_at).toLocaleString() : "—"}
+                      {r.notified_at
+                        ? new Date(r.notified_at).toLocaleString()
+                        : "—"}
                     </td>
                     <td className="p-3 whitespace-nowrap text-muted-foreground">
                       {r.notify_error ?? "—"}
