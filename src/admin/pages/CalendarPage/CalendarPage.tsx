@@ -1,14 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, CalendarDays, Ban, RefreshCcw } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  CalendarDays,
+  Ban,
+  RefreshCcw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import BlockTimeDialog, { BlockRequest } from "./components/BlockTimeDialog";
 import RescheduleDayDialog from "./components/RescheduleDayDialog";
+import EventDetailsDialog from "./components/EventDetailsDialog";
 
 type CalendarBlockRow = {
   id: string;
   start_at: string; // ISO
-  end_at: string;   // ISO
+  end_at: string; // ISO
   all_day: boolean;
   note: string | null;
 };
@@ -17,7 +24,7 @@ type Booking = {
   id: string;
   title: string;
   start: string; // ISO
-  end: string;   // ISO
+  end: string; // ISO
   kind?: "booking" | "blocked";
   name?: string;
   email?: string;
@@ -26,11 +33,15 @@ type Booking = {
 };
 
 const startOfMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1);
-const startOfNextMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth() + 1, 1);
-const startOfWeekSunday = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay());
+const startOfNextMonth = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth() + 1, 1);
+const startOfWeekSunday = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay());
 
 const ymd = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`;
 
 const fmtMonthTitle = (d: Date) =>
   d.toLocaleString(undefined, { month: "long", year: "numeric" });
@@ -41,6 +52,7 @@ const CalenderPage = () => {
   const [blockOpen, setBlockOpen] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
 
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [selected, setSelected] = useState<Booking | null>(null);
 
   const [blocks, setBlocks] = useState<CalendarBlockRow[]>([]);
@@ -53,8 +65,20 @@ const CalenderPage = () => {
       id: "1",
       title: "Signature Detail",
       kind: "booking",
-      start: new Date(cursor.getFullYear(), cursor.getMonth(), 7, 10, 0).toISOString(),
-      end: new Date(cursor.getFullYear(), cursor.getMonth(), 7, 12, 0).toISOString(),
+      start: new Date(
+        cursor.getFullYear(),
+        cursor.getMonth(),
+        7,
+        10,
+        0
+      ).toISOString(),
+      end: new Date(
+        cursor.getFullYear(),
+        cursor.getMonth(),
+        7,
+        12,
+        0
+      ).toISOString(),
       name: "Test Customer",
     },
   ];
@@ -63,14 +87,21 @@ const CalenderPage = () => {
     return blocks.map((b) => ({
       id: b.id,
       kind: "blocked",
-      title: b.note ? `Blocked: ${b.note}` : b.all_day ? "Blocked (All Day)" : "Blocked",
+      title: b.note
+        ? `Blocked: ${b.note}`
+        : b.all_day
+        ? "Blocked (All Day)"
+        : "Blocked",
       start: b.start_at,
       end: b.end_at,
       notes: b.note ?? undefined,
     }));
   }, [blocks]);
 
-  const allEvents = useMemo(() => [...bookings, ...blockedEvents], [bookings, blockedEvents]);
+  const allEvents = useMemo(
+    () => [...bookings, ...blockedEvents],
+    [bookings, blockedEvents]
+  );
 
   const days = useMemo(() => {
     const first = startOfMonth(cursor);
@@ -106,9 +137,32 @@ const CalenderPage = () => {
   const isSameMonth = (d: Date) => d.getMonth() === cursor.getMonth();
 
   const timeRange = (b: Booking) => {
-    const s = new Date(b.start).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-    const e = new Date(b.end).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    const s = new Date(b.start).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    const e = new Date(b.end).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
     return `${s}–${e}`;
+  };
+
+  const deleteBlock = async (blockId: string) => {
+    const ok = confirm("Delete this blocked time?");
+    if (!ok) return;
+
+    const { error } = await supabase
+      .from("calendar_blocks")
+      .delete()
+      .eq("id", blockId);
+
+    if (error) {
+      alert(`Failed to delete block: ${error.message}`);
+      return;
+    }
+
+    setBlocks((prev) => prev.filter((b) => b.id !== blockId));
   };
 
   // Load blocks for the current month
@@ -143,7 +197,6 @@ const CalenderPage = () => {
   }, [cursor]);
 
   const onAddBlock = async (req: BlockRequest) => {
-    // convert to rows, one per day
     const daysToAdd: string[] = [];
     const start = new Date(req.startDate + "T00:00:00");
     const end = new Date(req.endDate + "T00:00:00");
@@ -151,7 +204,8 @@ const CalenderPage = () => {
       daysToAdd.push(ymd(d));
     }
 
-    const makeIso = (day: string, time: string) => new Date(`${day}T${time}:00`).toISOString();
+    const makeIso = (day: string, time: string) =>
+      new Date(`${day}T${time}:00`).toISOString();
 
     const inserts = daysToAdd.map((day) => {
       if (req.allDay) {
@@ -194,15 +248,18 @@ const CalenderPage = () => {
   };
 
   const onRescheduleDay = async (day: string) => {
-    // log request (actual rescheduling comes later when Google Calendar is connected)
-    const { error } = await supabase.from("reschedule_requests").insert([{ day }]);
+    const { error } = await supabase
+      .from("reschedule_requests")
+      .insert([{ day }]);
 
     if (error) {
       alert(`Failed to log reschedule request: ${error.message}`);
       return;
     }
 
-    alert(`Reschedule request logged for ${day}. Next step: implement server-side rescheduling.`);
+    alert(
+      `Reschedule request logged for ${day}. Next step: implement server-side rescheduling.`
+    );
   };
 
   return (
@@ -216,8 +273,12 @@ const CalenderPage = () => {
           <p className="text-muted-foreground">
             Month view. Blocks are stored in Supabase (admin-only).
           </p>
-          {loadingBlocks && <p className="text-xs text-muted-foreground">Loading blocks…</p>}
-          {blockError && <p className="text-xs text-destructive">Blocks error: {blockError}</p>}
+          {loadingBlocks && (
+            <p className="text-xs text-muted-foreground">Loading blocks…</p>
+          )}
+          {blockError && (
+            <p className="text-xs text-destructive">Blocks error: {blockError}</p>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -252,7 +313,10 @@ const CalenderPage = () => {
       <div className="rounded-lg border border-border bg-card overflow-hidden">
         <div className="grid grid-cols-7 border-b border-border bg-card">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((w) => (
-            <div key={w} className="px-3 py-2 text-xs font-medium text-muted-foreground">
+            <div
+              key={w}
+              className="px-3 py-2 text-xs font-medium text-muted-foreground"
+            >
               {w}
             </div>
           ))}
@@ -269,7 +333,11 @@ const CalenderPage = () => {
                 key={key}
                 className="min-h-[110px] border-t border-border/60 border-r border-border/60 p-2 last:border-r-0"
               >
-                <div className={`text-xs ${muted ? "text-muted-foreground" : "text-foreground"} font-medium`}>
+                <div
+                  className={`text-xs ${
+                    muted ? "text-muted-foreground" : "text-foreground"
+                  } font-medium`}
+                >
                   {d.getDate()}
                 </div>
 
@@ -277,7 +345,10 @@ const CalenderPage = () => {
                   {dayEvents.slice(0, 3).map((b) => (
                     <button
                       key={b.id}
-                      onClick={() => setSelected(b)}
+                      onClick={() => {
+                        setSelected(b);
+                        setDetailsOpen(true);
+                      }}
                       className={`w-full text-left rounded-md border px-2 py-1 transition-colors ${
                         b.kind === "blocked"
                           ? "border-destructive/40 bg-destructive/10 hover:bg-destructive/15"
@@ -288,7 +359,9 @@ const CalenderPage = () => {
                         {timeRange(b)} {b.title}
                       </div>
                       {b.name && (
-                        <div className="text-[11px] text-muted-foreground truncate">{b.name}</div>
+                        <div className="text-[11px] text-muted-foreground truncate">
+                          {b.name}
+                        </div>
                       )}
                     </button>
                   ))}
@@ -305,38 +378,26 @@ const CalenderPage = () => {
         </div>
       </div>
 
-      <BlockTimeDialog open={blockOpen} onOpenChange={setBlockOpen} onSubmit={onAddBlock} />
-      <RescheduleDayDialog open={rescheduleOpen} onOpenChange={setRescheduleOpen} onSubmit={onRescheduleDay} />
+      <BlockTimeDialog
+        open={blockOpen}
+        onOpenChange={setBlockOpen}
+        onSubmit={onAddBlock}
+      />
+      <RescheduleDayDialog
+        open={rescheduleOpen}
+        onOpenChange={setRescheduleOpen}
+        onSubmit={onRescheduleDay}
+      />
 
-      {selected && (
-        <div className="rounded-lg border border-border bg-card p-4">
-          <div className="flex items-center justify-between">
-            <p className="font-semibold">
-              {selected.kind === "blocked" ? "Blocked time" : "Booking details"}
-            </p>
-            <Button variant="ghost" onClick={() => setSelected(null)}>
-              Close
-            </Button>
-          </div>
-
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <div>
-              <div className="text-muted-foreground text-xs">Title</div>
-              <div className="text-foreground font-medium">{selected.title}</div>
-            </div>
-            <div>
-              <div className="text-muted-foreground text-xs">Time</div>
-              <div className="text-foreground font-medium">
-                {new Date(selected.start).toLocaleString()} → {new Date(selected.end).toLocaleString()}
-              </div>
-            </div>
-            <div>
-              <div className="text-muted-foreground text-xs">Notes</div>
-              <div className="text-foreground font-medium">{selected.notes ?? "—"}</div>
-            </div>
-          </div>
-        </div>
-      )}
+      <EventDetailsDialog
+        open={detailsOpen}
+        onOpenChange={(open) => {
+          setDetailsOpen(open);
+          if (!open) setSelected(null);
+        }}
+        event={selected}
+        onDeleteBlock={deleteBlock}
+      />
     </div>
   );
 };
