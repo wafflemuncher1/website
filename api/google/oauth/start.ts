@@ -4,6 +4,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
+  console.log("GOOGLE_REDIRECT_URI:", redirectUri);
+  
   if (!clientId || !redirectUri) {
     res.status(500).send("Missing GOOGLE_CLIENT_ID or GOOGLE_REDIRECT_URI");
     return;
