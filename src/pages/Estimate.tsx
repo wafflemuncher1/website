@@ -15,6 +15,7 @@ import {
   Check,
   ShieldCheck,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -279,56 +280,96 @@ const Estimate = () => {
   };
   
 
-  const handleSubmit = async () => {
-      if (!agreedToServiceContract) {
+ 
+const handleSubmit = async () => {
+  if (!agreedToServiceContract) {
     alert("Please agree to the Service Contract before submitting.");
     return;
   }
-    const pkgs = getCategoryPackages();
-    const packageLabel =
-      selectedPackage !== null && pkgs[selectedPackage] ? pkgs[selectedPackage].label : "";
 
-    const payload = {
-      action: "createBooking",
+  const pkgs = getCategoryPackages();
+  const packageLabel =
+    selectedPackage !== null && pkgs[selectedPackage]
+      ? pkgs[selectedPackage].label
+      : "";
 
-      date: selectedDate,
-      timeLabel: selectedTime,
-      durationMins: getDurationMins(),
+  // ── 1. Send to Google Apps Script (creates Calendar event + emails) ────────
+  const payload = {
+    action: "createBooking",
 
-      name: contact.name,
-      email: contact.email,
-      phone: contact.phone,
+    date: selectedDate,
+    timeLabel: selectedTime,
+    durationMins: getDurationMins(),
 
-      address,
-      city,
-      zipCode,
-      notes,
+    name: contact.name,
+    email: contact.email,
+    phone: contact.phone,
 
-      vehicleSize: vehicle !== null ? vehicleSizes[vehicle].label : "",
-      vehicleCondition: condition !== null ? vehicleConditions[condition].label : "",
-      category: getCategoryLabel(),
-      packageLabel,
-      addOns: selectedAddOns.map((idx) => addOns[idx].label).join(", ") || "None",
-      total: `$${getTotal()}`,
+    address,
+    city,
+    zipCode,
+    notes,
 
-      consent: consent ? "Yes" : "No",
-    };
+    vehicleSize: vehicle !== null ? vehicleSizes[vehicle].label : "",
+    vehicleCondition: condition !== null ? vehicleConditions[condition].label : "",
+    category: getCategoryLabel(),
+    packageLabel,
+    addOns: selectedAddOns.map((idx) => addOns[idx].label).join(", ") || "None",
+    total: `$${getTotal()}`,
 
-    try {
-      const res = await fetch(SHEET_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload),
-      });
-
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error || "Booking failed");
-
-      setSubmitted(true);
-    } catch (e: any) {
-      alert(e?.message || "Booking failed. Please try another time.");
-    }
+    consent: consent ? "Yes" : "No",
   };
+
+  try {
+    const res = await fetch(SHEET_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+    });
+
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || "Booking failed");
+
+    // ── 2. Mirror to Supabase (powers admin panel + calendar display) ────────
+    // We do this after Apps Script succeeds so we never create a DB record
+    // for a booking that failed to land on the calendar.
+    try {
+      const totalCents = getTotal() * 100;
+
+      await supabase.from("estimate_requests").insert({
+        name: contact.name,
+        email: contact.email,
+        phone: contact.phone,
+        address,
+        city,
+        zip_code: zipCode,
+        vehicle_size: vehicle !== null ? vehicleSizes[vehicle].label : "",
+        condition: condition !== null ? vehicleConditions[condition].label : "",
+        service: packageLabel || getCategoryLabel(),
+        add_ons: selectedAddOns.map((idx) => addOns[idx].label),
+        total_cents: totalCents,
+        consent: true,
+        booking_date: selectedDate,
+        booking_time: selectedTime,
+        duration_mins: getDurationMins(),
+        notify_status: "sent",
+        completed: false,
+      });
+      // The database trigger automatically creates a calendar_blocks entry
+      // so the admin availability calendar shows this booking as blocked.
+    } catch (supabaseErr) {
+      // Supabase write is best-effort — the booking is already on Google
+      // Calendar so the customer is confirmed regardless.
+      console.error("Supabase mirror failed (booking still confirmed):", supabaseErr);
+    }
+
+    setSubmitted(true);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "Booking failed. Please try another time.";
+    alert(msg);
+  }
+};
+
 
   const goToStep = (s: number) => setStep(s);
 
