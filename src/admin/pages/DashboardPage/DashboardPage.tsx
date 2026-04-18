@@ -501,7 +501,7 @@ const DashboardPage = () => {
             </button>
           )}
           {reschedules.length > 0 && (
-            <button onClick={() => navigate("/admin/calendar")}
+            <button onClick={() => navigate("/admin/calender")}
               className="flex items-center gap-1.5 text-xs bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full hover:bg-blue-200 transition-colors dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800">
               <CloudRain className="h-3 w-3" />
               {reschedules.length} pending reschedule{reschedules.length > 1 ? "s" : ""}
