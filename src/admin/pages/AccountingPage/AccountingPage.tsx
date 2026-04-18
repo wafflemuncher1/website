@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,15 +25,14 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   DollarSign, TrendingUp, TrendingDown, Receipt,
-  Plus, Download, RefreshCw, CheckCircle2,
-  AlertTriangle, Link2, LinkOff, Trash2,
+  Plus, Download, Trash2,
+  AlertTriangle,
   ArrowUpRight, ArrowDownRight, Calculator,
-  Wallet, Package, FileText,
+  Wallet, Package, FileText, Waves,
 } from "lucide-react";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const fmt$ = (c: number) => `$${(c / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const fmtK = (c: number) => c >= 100000 ? `$${(c / 100000).toFixed(1)}k` : `$${(c / 100).toFixed(0)}`;
 
@@ -62,7 +60,6 @@ type Booking = { id: string; total_cents: number; booking_date: string; complete
 type Expense = { id: string; date: string; description: string; category: string; amount_cents: number; notes?: string; };
 type Invoice = { id: string; invoice_number: string; customer_name: string; total_cents: number; paid: boolean; created_at: string; };
 
-type QBStatus = { connected: boolean; companyName: string; lastSync: string; };
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
@@ -103,15 +100,12 @@ const StatCard = ({
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 const AccountingPage = () => {
-  const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [qbStatus, setQbStatus] = useState<QBStatus>({ connected: false, companyName: "", lastSync: "" });
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState(thisYear);
   const [selectedPeriod, setSelectedPeriod] = useState<"monthly" | "quarterly">("monthly");
 
@@ -148,85 +142,13 @@ const AccountingPage = () => {
     if (expRes.data) setExpenses(expRes.data as Expense[]);
     if (invRes.data) setInvoices(invRes.data as Invoice[]);
 
-    // QB status from admin_settings
-    const { data: settings } = await supabase.from("admin_settings")
-      .select("key,value")
-      .in("key", ["qb_connected","qb_company_name","qb_last_sync"]);
-
-    if (settings) {
-      const m = Object.fromEntries(settings.map(s => [s.key, s.value]));
-      setQbStatus({
-        connected: m.qb_connected === "true",
-        companyName: m.qb_company_name ?? "",
-        lastSync: m.qb_last_sync ?? "",
-      });
-    }
 
     setLoading(false);
   }, [selectedYear]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // Handle QB OAuth callback
-  useEffect(() => {
-    if (searchParams.get("qb_connected") === "true") {
-      toast({ title: "QuickBooks connected! ✓", description: "Your account is now linked." });
-      fetchAll();
-    }
-    if (searchParams.get("qb_error")) {
-      toast({ title: "QuickBooks connection failed", description: searchParams.get("qb_error") ?? "", variant: "destructive" });
-    }
-  }, [searchParams]); // eslint-disable-line
 
-  // ── QB Actions ──────────────────────────────────────────────────────────────
-
-  const connectQuickBooks = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/quickbooks-auth?action=init`, {
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-      });
-      const json = await res.json();
-      if (json.ok && json.url) window.location.href = json.url;
-      else toast({ title: "Error", description: json.error || "Could not start QB auth", variant: "destructive" });
-    } catch (e: unknown) {
-      toast({ title: "Error", description: String(e), variant: "destructive" });
-    }
-  };
-
-  const disconnectQB = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    await fetch(`${SUPABASE_URL}/functions/v1/quickbooks-auth?action=disconnect`, {
-      headers: { Authorization: `Bearer ${session?.access_token}` },
-    });
-    setQbStatus({ connected: false, companyName: "", lastSync: "" });
-    toast({ title: "QuickBooks disconnected" });
-  };
-
-  const syncToQB = async (action: "sync-customers" | "sync-invoices" | "sync-expenses") => {
-    setSyncing(action);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/quickbooks-sync`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({ action }),
-      });
-      const json = await res.json();
-      if (json.ok) {
-        toast({ title: `Synced ${json.synced} record${json.synced !== 1 ? "s" : ""} to QuickBooks ✓` });
-        fetchAll();
-      } else {
-        toast({ title: "Sync failed", description: json.error, variant: "destructive" });
-      }
-    } catch (e: unknown) {
-      toast({ title: "Error", description: String(e), variant: "destructive" });
-    }
-    setSyncing(null);
-  };
 
   // ── Expense CRUD ────────────────────────────────────────────────────────────
 
@@ -298,6 +220,61 @@ const AccountingPage = () => {
     const a = document.createElement("a");
     a.href = url; a.download = filename; a.click();
     URL.revokeObjectURL(url);
+  };
+
+  // ── Wave Accounting exports ──────────────────────────────────────────────────
+  // Wave can import transactions and customers via CSV.
+  // Format matches Wave's expected import structure.
+
+  const exportWaveTransactions = () => {
+    // Wave transaction import format: Date, Description, Amount
+    // Positive = income, negative = expense
+    const rows: string[][] = [["Date", "Description", "Amount", "Category"]];
+
+    // Revenue rows
+    bookings.filter(b => b.completed && b.booking_date).forEach(b => {
+      rows.push([
+        b.booking_date,
+        `Detailing — ${b.service || "Service"}`,
+        (b.total_cents / 100).toFixed(2),
+        "Income",
+      ]);
+    });
+
+    // Expense rows (negative amounts)
+    expenses.forEach(e => {
+      rows.push([
+        e.date,
+        e.description,
+        (-e.amount_cents / 100).toFixed(2),
+        e.category,
+      ]);
+    });
+
+    // Sort by date
+    rows.slice(1).sort((a, b) => a[0] > b[0] ? 1 : -1);
+
+    downloadCSV(rows, `wave-transactions-${selectedYear}.csv`);
+    toast({ title: "Wave transactions CSV downloaded ✓", description: "Import via Wave → Accounting → Transactions → Import" });
+  };
+
+  const exportWaveCustomers = async () => {
+    const { data: allB } = await supabase
+      .from("estimate_requests")
+      .select("name, email, phone, address, city, zip_code")
+      .not("name", "is", null);
+
+    const rows: string[][] = [["Customer Name", "Email", "Phone", "Address", "City", "State/Province", "Postal Code", "Country"]];
+    const seen = new Set<string>();
+
+    (allB ?? []).forEach((b: { name: string; email: string; phone: string; address: string; city: string; zip_code: string }) => {
+      if (seen.has(b.name)) return;
+      seen.add(b.name);
+      rows.push([b.name ?? "", b.email ?? "", b.phone ?? "", b.address ?? "", b.city ?? "", "KY", b.zip_code ?? "", "US"]);
+    });
+
+    downloadCSV(rows, `wave-customers-${selectedYear}.csv`);
+    toast({ title: "Wave customers CSV downloaded ✓", description: "Import via Wave → Sales → Customers → Import Customers" });
   };
 
   // ── Derived stats ───────────────────────────────────────────────────────────
@@ -372,7 +349,7 @@ const AccountingPage = () => {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">Accounting</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">P&L, expenses, taxes & QuickBooks sync</p>
+          <p className="text-muted-foreground text-sm mt-0.5">P&L, expenses, taxes & Wave export</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {/* Year selector */}
@@ -398,88 +375,50 @@ const AccountingPage = () => {
         </div>
       </div>
 
-      {/* ── QuickBooks Connection Card ────────────────────────────────────── */}
-      <div className={[
-        "rounded-xl border p-4",
-        qbStatus.connected ? "border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800" : "bg-card",
-      ].join(" ")}>
+      {/* ── Wave Accounting Export Card ──────────────────────────────────────── */}
+      <div className="rounded-xl border bg-card p-4">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div className="flex items-start gap-3">
-            <div className={[
-              "p-2 rounded-lg shrink-0",
-              qbStatus.connected ? "bg-green-100 dark:bg-green-900/30" : "bg-muted",
-            ].join(" ")}>
-              {qbStatus.connected
-                ? <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                : <Link2 className="h-5 w-5 text-muted-foreground" />}
+            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 shrink-0">
+              <Waves className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="font-semibold text-sm">
-                {qbStatus.connected ? "QuickBooks Online Connected" : "Connect QuickBooks Online"}
-              </h2>
-              {qbStatus.connected ? (
-                <div className="text-xs text-muted-foreground mt-0.5 space-y-0.5">
-                  {qbStatus.companyName && <p>Company: <span className="font-medium text-foreground">{qbStatus.companyName}</span></p>}
-                  {qbStatus.lastSync
-                    ? <p>Last sync: {new Date(qbStatus.lastSync).toLocaleString()}</p>
-                    : <p>Never synced — use the buttons below to push your data</p>}
-                </div>
-              ) : (
-                <div className="text-xs text-muted-foreground mt-1 max-w-md">
-                  Link your QuickBooks account to automatically sync customers, invoices, and expenses.
-                  Requires a <span className="font-medium">QuickBooks Online</span> subscription and a developer app set up at{" "}
-                  <a href="https://developer.intuit.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">developer.intuit.com</a>.
-                </div>
-              )}
+              <h2 className="font-semibold text-sm">Wave Accounting</h2>
+              <p className="text-xs text-muted-foreground mt-0.5 max-w-md">
+                Export your revenue, expenses, and customers as CSV files formatted for Wave's import tool.
+                No setup required — download and import directly into Wave in seconds.
+              </p>
             </div>
           </div>
-
           <div className="flex items-center gap-2 flex-wrap">
-            {qbStatus.connected ? (
-              <>
-                <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5"
-                  disabled={syncing === "sync-customers"} onClick={() => syncToQB("sync-customers")}>
-                  {syncing === "sync-customers" ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                  Sync Customers
-                </Button>
-                <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5"
-                  disabled={syncing === "sync-invoices"} onClick={() => syncToQB("sync-invoices")}>
-                  {syncing === "sync-invoices" ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                  Sync Invoices
-                </Button>
-                <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5"
-                  disabled={syncing === "sync-expenses"} onClick={() => syncToQB("sync-expenses")}>
-                  {syncing === "sync-expenses" ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                  Sync Expenses
-                </Button>
-                <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
-                  onClick={disconnectQB}>
-                  <LinkOff className="h-3.5 w-3.5" /> Disconnect
-                </Button>
-              </>
-            ) : (
-              <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#2CA01C] hover:bg-[#249018] text-white"
-                onClick={connectQuickBooks}>
-                <Link2 className="h-3.5 w-3.5" /> Connect QuickBooks
-              </Button>
-            )}
+            <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5"
+              onClick={exportWaveTransactions}>
+              <Download className="h-3.5 w-3.5" /> Transactions CSV
+            </Button>
+            <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5"
+              onClick={exportWaveCustomers}>
+              <Download className="h-3.5 w-3.5" /> Customers CSV
+            </Button>
           </div>
         </div>
-
-        {/* Setup instructions when not connected */}
-        {!qbStatus.connected && (
-          <div className="mt-4 pt-4 border-t">
-            <p className="text-xs font-medium text-muted-foreground mb-2">Setup steps:</p>
-            <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
-              <li>Go to <a href="https://developer.intuit.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">developer.intuit.com</a> → create an app → choose QuickBooks Online</li>
-              <li>Set Redirect URI to: <code className="bg-muted px-1 rounded text-[10px]">{SUPABASE_URL}/functions/v1/quickbooks-auth</code></li>
-              <li>Copy your Client ID & Client Secret</li>
-              <li>Add them as Supabase env vars: <code className="bg-muted px-1 rounded text-[10px]">QB_CLIENT_ID</code> and <code className="bg-muted px-1 rounded text-[10px]">QB_CLIENT_SECRET</code></li>
-              <li>Also add <code className="bg-muted px-1 rounded text-[10px]">APP_URL=https://www.glossworksky.com</code></li>
-              <li>Click Connect above ↑</li>
-            </ol>
+        <div className="mt-4 pt-4 border-t grid sm:grid-cols-2 gap-3 text-xs text-muted-foreground">
+          <div className="flex items-start gap-2">
+            <span className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded px-1.5 py-0.5 font-medium shrink-0">1</span>
+            <span>Click <strong className="text-foreground">Transactions CSV</strong> — includes all your income + expenses for the selected year in Wave's format</span>
           </div>
-        )}
+          <div className="flex items-start gap-2">
+            <span className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded px-1.5 py-0.5 font-medium shrink-0">2</span>
+            <span>In Wave → <strong className="text-foreground">Accounting → Transactions</strong> → click Import → upload the file</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded px-1.5 py-0.5 font-medium shrink-0">3</span>
+            <span>Click <strong className="text-foreground">Customers CSV</strong> to export your customer list</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded px-1.5 py-0.5 font-medium shrink-0">4</span>
+            <span>In Wave → <strong className="text-foreground">Sales → Customers</strong> → Import Customers → upload the file</span>
+          </div>
+        </div>
       </div>
 
       {/* ── P&L KPI Cards ─────────────────────────────────────────────────── */}
