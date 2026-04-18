@@ -12,6 +12,8 @@ import AdminLayout from "./admin/AdminLayout";
 import DashboardPage from "./admin/pages/DashboardPage/DashboardPage";
 import DatabasePage from "./admin/pages/DatabasePage/DatabasePage";
 import CalenderPage from "./admin/pages/CalendarPage/CalendarPage";
+import BookingsPage from "./admin/pages/BookingsPage/BookingsPage";
+
 
 
 
@@ -33,6 +35,8 @@ const App = () => (
   <Route index element={<DashboardPage />} />
   <Route path="database" element={<DatabasePage />} />
   <Route path="calender" element={<CalenderPage />} />
+    <Route path="bookings" element={<BookingsPage />} />
+
 </Route>
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
