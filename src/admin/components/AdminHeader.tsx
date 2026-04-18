@@ -44,11 +44,12 @@ const AdminHeader = () => {
             Bookings
           </DropdownMenuItem>
 
-          <DropdownMenuItem disabled className="text-muted-foreground">
-            Customers (coming soon)
+          <DropdownMenuItem onClick={() => navigate("/admin/accounting")}>
+            Accounting 
           </DropdownMenuItem>
-          <DropdownMenuItem disabled className="text-muted-foreground">
-            Settings (coming soon)
+          
+          <DropdownMenuItem onClick={() => navigate("/admin/servicearea")}>
+            ServiceArea 
           </DropdownMenuItem>
 
           <DropdownMenuItem onClick={() => navigate("/admin/database")}>

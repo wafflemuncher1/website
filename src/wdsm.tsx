@@ -13,10 +13,6 @@ import DashboardPage from "./admin/pages/DashboardPage/DashboardPage";
 import DatabasePage from "./admin/pages/DatabasePage/DatabasePage";
 import CalenderPage from "./admin/pages/CalendarPage/CalendarPage";
 import BookingsPage from "./admin/pages/BookingsPage/BookingsPage";
-import AccountingPage from "./admin/pages/AccountingPage/AccountingPage";
-import ServiceAreaPage from "./admin/pages/ServiceAreaPage/ServiceAreaPage";
-
-
 
 
 
@@ -39,10 +35,7 @@ const App = () => (
   <Route path="dashboard" element={<DashboardPage />} />
   <Route path="database" element={<DatabasePage />} />
   <Route path="calender" element={<CalenderPage />} />
-  <Route path="bookings" element={<BookingsPage />} />
-  <Route path="accounting" element={<AccountingPage />} />
-  <Route path="servicearea" element={<ServiceAreaPage />} />
-
+    <Route path="bookings" element={<BookingsPage />} />
 
 </Route>
           
