@@ -31,7 +31,7 @@ const AdminHeader = () => {
         <DropdownMenuContent align="start" className="w-48">
           <DropdownMenuLabel>Navigation</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => navigate("/admin")}>
+          <DropdownMenuItem onClick={() => navigate("/admin/dashboard")}>
             Dashboard
           </DropdownMenuItem>
 
