@@ -34,21 +34,27 @@ const AdminHeader = () => {
           <DropdownMenuItem onClick={() => navigate("/admin")}>
             Dashboard
           </DropdownMenuItem>
+
           <DropdownMenuItem onClick={() => navigate("/admin/calender")}>
-  Calender
-</DropdownMenuItem>
-          <DropdownMenuItem disabled className="text-muted-foreground">
-            Bookings (coming soon)
+            Calender
           </DropdownMenuItem>
+
+          {/* ✅ change this from "disabled coming soon" to a real link */}
+          <DropdownMenuItem onClick={() => navigate("/admin/bookings")}>
+            Bookings
+          </DropdownMenuItem>
+
           <DropdownMenuItem disabled className="text-muted-foreground">
             Customers (coming soon)
           </DropdownMenuItem>
           <DropdownMenuItem disabled className="text-muted-foreground">
             Settings (coming soon)
           </DropdownMenuItem>
+
           <DropdownMenuItem onClick={() => navigate("/admin/database")}>
-  Database
-</DropdownMenuItem>
+            Database
+          </DropdownMenuItem>
+
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} className="text-destructive">
             <LogOut className="mr-2 h-4 w-4" />
