@@ -243,12 +243,12 @@ const DashboardPage = () => {
     const yearStart = startOfYear();
 
     const [bRes, invRes, expRes, revRes, rescRes, custRes] = await Promise.all([
-      // All bookings this year
+      // All bookings — no date cap so future scheduled bookings are included
       supabase
         .from("estimate_requests")
         .select("id,created_at,name,email,phone,service,vehicle_size,total_cents,booking_date,booking_time,duration_mins,address,city,completed,condition")
-        .gte("created_at", yearStart + "T00:00:00")
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false })
+        .limit(500),
       // Invoices
       supabase
         .from("invoices")
@@ -282,14 +282,23 @@ const DashboardPage = () => {
 
   // ── Derived stats ──────────────────────────────────────────────────────────
 
+  // Full-period helpers — week and month are NOT capped at today
+  // so a booking scheduled for this Thursday (already marked complete) counts this week
+  const endOfWeekStr = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + (6 - d.getDay()));
+    return ymd(d);
+  };
+  const endOfMonthStr = () => ymd(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0));
+
   const todayBookings = allBookings.filter(b => b.booking_date === today);
-  const weekBookings = allBookings.filter(b => b.booking_date >= startOfWeek() && b.booking_date <= today);
-  const monthBookings = allBookings.filter(b => b.booking_date >= startOfMonth() && b.booking_date <= today);
+  const weekBookings  = allBookings.filter(b => b.booking_date >= startOfWeek() && b.booking_date <= endOfWeekStr());
+  const monthBookings = allBookings.filter(b => b.booking_date >= startOfMonth() && b.booking_date <= endOfMonthStr());
 
   const todayRevenue = todayBookings.filter(b => b.completed).reduce((s, b) => s + b.total_cents, 0);
-  const weekRevenue = weekBookings.filter(b => b.completed).reduce((s, b) => s + b.total_cents, 0);
+  const weekRevenue  = weekBookings.filter(b => b.completed).reduce((s, b) => s + b.total_cents, 0);
   const monthRevenue = monthBookings.filter(b => b.completed).reduce((s, b) => s + b.total_cents, 0);
-  const yearRevenue = allBookings.filter(b => b.completed).reduce((s, b) => s + b.total_cents, 0);
+  const yearRevenue  = allBookings.filter(b => b.completed).reduce((s, b) => s + b.total_cents, 0);
 
   // Last month for trend comparison
   const lastMonthStart = ymd(new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1));
@@ -297,9 +306,10 @@ const DashboardPage = () => {
   const lastMonthRevenue = allBookings
     .filter(b => b.completed && b.booking_date >= lastMonthStart && b.booking_date <= lastMonthEnd)
     .reduce((s, b) => s + b.total_cents, 0);
+  // Trend: compare this month's completed revenue vs last month's full completed revenue
   const revenueTrend = lastMonthRevenue > 0
     ? Math.round(((monthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100)
-    : 0;
+    : monthRevenue > 0 ? 100 : 0;
 
   const monthExpenses = expenses
     .filter(e => e.date >= startOfMonth())
@@ -501,7 +511,7 @@ const DashboardPage = () => {
             </button>
           )}
           {reschedules.length > 0 && (
-            <button onClick={() => navigate("/admin/calender")}
+            <button onClick={() => navigate("/admin/availability")}
               className="flex items-center gap-1.5 text-xs bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full hover:bg-blue-200 transition-colors dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800">
               <CloudRain className="h-3 w-3" />
               {reschedules.length} pending reschedule{reschedules.length > 1 ? "s" : ""}
@@ -513,11 +523,11 @@ const DashboardPage = () => {
       {/* ── KPI Grid ───────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <StatCard label="Today's Revenue" value={fmt$(todayRevenue)} sub={`${todayBookings.filter(b => b.completed).length} job${todayBookings.filter(b => b.completed).length !== 1 ? "s" : ""} done`} icon={DollarSign} color="green" />
-        <StatCard label="This Week" value={fmt$(weekRevenue)} sub={`${weekBookings.filter(b => b.completed).length} jobs`} icon={TrendingUp} color="green" trend={{ value: revenueTrend, label: "vs last month" }} />
-        <StatCard label="This Month" value={fmt$(monthRevenue)} sub={`${fmt$(monthExpenses)} expenses`} icon={BarChart2} color="blue" />
+        <StatCard label="This Week" value={fmt$(weekRevenue)} sub={`${weekBookings.filter(b => b.completed).length} job${weekBookings.filter(b => b.completed).length !== 1 ? "s" : ""} complete`} icon={TrendingUp} color="green" trend={{ value: revenueTrend, label: "vs last month" }} />
+        <StatCard label="This Month" value={fmt$(monthRevenue)} sub={`${fmt$(monthExpenses)} expenses · ${monthBookings.filter(b => b.completed).length} job${monthBookings.filter(b => b.completed).length !== 1 ? "s" : ""}`} icon={BarChart2} color="blue" />
         <StatCard label="Net Profit (Mo.)" value={fmt$(monthProfit)} sub={monthProfit >= 0 ? "Profitable" : "In the red"} icon={Wallet} color={monthProfit >= 0 ? "green" : "red"} />
         <StatCard label="Unpaid Invoices" value={fmt$(unpaidTotal)} sub={`${unpaidInvoices.length} outstanding`} icon={Receipt} color="amber" onClick={() => navigate("/admin/invoices")} />
-        <StatCard label="Total Clients" value={String(totalCustomers)} sub="all time" icon={Users} color="purple" onClick={() => navigate("/admin/bookings")} />
+        <StatCard label="Total Clients" value={String(totalCustomers)} sub="all time" icon={Users} color="purple" onClick={() => navigate("/admin/customers")} />
       </div>
 
       {/* ── Secondary stats ────────────────────────────────────────────────── */}
