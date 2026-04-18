@@ -501,7 +501,7 @@ const DashboardPage = () => {
             </button>
           )}
           {reschedules.length > 0 && (
-            <button onClick={() => navigate("/admin/availability")}
+            <button onClick={() => navigate("/admin/calendar")}
               className="flex items-center gap-1.5 text-xs bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full hover:bg-blue-200 transition-colors dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800">
               <CloudRain className="h-3 w-3" />
               {reschedules.length} pending reschedule{reschedules.length > 1 ? "s" : ""}
@@ -517,7 +517,7 @@ const DashboardPage = () => {
         <StatCard label="This Month" value={fmt$(monthRevenue)} sub={`${fmt$(monthExpenses)} expenses`} icon={BarChart2} color="blue" />
         <StatCard label="Net Profit (Mo.)" value={fmt$(monthProfit)} sub={monthProfit >= 0 ? "Profitable" : "In the red"} icon={Wallet} color={monthProfit >= 0 ? "green" : "red"} />
         <StatCard label="Unpaid Invoices" value={fmt$(unpaidTotal)} sub={`${unpaidInvoices.length} outstanding`} icon={Receipt} color="amber" onClick={() => navigate("/admin/invoices")} />
-        <StatCard label="Total Clients" value={String(totalCustomers)} sub="all time" icon={Users} color="purple" onClick={() => navigate("/admin/customers")} />
+        <StatCard label="Total Clients" value={String(totalCustomers)} sub="all time" icon={Users} color="purple" onClick={() => navigate("/admin/bookings")} />
       </div>
 
       {/* ── Secondary stats ────────────────────────────────────────────────── */}
