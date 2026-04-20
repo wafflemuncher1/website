@@ -70,7 +70,7 @@ const AdminHeader = () => {
 
       {/* Right: logo linking to dashboard */}
       <button
-        onClick={() => navigate("/admin")}
+        onClick={() => navigate("/admin/dashboard")}
         className="text-lg font-bold tracking-tight text-foreground hover:opacity-80 transition-opacity"
       >
         GLOSSWORKS
