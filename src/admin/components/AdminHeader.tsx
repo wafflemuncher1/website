@@ -47,6 +47,10 @@ const AdminHeader = () => {
           <DropdownMenuItem onClick={() => navigate("/admin/accounting")}>
             Accounting 
           </DropdownMenuItem>
+
+          <DropdownMenuItem onClick={() => navigate("/admin/investments")}>
+            Investments
+          </DropdownMenuItem>
           
           <DropdownMenuItem onClick={() => navigate("/admin/servicearea")}>
             ServiceArea 

@@ -15,6 +15,7 @@ import CalenderPage from "./admin/pages/CalendarPage/CalendarPage";
 import BookingsPage from "./admin/pages/BookingsPage/BookingsPage";
 import AccountingPage from "./admin/pages/AccountingPage/AccountingPage";
 import ServiceAreaPage from "./admin/pages/ServiceAreaPage/ServiceAreaPage";
+import InvestmentsPage  from "./admin/pages/InvestmentsPage/InvestmentsPage.tsx";
 
 
 
@@ -42,6 +43,7 @@ const App = () => (
   <Route path="bookings" element={<BookingsPage />} />
   <Route path="accounting" element={<AccountingPage />} />
   <Route path="servicearea" element={<ServiceAreaPage />} />
+  <Route path="investments" element={<InvestmentsPage />} />
 
 
 </Route>
