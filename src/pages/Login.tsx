@@ -69,7 +69,7 @@ const Login = () => {
   }
 
   if (roles && roles.length > 0) {
-    navigate("/admin", { replace: true });
+    navigate("/admin/dashboard", { replace: true });
     setLoading(false);
     return;
   }
