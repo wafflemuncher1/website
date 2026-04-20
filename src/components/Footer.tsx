@@ -11,8 +11,6 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-bold tracking-wider uppercase mb-4">Our Services</h4>
             <ul className="space-y-2 text-sm text-muted-foreground font-body">
-              <li>Waxing</li>
-              <li>Paint Correction & Polishing</li>
               <li>Interior Detailing</li>
               <li>Sealants</li>
               <li>Exterior Detailing</li>
@@ -23,8 +21,8 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-bold tracking-wider uppercase mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm text-muted-foreground font-body">
-              <li><a href="#" className="hover:text-foreground transition-colors">Home</a></li>
-              <li><a href="#estimate" className="hover:text-foreground transition-colors">Estimates</a></li>
+              <li><a href="/" className="hover:text-foreground transition-colors">Home</a></li>
+              <li><a href="/estimate" className="hover:text-foreground transition-colors">Estimates</a></li>
               <li><a href="#reviews" className="hover:text-foreground transition-colors">Reviews</a></li>
               <li>
   <Link to="/login" className="hover:text-foreground transition-colors">
