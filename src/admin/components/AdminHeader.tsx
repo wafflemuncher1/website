@@ -56,6 +56,10 @@ const AdminHeader = () => {
             ServiceArea 
           </DropdownMenuItem>
 
+           <DropdownMenuItem onClick={() => navigate("/admin/messages")}>
+            Messages
+          </DropdownMenuItem>
+
           <DropdownMenuItem onClick={() => navigate("/admin/database")}>
             Database
           </DropdownMenuItem>
