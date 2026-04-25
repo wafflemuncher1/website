@@ -10,7 +10,7 @@ import Estimate from "./pages/Estimate.tsx"; // <-- add this
 import Login from "./pages/Login.tsx";
 import AdminLayout from "./admin/AdminLayout";
 import DashboardPage from "./admin/pages/DashboardPage/DashboardPage";
-import DatabasePage from "./admin/pages/DatabasePage/DatabasePage";
+
 import CalenderPage from "./admin/pages/CalendarPage/CalendarPage";
 import BookingsPage from "./admin/pages/BookingsPage/BookingsPage";
 import AccountingPage from "./admin/pages/AccountingPage/AccountingPage";
@@ -39,7 +39,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
          <Route path="/admin" element={<AdminLayout />}>
   <Route path="dashboard" element={<DashboardPage />} />
-  <Route path="database" element={<DatabasePage />} />
+
   <Route path="calender" element={<CalenderPage />} />
   <Route path="bookings" element={<BookingsPage />} />
   <Route path="accounting" element={<AccountingPage />} />
