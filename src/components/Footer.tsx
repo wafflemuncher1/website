@@ -25,10 +25,40 @@ const Footer = () => {
               <li><a href="/estimate" className="hover:text-foreground transition-colors">Estimates</a></li>
               <li><a href="#reviews" className="hover:text-foreground transition-colors">Reviews</a></li>
               <li>
-  <Link to="/login" className="hover:text-foreground transition-colors">
-    Admin Login
-  </Link>
-</li>
+                <a 
+                  href="https://docs.google.com/document/d/1JCG2zETQ5b5PgECjxxxnp84Yixg7QmX00KAWUVvEyYk/edit?usp=sharing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://docs.google.com/document/d/177g3_znPhWbfPEcAA7aydbfoCXCQqeZt65S1E-U24Tc/edit?usp=sharing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Terms & Conditions
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://docs.google.com/document/d/1THUKnhmFFCmNiYjJ_WNiwbss3F8MPF-NoSL00hKulnw/edit?usp=sharing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Service Agreement
+                </a>
+              </li>
+              <li>
+                <Link to="/login" className="hover:text-foreground transition-colors">
+                  Admin Login
+                </Link>
+              </li>
             </ul>
             <h4 className="text-sm font-bold tracking-wider uppercase mt-6 mb-3">Social Media</h4>
             <div className="flex gap-3">
@@ -79,7 +109,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary" />
-                <a href="mailto:Conatct@glossworksky.com" className="hover:text-foreground transition-colors">Contact@glossworksky.com</a>
+                <a href="mailto:Contact@glossworksky.com" className="hover:text-foreground transition-colors">Contact@glossworksky.com</a>
               </li>
             </ul>
             <div className="mt-6">
@@ -89,9 +119,10 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-border/50 pt-6">
-          <p className="text-center text-xs text-muted-foreground font-body">
-            © {new Date().getFullYear()} Glossworks Mobile Detailing. All rights reserved.
-          </p>
+          <div className="text-center text-xs text-muted-foreground font-body space-x-4">
+            <span>© {new Date().getFullYear()} Glossworks Mobile Detailing. All rights reserved.</span>
+            <a href="PASTE_PRIVACY_POLICY_GOOGLE_DOC_URL_HERE" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Privacy Policy</a>
+          </div>
         </div>
       </div>
     </footer>
