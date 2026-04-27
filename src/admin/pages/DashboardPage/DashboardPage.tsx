@@ -454,7 +454,7 @@ const DashboardPage = () => {
   // ── Greet ──────────────────────────────────────────────────────────────────
 
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const greeting = hour < 12 ? "Good morning Zane" : hour < 17 ? "Good afternoon Zane" : "Good evening Zane";
   const dateDisplay = new Date().toLocaleDateString("en-US", {
     weekday: "long", month: "long", day: "numeric", year: "numeric",
   });

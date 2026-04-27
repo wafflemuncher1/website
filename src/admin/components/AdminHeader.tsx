@@ -60,7 +60,9 @@ const AdminHeader = () => {
             Messages
           </DropdownMenuItem>
 
-          
+          <DropdownMenuItem onClick={() => navigate("/admin/settings")}>
+            Settings
+          </DropdownMenuItem>
 
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} className="text-destructive">

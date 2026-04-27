@@ -17,6 +17,7 @@ import AccountingPage from "./admin/pages/AccountingPage/AccountingPage";
 import ServiceAreaPage from "./admin/pages/ServiceAreaPage/ServiceAreaPage";
 import InvestmentsPage  from "./admin/pages/InvestmentsPage/InvestmentsPage.tsx";
 import MessagesPage from "./admin/pages/MessagesPage/MessagesPage.tsx";
+import SettingsPage from "./admin/pages/SettingsPage/SettingsPage.tsx";
 
 
 
@@ -46,6 +47,7 @@ const App = () => (
   <Route path="servicearea" element={<ServiceAreaPage />} />
   <Route path="investments" element={<InvestmentsPage />} />
   <Route path="messages" element={<MessagesPage />} />
+  <Route path="settings" element={<SettingsPage />} />
 
 
 </Route>
