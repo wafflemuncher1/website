@@ -38,7 +38,7 @@ const CTABanner = () => {
                 Detailing on Social Media
               </h3>
               <a
-                href="#estimate"
+                href="/estimate"
                 className="inline-block mt-4 px-8 py-3 bg-primary text-primary-foreground font-bold rounded-lg text-lg tracking-wider hover:opacity-90 transition-opacity"
               >
                 GET A QUOTE
