@@ -121,7 +121,6 @@ const Footer = () => {
         <div className="border-t border-border/50 pt-6">
           <div className="text-center text-xs text-muted-foreground font-body space-x-4">
             <span>© {new Date().getFullYear()} Glossworks Mobile Detailing. All rights reserved.</span>
-            <a href="PASTE_PRIVACY_POLICY_GOOGLE_DOC_URL_HERE" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Privacy Policy</a>
           </div>
         </div>
       </div>
