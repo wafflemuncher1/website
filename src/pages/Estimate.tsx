@@ -22,119 +22,116 @@ import { Checkbox } from "@/components/ui/checkbox";
 import StickyHeader from "@/components/StickyHeader";
 import Footer from "@/components/Footer";
 
-const steps = [
-  { label: "Vehicle", icon: Car },
-  { label: "Condition", icon: ShieldCheck },
-  { label: "Category", icon: Layers },
-  { label: "Package", icon: Sparkles },
-  { label: "Add-Ons", icon: Plus },
-  { label: "Date & Time", icon: Calendar },
-  { label: "Location", icon: MapPin },
-  { label: "Your Info", icon: User },
-  { label: "Summary", icon: ClipboardList },
-];
+// ─── Constants ────────────────────────────────────────────────────────────────
 
-const vehicleSizes = [
-  { label: "Small", desc: "Coupe / Sedan", upcharge: 0 },
-  { label: "Medium", desc: "Small SUV / Crossover", upcharge: 15 },
-  { label: "Large", desc: "Large SUV / Truck", upcharge: 25 },
-  { label: "XL", desc: "XL Vehicle / Minivan", upcharge: 50 },
-];
-
-const vehicleConditions = [
-  { label: "Clean", desc: "Recently washed, minimal dirt", upcharge: 0 },
-  { label: "Moderate", desc: "Average daily driver condition", upcharge: 0 },
-  { label: "Dirty", desc: "Heavy buildup, hasn't been washed in a while", upcharge: 25 },
-  { label: "Extreme", desc: "Excessive dirt, pet hair, or neglect", upcharge: 50 },
-];
-
-const serviceCategories = [
-  { label: "Details", desc: "All bundles" },
-
-];
-
-const packages: Record<
-  string,
-  { label: string; price: number; popular?: boolean; features: string[] }[]
-> = {
-  "Details": [
-    {
-      label: "The Baseline",
-      price: 75,
-      features: [
-        "Multi-Stage Prep: pH-neutral foam bath to safely lift surface grit.",
-        "Wheels: Deep barrel cleaning & tire scrub.",
-        "De-Greasing: Intensive bug removal and cleaning of fuel doors and door jambs.",
-        "Protection: Finished with Bead Maker for signature slickness and high gloss.",
-        "Tire Finish: Premium tire dressing applied.",
-      ],
-    },
-    {
-      label: "The Signature Detail",
-      price: 165,
-      popular: true,
-      features: [
-        "Full Baseline Process: Includes everything in the $75 package.",
-        "High-Power Deep Vacuum: Complete debris removal from cabin, trunk, and tight crevices.",
-        "Full Interior Sanitization & Wipe Down",
-        "Deep-Clean Floor Mats Rubber and Carpet",
-        "UV Surface Armor (Prevents Fading & Cracking)",
-      ],
-    },
-   
-  ],
-  "Sorry this does not exsist yet": [
-    {
-      label: "",
-      price: 0,
-      features: [
-        "",
-      ],
-    },
-    {
-      label: "",
-      price:0,
-      popular: true,
-      features: [
-        "",
-      ],
-    },
-  ],
-  "Sorry this does not exsist yet 2": [
-    {
-      label: "",
-      price: 0,
-      features: [
-        "",
-      ],
-    },
-    {
-      label: "",
-      price: 0,
-      popular: true,
-      features: [
-        "",
-      ],
-    },
-  ],
-};
-
-const addOns = [
- 
-  { key: "iron", label: "Iron Decontamination", desc: "Chemical removal of iron particles", price: 35 },
-
+const ALL_SLOTS = [
+  "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM",
+  "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM",
 ];
 
 const SHEET_ENDPOINT =
   "https://script.google.com/macros/s/AKfycbzdxiRLadUk1R3y5uFfB6MUPtGDMDc6qoCVig1_PwmSueUf0e0ubjKRGF68K5wwpQFObw/exec";
 
-const isValidEmail = (email: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-const isValidPhone = (phone: string) =>
-  /^[\d\s\-\+\(\)]{7,15}$/.test(phone.trim());
+// Shape coming back from the `packages` Supabase table
+interface DbPackage {
+  id: string;
+  label: string;
+  price_cents: number;
+  duration_mins: number;
+  features: string[];
+  active: boolean;
+  sort_order: number;
+}
+
+// Shape the UI already expects (keeps all existing rendering code untouched)
+interface UiPackage {
+  id: string;
+  label: string;
+  price: number;          // dollars
+  duration_mins: number;
+  popular?: boolean;
+  features: string[];
+}
+
+// ─── Static data (unchanged) ──────────────────────────────────────────────────
+
+const steps = [
+  { label: "Vehicle",   icon: Car },
+  { label: "Condition", icon: ShieldCheck },
+  { label: "Category",  icon: Layers },
+  { label: "Package",   icon: Sparkles },
+  { label: "Add-Ons",   icon: Plus },
+  { label: "Date & Time", icon: Calendar },
+  { label: "Location",  icon: MapPin },
+  { label: "Your Info", icon: User },
+  { label: "Summary",   icon: ClipboardList },
+];
+
+const vehicleSizes = [
+  { label: "Small",  desc: "Coupe / Sedan",            upcharge: 0  },
+  { label: "Medium", desc: "Small SUV / Crossover",    upcharge: 15 },
+  { label: "Large",  desc: "Large SUV / Truck",        upcharge: 25 },
+  { label: "XL",     desc: "XL Vehicle / Minivan",     upcharge: 50 },
+];
+
+const vehicleConditions = [
+  { label: "Clean",    desc: "Recently washed, minimal dirt",                upcharge: 0  },
+  { label: "Moderate", desc: "Average daily driver condition",               upcharge: 0  },
+  { label: "Dirty",    desc: "Heavy buildup, hasn't been washed in a while", upcharge: 25 },
+  { label: "Extreme",  desc: "Excessive dirt, pet hair, or neglect",         upcharge: 50 },
+];
+
+const serviceCategories = [
+  { label: "Details", desc: "All bundles" },
+];
+
+const addOns = [
+  { key: "iron", label: "Iron Decontamination", desc: "Chemical removal of iron particles", price: 35 },
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const isValidPhone = (phone: string) => /^[\d\s\-\+\(\)]{7,15}$/.test(phone.trim());
+
+/** Convert a flat list of active DB packages into the UI shape */
+const toUiPackages = (rows: DbPackage[]): UiPackage[] =>
+  rows.map((r) => ({
+    id:           r.id,
+    label:        r.label,
+    price:        r.price_cents / 100,
+    duration_mins: r.duration_mins,
+    features:     r.features,
+  }));
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 const Estimate = () => {
+  // ── Packages loaded from Supabase ──────────────────────────────────────────
+  const [dbPackages, setDbPackages] = useState<UiPackage[]>([]);
+  const [packagesLoading, setPackagesLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPackages = async () => {
+      setPackagesLoading(true);
+      const { data, error } = await supabase
+        .from("packages")
+        .select("*")
+        .eq("active", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+
+      if (!error && data) {
+        setDbPackages(toUiPackages(data as DbPackage[]));
+      }
+      setPackagesLoading(false);
+    };
+    loadPackages();
+  }, []);
+
+  // ── Form state (unchanged) ─────────────────────────────────────────────────
   const [step, setStep] = useState(0);
   const [vehicle, setVehicle] = useState<number | null>(null);
   const [condition, setCondition] = useState<number | null>(null);
@@ -159,32 +156,29 @@ const Estimate = () => {
   const [submitted, setSubmitted] = useState(false);
   const [agreedToServiceContract, setAgreedToServiceContract] = useState(false);
 
-  // Default duration for booking slots (later you can map per package)
-  const getDurationMins = () => {
-  const pkgs = getCategoryPackages();
-  const pkg = selectedPackage !== null ? pkgs[selectedPackage] : null;
+  // ── Derived helpers ────────────────────────────────────────────────────────
 
-  // default if nothing selected yet
-  if (!pkg) return 180;
+  const getCategoryLabel = () =>
+    category !== null ? serviceCategories[category].label : "";
 
-  // set durations by package name
-  switch (pkg.label) {
-    case "The Baseline":
-      return 120; // 2 hours
-    case "The Signature Detail":
-      return 180; // 3 hours
-    
-    default:
-      return 180;
-  }
-};
+  /**
+   * Returns the packages for the currently selected category.
+   * Since all packages live in Supabase under one category ("Details"),
+   * we just return all loaded packages regardless of category label.
+   */
+  const getCategoryPackages = (): UiPackage[] => dbPackages;
 
-  // Scroll to top on step change
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [step]);
+  /**
+   * Duration comes directly from the selected package's duration_mins field.
+   * No more hard-coded switch statement — changing it in Settings is enough.
+   */
+  const getDurationMins = (): number => {
+    const pkgs = getCategoryPackages();
+    const pkg = selectedPackage !== null ? pkgs[selectedPackage] : null;
+    return pkg?.duration_mins ?? 180;
+  };
 
-  // Load availability when date changes
+  // ── Availability — pure Supabase query (replaces Google Sheet call) ─────────
   useEffect(() => {
     const loadAvailability = async () => {
       if (!selectedDate) return;
@@ -195,22 +189,54 @@ const Estimate = () => {
       setSelectedTime("");
 
       try {
-        const res = await fetch(SHEET_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "getAvailability",
-            date: selectedDate,
-            durationMins: getDurationMins(),
-          }),
+        // 1. Check if the whole day is blocked by admin
+        const { data: blockedDay } = await supabase
+          .from("blocked_dates")
+          .select("id")
+          .eq("date", selectedDate)
+          .maybeSingle();
+
+        if (blockedDay) {
+          setSlotError("This date is unavailable. Please choose another day.");
+          setLoadingSlots(false);
+          return;
+        }
+
+        // 2. Fetch existing (non-completed) bookings on this date
+        const { data: bookings, error: bookingsError } = await supabase
+          .from("estimate_requests")
+          .select("booking_time, duration_mins")
+          .eq("booking_date", selectedDate)
+          .eq("completed", false);
+
+        if (bookingsError) throw bookingsError;
+
+        // 3. Build the set of already-occupied slots
+        const occupiedSlots = new Set<string>();
+        for (const booking of bookings ?? []) {
+          const startIdx = ALL_SLOTS.indexOf(booking.booking_time ?? "");
+          if (startIdx === -1) continue;
+          const bookedSlotCount = Math.ceil((booking.duration_mins ?? 120) / 60);
+          for (let i = 0; i < bookedSlotCount; i++) {
+            if (ALL_SLOTS[startIdx + i]) occupiedSlots.add(ALL_SLOTS[startIdx + i]);
+          }
+        }
+
+        // 4. Filter slots: a slot is available only if every slot the new
+        //    booking would occupy is currently free.
+        const newSlotCount = Math.ceil(getDurationMins() / 60);
+        const available = ALL_SLOTS.filter((_, startIdx) => {
+          for (let j = 0; j < newSlotCount; j++) {
+            const slot = ALL_SLOTS[startIdx + j];
+            if (!slot || occupiedSlots.has(slot)) return false;
+          }
+          return true;
         });
 
-        const json = await res.json();
-        if (!json.ok) throw new Error(json.error || "Failed to load availability");
-
-        setAvailableSlots(json.slots || []);
-      } catch (e: any) {
-        setSlotError(e?.message || "Failed to load availability");
+        setAvailableSlots(available);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : "Failed to load availability";
+        setSlotError(msg);
       } finally {
         setLoadingSlots(false);
       }
@@ -220,22 +246,21 @@ const Estimate = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate]);
 
+  // ── Scroll to top on step change (unchanged) ───────────────────────────────
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
+
+  // ── canNext (unchanged logic) ──────────────────────────────────────────────
   const canNext = (() => {
     switch (step) {
-      case 0:
-        return vehicle !== null;
-      case 1:
-        return condition !== null;
-      case 2:
-        return category !== null;
-      case 3:
-        return selectedPackage !== null;
-      case 4:
-        return true; // add-ons optional
-      case 5:
-        return selectedDate !== "" && selectedTime !== "";
-      case 6:
-        return address.trim() !== "" && city.trim() !== "" && zipCode.trim() !== "";
+      case 0: return vehicle !== null;
+      case 1: return condition !== null;
+      case 2: return category !== null;
+      case 3: return selectedPackage !== null;
+      case 4: return true;
+      case 5: return selectedDate !== "" && selectedTime !== "";
+      case 6: return address.trim() !== "" && city.trim() !== "" && zipCode.trim() !== "";
       case 7:
         return (
           contact.name.trim() !== "" &&
@@ -243,145 +268,117 @@ const Estimate = () => {
           isValidPhone(contact.phone) &&
           consent
         );
-      default:
-        return false;
+      default: return false;
     }
   })();
 
-  const toggleAddOn = (idx: number) => {
+  const toggleAddOn = (idx: number) =>
     setSelectedAddOns((prev) =>
       prev.includes(idx) ? prev.filter((x) => x !== idx) : [...prev, idx],
     );
-  };
 
   const handleCategoryChange = (idx: number) => {
     setCategory(idx);
     setSelectedPackage(null);
   };
 
-  const getCategoryLabel = () =>
-    category !== null ? serviceCategories[category].label : "";
-
-  const getCategoryPackages = () =>
-    category !== null ? packages[serviceCategories[category].label] || [] : [];
-
   const getTotal = () => {
     const pkgs = getCategoryPackages();
-    const pkgPrice =
-      selectedPackage !== null && pkgs[selectedPackage]
-        ? pkgs[selectedPackage].price
-        : 0;
+    const pkgPrice = selectedPackage !== null && pkgs[selectedPackage] ? pkgs[selectedPackage].price : 0;
     const sizeUpcharge = vehicle !== null ? vehicleSizes[vehicle].upcharge : 0;
-    const conditionUpcharge =
-      condition !== null ? vehicleConditions[condition].upcharge : 0;
+    const conditionUpcharge = condition !== null ? vehicleConditions[condition].upcharge : 0;
     const addOnsTotal = selectedAddOns.reduce((sum, idx) => sum + addOns[idx].price, 0);
     return pkgPrice + sizeUpcharge + conditionUpcharge + addOnsTotal;
-    
-  };
-  
-
- 
-const handleSubmit = async () => {
-  if (!agreedToServiceContract) {
-    alert("Please agree to the Service Contract before submitting.");
-    return;
-  }
-
-  const pkgs = getCategoryPackages();
-  const packageLabel =
-    selectedPackage !== null && pkgs[selectedPackage]
-      ? pkgs[selectedPackage].label
-      : "";
-
-  // ── 1. Send to Google Apps Script (creates Calendar event + emails) ────────
-  const payload = {
-    action: "createBooking",
-
-    date: selectedDate,
-    timeLabel: selectedTime,
-    durationMins: getDurationMins(),
-
-    name: contact.name,
-    email: contact.email,
-    phone: contact.phone,
-
-    address,
-    city,
-    zipCode,
-    notes,
-
-    vehicleSize: vehicle !== null ? vehicleSizes[vehicle].label : "",
-    vehicleCondition: condition !== null ? vehicleConditions[condition].label : "",
-    category: getCategoryLabel(),
-    packageLabel,
-    addOns: selectedAddOns.map((idx) => addOns[idx].label).join(", ") || "None",
-    total: `$${getTotal()}`,
-
-    consent: consent ? "Yes" : "No",
   };
 
-  try {
-    const res = await fetch(SHEET_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload),
-    });
-
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "Booking failed");
-
-    // ── 2. Mirror to Supabase (powers admin panel + calendar display) ────────
-    // We do this after Apps Script succeeds so we never create a DB record
-    // for a booking that failed to land on the calendar.
-    try {
-      const totalCents = getTotal() * 100;
-
-      await supabase.from("estimate_requests").insert({
-        name: contact.name,
-        email: contact.email,
-        phone: contact.phone,
-        address,
-        city,
-        zip_code: zipCode,
-        vehicle_size: vehicle !== null ? vehicleSizes[vehicle].label : "",
-        condition: condition !== null ? vehicleConditions[condition].label : "",
-        service: packageLabel || getCategoryLabel(),
-        add_ons: selectedAddOns.map((idx) => addOns[idx].label),
-        total_cents: totalCents,
-        consent: true,
-        booking_date: selectedDate,
-        booking_time: selectedTime,
-        duration_mins: getDurationMins(),
-        notify_status: "sent",
-        completed: false,
-      });
-      // The database trigger automatically creates a calendar_blocks entry
-      // so the admin availability calendar shows this booking as blocked.
-    } catch (supabaseErr) {
-      // Supabase write is best-effort — the booking is already on Google
-      // Calendar so the customer is confirmed regardless.
-      console.error("Supabase mirror failed (booking still confirmed):", supabaseErr);
+  // ── Submit (unchanged — still hits Google Sheet for calendar) ─────────────
+  const handleSubmit = async () => {
+    if (!agreedToServiceContract) {
+      alert("Please agree to the Service Contract before submitting.");
+      return;
     }
 
-    setSubmitted(true);
-  } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : "Booking failed. Please try another time.";
-    alert(msg);
-  }
-};
+    const pkgs = getCategoryPackages();
+    const packageLabel =
+      selectedPackage !== null && pkgs[selectedPackage]
+        ? pkgs[selectedPackage].label
+        : "";
 
+    const payload = {
+      action: "createBooking",
+      date: selectedDate,
+      timeLabel: selectedTime,
+      durationMins: getDurationMins(),
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone,
+      address,
+      city,
+      zipCode,
+      notes,
+      vehicleSize: vehicle !== null ? vehicleSizes[vehicle].label : "",
+      vehicleCondition: condition !== null ? vehicleConditions[condition].label : "",
+      category: getCategoryLabel(),
+      packageLabel,
+      addOns: selectedAddOns.map((idx) => addOns[idx].label).join(", ") || "None",
+      total: `$${getTotal()}`,
+      consent: consent ? "Yes" : "No",
+    };
+
+    try {
+      const res = await fetch(SHEET_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || "Booking failed");
+
+      // Mirror to Supabase (best-effort)
+      try {
+        await supabase.from("estimate_requests").insert({
+          name: contact.name,
+          email: contact.email,
+          phone: contact.phone,
+          address,
+          city,
+          zip_code: zipCode,
+          vehicle_size: vehicle !== null ? vehicleSizes[vehicle].label : "",
+          condition: condition !== null ? vehicleConditions[condition].label : "",
+          service: packageLabel || getCategoryLabel(),
+          add_ons: selectedAddOns.map((idx) => addOns[idx].label),
+          total_cents: getTotal() * 100,
+          consent: true,
+          booking_date: selectedDate,
+          booking_time: selectedTime,
+          duration_mins: getDurationMins(),
+          notify_status: "sent",
+          completed: false,
+        });
+      } catch (supabaseErr) {
+        console.error("Supabase mirror failed (booking still confirmed):", supabaseErr);
+      }
+
+      setSubmitted(true);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Booking failed. Please try another time.";
+      alert(msg);
+    }
+  };
 
   const goToStep = (s: number) => setStep(s);
 
   const slideVariants = {
-    enter: { opacity: 0, x: 30 },
+    enter:  { opacity: 0, x: 30 },
     center: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -30 },
+    exit:   { opacity: 0, x: -30 },
   };
 
   const total = getTotal();
   const pkgs = getCategoryPackages();
 
+  // ── Submitted screen (unchanged) ───────────────────────────────────────────
   if (submitted) {
     return (
       <div className="min-h-screen bg-black flex flex-col">
@@ -397,7 +394,7 @@ const handleSubmit = async () => {
             </div>
             <h3 className="text-2xl font-bold mb-2 text-white">Booking Confirmed!</h3>
             <p className="text-muted-foreground font-body">
-              You’re on the schedule. We’ll reach out soon to confirm details. Thank you for choosing Glossworks.
+              You're on the schedule. We'll reach out soon to confirm details. Thank you for choosing Glossworks.
             </p>
           </motion.div>
         </div>
@@ -406,7 +403,7 @@ const handleSubmit = async () => {
     );
   }
 
-  // Mini summary component for the Add-Ons step
+  // ── Mini summary (unchanged) ───────────────────────────────────────────────
   const MiniSummary = () => (
     <div className="mt-6 border border-neutral-800 rounded-lg p-4 bg-neutral-900">
       <h4 className="text-sm font-semibold text-white mb-3">Your Estimate So Far</h4>
@@ -427,21 +424,18 @@ const handleSubmit = async () => {
               : "—"}
           </span>
         </div>
-
         {vehicle !== null && vehicleSizes[vehicle].upcharge > 0 && (
           <div className="flex justify-between">
             <span>Size upcharge</span>
             <span className="text-white">+ ${vehicleSizes[vehicle].upcharge}</span>
           </div>
         )}
-
         {condition !== null && vehicleConditions[condition].upcharge > 0 && (
           <div className="flex justify-between">
             <span>Condition upcharge</span>
             <span className="text-white">+ ${vehicleConditions[condition].upcharge}</span>
           </div>
         )}
-
         {selectedAddOns.length > 0 && (
           <div className="flex justify-between">
             <span>Add-ons ({selectedAddOns.length})</span>
@@ -450,24 +444,24 @@ const handleSubmit = async () => {
             </span>
           </div>
         )}
-
         <div className="flex justify-between font-bold text-white pt-2 border-t border-neutral-800">
           <span>Estimated Total</span>
           <span className="text-primary">${total}</span>
         </div>
       </div>
-
       <Button onClick={() => goToStep(5)} className="w-full mt-4" size="lg">
         Book Now <ArrowRight className="ml-2 h-4 w-4" />
       </Button>
     </div>
   );
 
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-black flex flex-col overflow-x-hidden">
       <StickyHeader />
       <div className="flex-1 pt-32 pb-20">
         <div className="container mx-auto px-4 md:px-8 max-w-3xl">
+
           {/* Title */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -528,6 +522,7 @@ const handleSubmit = async () => {
                 exit="exit"
                 transition={{ duration: 0.25 }}
               >
+
                 {/* Step 0: Vehicle */}
                 {step === 0 && (
                   <div>
@@ -608,37 +603,50 @@ const handleSubmit = async () => {
                   <div>
                     <h3 className="text-lg font-semibold mb-2 text-white">Choose a Package</h3>
                     <p className="text-xs text-muted-foreground mb-5">{getCategoryLabel()} packages</p>
-                    <div className="space-y-3">
-                      {pkgs.map((p, i) => (
-                        <button
-                          key={p.label}
-                          onClick={() => setSelectedPackage(i)}
-                          className={`w-full text-left rounded-lg border p-4 transition-all relative ${
-                            selectedPackage === i
-                              ? "border-primary bg-primary/10 text-white"
-                              : "border-neutral-800 bg-neutral-900 text-muted-foreground hover:border-primary/30"
-                          }`}
-                        >
-                          {p.popular && (
-                            <span className="absolute -top-2.5 right-3 text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full font-semibold">
-                              Most Popular
-                            </span>
-                          )}
-                          <div className="flex justify-between items-start mb-2">
-                            <span className="text-sm font-semibold">{p.label}</span>
-                            <span className="text-primary font-bold">${p.price}</span>
-                          </div>
-                          <ul className="space-y-1">
-                            {p.features.map((f, fi) => (
-                              <li key={fi} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                <Check className="h-3 w-3 text-primary shrink-0 mt-0.5" />
-                                {f}
-                              </li>
-                            ))}
-                          </ul>
-                        </button>
-                      ))}
-                    </div>
+                    {packagesLoading ? (
+                      <div className="space-y-3">
+                        {[...Array(2)].map((_, i) => (
+                          <div key={i} className="h-32 rounded-lg bg-neutral-800 animate-pulse" />
+                        ))}
+                      </div>
+                    ) : pkgs.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No packages available. Add them in Settings.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {pkgs.map((p, i) => (
+                          <button
+                            key={p.id}
+                            onClick={() => setSelectedPackage(i)}
+                            className={`w-full text-left rounded-lg border p-4 transition-all relative ${
+                              selectedPackage === i
+                                ? "border-primary bg-primary/10 text-white"
+                                : "border-neutral-800 bg-neutral-900 text-muted-foreground hover:border-primary/30"
+                            }`}
+                          >
+                            {p.popular && (
+                              <span className="absolute -top-2.5 right-3 text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full font-semibold">
+                                Most Popular
+                              </span>
+                            )}
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="text-sm font-semibold">{p.label}</span>
+                              <span className="text-primary font-bold">${p.price}</span>
+                            </div>
+                            <ul className="space-y-1">
+                              {p.features.map((f, fi) => (
+                                <li key={fi} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                                  <Check className="h-3 w-3 text-primary shrink-0 mt-0.5" />
+                                  {f}
+                                </li>
+                              ))}
+                            </ul>
+                            <p className="text-xs text-muted-foreground mt-2 opacity-60">
+                              ⏱ ~{(p.duration_mins / 60).toFixed(1)} hrs
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -696,8 +704,9 @@ const handleSubmit = async () => {
 
                       <div>
                         <label className="text-sm text-muted-foreground mb-2 block">Time Slot</label>
-
-                        {loadingSlots ? (
+                        {!selectedDate ? (
+                          <p className="text-sm text-muted-foreground">Pick a date first.</p>
+                        ) : loadingSlots ? (
                           <p className="text-sm text-muted-foreground">Loading available times...</p>
                         ) : slotError ? (
                           <p className="text-sm text-red-400">{slotError}</p>
@@ -832,17 +841,14 @@ const handleSubmit = async () => {
                           {vehicle !== null ? `${vehicleSizes[vehicle].label} (${vehicleSizes[vehicle].desc})` : "—"}
                         </span>
                       </div>
-
                       <div className="flex justify-between text-muted-foreground">
                         <span>Condition</span>
                         <span className="text-white">{condition !== null ? vehicleConditions[condition].label : "—"}</span>
                       </div>
-
                       <div className="flex justify-between text-muted-foreground">
                         <span>Category</span>
                         <span className="text-white">{getCategoryLabel() || "—"}</span>
                       </div>
-
                       <div className="flex justify-between text-muted-foreground">
                         <span>Package</span>
                         <span className="text-white">
@@ -851,21 +857,18 @@ const handleSubmit = async () => {
                             : "—"}
                         </span>
                       </div>
-
                       {vehicle !== null && vehicleSizes[vehicle].upcharge > 0 && (
                         <div className="flex justify-between text-muted-foreground">
                           <span>Size upcharge</span>
                           <span className="text-white">+ ${vehicleSizes[vehicle].upcharge}</span>
                         </div>
                       )}
-
                       {condition !== null && vehicleConditions[condition].upcharge > 0 && (
                         <div className="flex justify-between text-muted-foreground">
                           <span>Condition upcharge</span>
                           <span className="text-white">+ ${vehicleConditions[condition].upcharge}</span>
                         </div>
                       )}
-
                       <div className="flex justify-between text-muted-foreground">
                         <span>Add-ons</span>
                         <span className="text-white">
@@ -874,7 +877,6 @@ const handleSubmit = async () => {
                             : "None"}
                         </span>
                       </div>
-
                       {selectedAddOns.length > 0 && (
                         <div className="pl-4 space-y-1 pt-1">
                           {selectedAddOns.map((idx) => (
@@ -885,22 +887,17 @@ const handleSubmit = async () => {
                           ))}
                         </div>
                       )}
-
                       <div className="border-t border-neutral-800 pt-2 mt-2">
                         <div className="flex justify-between text-muted-foreground">
                           <span>Date & Time</span>
-                          <span className="text-white">
-                            {selectedDate} at {selectedTime}
-                          </span>
+                          <span className="text-white">{selectedDate} at {selectedTime}</span>
                         </div>
-
                         <div className="flex justify-between text-muted-foreground mt-1">
                           <span>Location</span>
                           <span className="text-white text-right max-w-[200px]">
                             {address}, {city} {zipCode}
                           </span>
                         </div>
-
                         {notes && (
                           <div className="flex justify-between text-muted-foreground mt-1">
                             <span>Notes</span>
@@ -908,7 +905,6 @@ const handleSubmit = async () => {
                           </div>
                         )}
                       </div>
-
                       <div className="border-t border-neutral-800 pt-2 mt-2">
                         <div className="flex justify-between text-muted-foreground">
                           <span>Name</span>
@@ -929,41 +925,42 @@ const handleSubmit = async () => {
                       </div>
                     </div>
 
-<div className="flex items-start gap-3 py-3 mt-2 border border-neutral-800 bg-neutral-900 rounded-lg px-4 mb-4">
-  <Checkbox
-    id="service-contract"
-    checked={agreedToServiceContract}
-    onCheckedChange={(v) => setAgreedToServiceContract(v === true)}
-    className="mt-0.5 border-neutral-600"
-  />
-  <label
-    htmlFor="service-contract"
-    className="text-xs text-muted-foreground leading-snug cursor-pointer"
-  >
-    I agree to the{" "}
-    <a
-      href="https://docs.google.com/document/d/1THUKnhmFFCmNiYjJ_WNiwbss3F8MPF-NoSL00hKulnw/edit?usp=sharing"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-primary underline underline-offset-4 hover:text-primary/80"
-      onClick={(e) => e.stopPropagation()}
-    >
-      Service Contract
-    </a>
-    .
-  </label>
-</div>
+                    <div className="flex items-start gap-3 py-3 mt-2 border border-neutral-800 bg-neutral-900 rounded-lg px-4 mb-4">
+                      <Checkbox
+                        id="service-contract"
+                        checked={agreedToServiceContract}
+                        onCheckedChange={(v) => setAgreedToServiceContract(v === true)}
+                        className="mt-0.5 border-neutral-600"
+                      />
+                      <label
+                        htmlFor="service-contract"
+                        className="text-xs text-muted-foreground leading-snug cursor-pointer"
+                      >
+                        I agree to the{" "}
+                        <a
+                          href="https://docs.google.com/document/d/1THUKnhmFFCmNiYjJ_WNiwbss3F8MPF-NoSL00hKulnw/edit?usp=sharing"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary underline underline-offset-4 hover:text-primary/80"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Service Contract
+                        </a>
+                        .
+                      </label>
+                    </div>
 
                     <Button
-  onClick={handleSubmit}
-  className="w-full"
-  size="lg"
-  disabled={!agreedToServiceContract}
->
+                      onClick={handleSubmit}
+                      className="w-full"
+                      size="lg"
+                      disabled={!agreedToServiceContract}
+                    >
                       Confirm & Submit <Send className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
                 )}
+
               </motion.div>
             </AnimatePresence>
           </div>
@@ -978,13 +975,13 @@ const handleSubmit = async () => {
             >
               <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
-
             {step < 8 && step !== 4 && (
               <Button onClick={() => setStep(step + 1)} disabled={!canNext}>
                 Next <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             )}
           </div>
+
         </div>
       </div>
       <Footer />
