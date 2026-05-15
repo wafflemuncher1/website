@@ -17,7 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   CheckCircle, Search, Eye, Plus, Phone, ChevronLeft, ChevronRight,
-  Trash2, ExternalLink, CheckCircle2, XCircle, AlertTriangle,
+  Trash2, ExternalLink, CheckCircle2, XCircle, AlertTriangle, Pencil, X, Save,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -44,6 +44,24 @@ type Booking = {
   notes?: string;
   booking_date?: string;
   booking_time?: string;
+};
+
+type BookingEdit = {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  zip_code: string;
+  vehicle_size: string;
+  condition: string;
+  service: string;
+  add_ons: string[];
+  total_cents: number;
+  notes: string;
+  booking_date: string;
+  booking_time: string;
+  completed: boolean;
 };
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -109,6 +127,24 @@ const parseAddOns = (raw: unknown): string[] => {
   }
   return [];
 };
+
+const bookingToEdit = (b: Booking): BookingEdit => ({
+  name: b.name ?? "",
+  email: b.email ?? "",
+  phone: b.phone ?? "",
+  address: b.address ?? "",
+  city: b.city ?? "",
+  zip_code: b.zip_code ?? "",
+  vehicle_size: b.vehicle_size ?? "",
+  condition: b.condition ?? "",
+  service: b.service ?? "",
+  add_ons: parseAddOns(b.add_ons),
+  total_cents: b.total_cents ?? 0,
+  notes: b.notes ?? "",
+  booking_date: b.booking_date ?? "",
+  booking_time: b.booking_time ?? "",
+  completed: b.completed ?? false,
+});
 
 // ─── Manual Booking Wizard ────────────────────────────────────────────────────
 
@@ -425,6 +461,371 @@ const SRow = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
+// ─── Edit Detail Dialog ───────────────────────────────────────────────────────
+
+const EditDetailDialog = ({
+  booking,
+  onClose,
+  onUpdated,
+  onDeleteRequest,
+  onMarkComplete,
+}: {
+  booking: Booking | null;
+  onClose: () => void;
+  onUpdated: () => void;
+  onDeleteRequest: (b: Booking) => void;
+  onMarkComplete: (id: string) => void;
+}) => {
+  const [editMode, setEditMode] = useState(false);
+  const [editData, setEditData] = useState<BookingEdit | null>(null);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+
+  // Reset edit state whenever we open a new booking
+  useEffect(() => {
+    if (booking) {
+      setEditData(bookingToEdit(booking));
+      setEditMode(false);
+    }
+  }, [booking?.id]);
+
+  if (!booking || !editData) return null;
+
+  const addOns = parseAddOns(booking.add_ons);
+
+  const set = <K extends keyof BookingEdit>(key: K, value: BookingEdit[K]) =>
+    setEditData(prev => prev ? { ...prev, [key]: value } : prev);
+
+  const toggleEditAddOn = (label: string) => {
+    setEditData(prev => {
+      if (!prev) return prev;
+      const has = prev.add_ons.includes(label);
+      return { ...prev, add_ons: has ? prev.add_ons.filter(a => a !== label) : [...prev.add_ons, label] };
+    });
+  };
+
+  const handleSave = async () => {
+    if (!editData) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("estimate_requests")
+      .update({
+        name: editData.name.trim(),
+        email: editData.email.trim() || null,
+        phone: editData.phone.trim(),
+        address: editData.address.trim(),
+        city: editData.city.trim(),
+        zip_code: editData.zip_code.trim(),
+        vehicle_size: editData.vehicle_size || null,
+        condition: editData.condition || null,
+        service: editData.service || null,
+        add_ons: editData.add_ons,
+        total_cents: editData.total_cents,
+        notes: editData.notes.trim() || null,
+        booking_date: editData.booking_date || null,
+        booking_time: editData.booking_time || null,
+        completed: editData.completed,
+      })
+      .eq("id", booking.id);
+
+    if (error) {
+      toast({ title: "Error saving changes", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Booking updated ✓" });
+      setEditMode(false);
+      onUpdated();
+    }
+    setSaving(false);
+  };
+
+  const handleDiscard = () => {
+    setEditData(bookingToEdit(booking));
+    setEditMode(false);
+  };
+
+  return (
+    <Dialog open={!!booking} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center justify-between pr-6">
+            <DialogTitle>
+              {editMode ? "Edit Booking" : `Booking — ${booking.name}`}
+            </DialogTitle>
+            <Button
+              variant={editMode ? "ghost" : "outline"}
+              size="sm"
+              className="gap-1.5 h-7 text-xs"
+              onClick={() => editMode ? handleDiscard() : setEditMode(true)}
+            >
+              {editMode
+                ? <><X className="h-3 w-3" /> Discard</>
+                : <><Pencil className="h-3 w-3" /> Edit</>}
+            </Button>
+          </div>
+        </DialogHeader>
+
+        {/* ── VIEW MODE ──────────────────────────────────────────────────── */}
+        {!editMode && (
+          <div className="space-y-4 text-sm">
+            <div className="grid grid-cols-2 gap-3">
+              <Detail label="Created" value={fmtDateTime(booking.created_at)} />
+              <Detail label="Ticket" value={booking.ticket_number || "—"} />
+              <Detail label="Name" value={booking.name} />
+              <Detail label="Phone" value={booking.phone} />
+              <Detail label="Email" value={booking.email || "—"} />
+              <Detail label="Vehicle" value={booking.vehicle_size || "—"} />
+              <Detail label="Condition" value={booking.condition || "—"} />
+              <Detail label="Service" value={booking.service || "—"} />
+              <Detail label="Total" value={fmtCents(booking.total_cents)} />
+              <Detail label="Consent" value={booking.consent ? "Yes ✓" : "No"} />
+              {booking.booking_date && (
+                <Detail label="Scheduled" value={`${booking.booking_date}${booking.booking_time ? ` at ${booking.booking_time}` : ""}`} />
+              )}
+              <Detail label="Address" value={`${booking.address || ""}, ${booking.city || ""} ${booking.zip_code || ""}`.trim()} />
+              <Detail label="Completed" value={booking.completed ? "Yes ✓" : "No"} />
+            </div>
+
+            {addOns.length > 0 && (
+              <div>
+                <p className="text-muted-foreground text-xs mb-1.5">Add-ons</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {addOns.map((a, i) => <Badge key={i} variant="outline" className="text-xs">{a}</Badge>)}
+                </div>
+              </div>
+            )}
+
+            {booking.service_agreement_url && (
+              <div>
+                <p className="text-muted-foreground text-xs mb-1">Service Agreement</p>
+                <a href={booking.service_agreement_url} target="_blank" rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline text-xs flex items-center gap-1">
+                  <ExternalLink className="h-3 w-3" /> View signed agreement
+                </a>
+              </div>
+            )}
+
+            {booking.notes && (
+              <div>
+                <p className="text-muted-foreground text-xs mb-1">Notes</p>
+                <p>{booking.notes}</p>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-1">
+              {!booking.completed && (
+                <Button className="flex-1 gap-1.5" onClick={() => onMarkComplete(booking.id)}>
+                  <CheckCircle className="h-4 w-4" /> Mark Complete
+                </Button>
+              )}
+              <Button variant="destructive" className="gap-1.5" onClick={() => { onDeleteRequest(booking); onClose(); }}>
+                <Trash2 className="h-4 w-4" /> Delete
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* ── EDIT MODE ──────────────────────────────────────────────────── */}
+        {editMode && editData && (
+          <div className="space-y-4 text-sm">
+
+            {/* Customer info */}
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Customer</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <Label className="text-xs mb-1 block">Full Name *</Label>
+                  <Input value={editData.name} onChange={e => set("name", e.target.value)} placeholder="John Smith" />
+                </div>
+                <div>
+                  <Label className="text-xs mb-1 block">Phone *</Label>
+                  <Input type="tel" value={editData.phone} onChange={e => set("phone", e.target.value)} placeholder="502-555-1234" />
+                </div>
+                <div>
+                  <Label className="text-xs mb-1 block">Email</Label>
+                  <Input type="email" value={editData.email} onChange={e => set("email", e.target.value)} placeholder="john@email.com" />
+                </div>
+              </div>
+            </div>
+
+            {/* Address */}
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Location</p>
+              <div className="space-y-2">
+                <div>
+                  <Label className="text-xs mb-1 block">Street Address</Label>
+                  <Input value={editData.address} onChange={e => set("address", e.target.value)} placeholder="123 Main St" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs mb-1 block">City</Label>
+                    <Input value={editData.city} onChange={e => set("city", e.target.value)} placeholder="Louisville" />
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1 block">Zip Code</Label>
+                    <Input value={editData.zip_code} onChange={e => set("zip_code", e.target.value)} placeholder="40202" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Vehicle & Service */}
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Service Details</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs mb-1 block">Vehicle Size</Label>
+                  <Select value={editData.vehicle_size} onValueChange={v => set("vehicle_size", v)}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Select size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {VEHICLE_SIZES.map(v => (
+                        <SelectItem key={v.label} value={v.label} className="text-xs">
+                          {v.label} — {v.desc}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs mb-1 block">Condition</Label>
+                  <Select value={editData.condition} onValueChange={v => set("condition", v)}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Select condition" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CONDITIONS.map(c => (
+                        <SelectItem key={c.label} value={c.label} className="text-xs">
+                          {c.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-xs mb-1 block">Package</Label>
+                  <Select value={editData.service} onValueChange={v => set("service", v)}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Select package" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PACKAGES.map(p => (
+                        <SelectItem key={p.label} value={p.label} className="text-xs">
+                          {p.label} — ${p.price}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Add-ons */}
+            <div>
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">Add-ons</Label>
+              <div className="flex flex-wrap gap-2">
+                {ADD_ONS.map(a => {
+                  const active = editData.add_ons.includes(a.label);
+                  return (
+                    <button
+                      key={a.key}
+                      type="button"
+                      onClick={() => toggleEditAddOn(a.label)}
+                      className={[
+                        "rounded-md border px-3 py-1.5 text-xs font-medium transition-all",
+                        active ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/40 text-muted-foreground",
+                      ].join(" ")}
+                    >
+                      {active ? "✓ " : ""}{a.label} (+${a.price})
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Date & Time */}
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Schedule</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs mb-1 block">Date</Label>
+                  <Input type="date" value={editData.booking_date} onChange={e => set("booking_date", e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs mb-1 block">Time</Label>
+                  <Select value={editData.booking_time} onValueChange={v => set("booking_time", v)}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TIME_SLOTS.map(t => (
+                        <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Total */}
+            <div>
+              <Label className="text-xs mb-1 block">Total (in cents, e.g. 16500 = $165.00)</Label>
+              <Input
+                type="number"
+                value={editData.total_cents}
+                onChange={e => set("total_cents", Number(e.target.value))}
+                placeholder="16500"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                = {editData.total_cents ? `$${(editData.total_cents / 100).toFixed(2)}` : "$0.00"}
+              </p>
+            </div>
+
+            {/* Status */}
+            <div>
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">Status</Label>
+              <button
+                type="button"
+                onClick={() => set("completed", !editData.completed)}
+                className={[
+                  "rounded-md border px-3 py-1.5 text-xs font-medium transition-all flex items-center gap-1.5",
+                  editData.completed
+                    ? "border-green-500 bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400"
+                    : "border-border text-muted-foreground hover:border-primary/40",
+                ].join(" ")}
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                {editData.completed ? "Completed" : "Mark as Completed"}
+              </button>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <Label className="text-xs mb-1 block">Notes</Label>
+              <Textarea
+                value={editData.notes}
+                onChange={e => set("notes", e.target.value)}
+                placeholder="Gate code, parking instructions, extra details…"
+                rows={3}
+              />
+            </div>
+
+            {/* Save / Discard */}
+            <div className="flex gap-2 pt-1">
+              <Button className="flex-1 gap-1.5" onClick={handleSave} disabled={saving || !editData.name.trim() || !editData.phone.trim()}>
+                {saving ? "Saving…" : <><Save className="h-4 w-4" /> Save Changes</>}
+              </Button>
+              <Button variant="outline" onClick={handleDiscard} className="gap-1.5">
+                <X className="h-4 w-4" /> Discard
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const BookingsPage = () => {
@@ -622,75 +1023,14 @@ const BookingsPage = () => {
         </div>
       )}
 
-      {/* ── Detail dialog ────────────────────────────────────────────────────── */}
-      <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Booking — {selected?.name}</DialogTitle>
-          </DialogHeader>
-          {selected && (() => {
-            const addOns = parseAddOns(selected.add_ons);
-            return (
-              <div className="space-y-4 text-sm">
-                <div className="grid grid-cols-2 gap-3">
-                  <Detail label="Created" value={fmtDateTime(selected.created_at)} />
-                  <Detail label="Ticket" value={selected.ticket_number || "—"} />
-                  <Detail label="Name" value={selected.name} />
-                  <Detail label="Phone" value={selected.phone} />
-                  <Detail label="Email" value={selected.email || "—"} />
-                  <Detail label="Vehicle" value={selected.vehicle_size || "—"} />
-                  <Detail label="Condition" value={selected.condition || "—"} />
-                  <Detail label="Service" value={selected.service || "—"} />
-                  <Detail label="Total" value={fmtCents(selected.total_cents)} />
-                  <Detail label="Consent" value={selected.consent ? "Yes ✓" : "No"} />
-                  {selected.booking_date && (
-                    <Detail label="Scheduled" value={`${selected.booking_date}${selected.booking_time ? ` at ${selected.booking_time}` : ""}`} />
-                  )}
-                  <Detail label="Address" value={`${selected.address || ""}, ${selected.city || ""} ${selected.zip_code || ""}`.trim()} />
-                  <Detail label="Completed" value={selected.completed ? "Yes ✓" : "No"} />
-                </div>
-
-                {addOns.length > 0 && (
-                  <div>
-                    <p className="text-muted-foreground text-xs mb-1.5">Add-ons</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {addOns.map((a, i) => <Badge key={i} variant="outline" className="text-xs">{a}</Badge>)}
-                    </div>
-                  </div>
-                )}
-
-                {selected.service_agreement_url && (
-                  <div>
-                    <p className="text-muted-foreground text-xs mb-1">Service Agreement</p>
-                    <a href={selected.service_agreement_url} target="_blank" rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline text-xs flex items-center gap-1">
-                      <ExternalLink className="h-3 w-3" /> View signed agreement
-                    </a>
-                  </div>
-                )}
-
-                {selected.notes && (
-                  <div>
-                    <p className="text-muted-foreground text-xs mb-1">Notes</p>
-                    <p>{selected.notes}</p>
-                  </div>
-                )}
-
-                <div className="flex gap-2 pt-1">
-                  {!selected.completed && (
-                    <Button className="flex-1 gap-1.5" onClick={() => markComplete(selected.id)}>
-                      <CheckCircle className="h-4 w-4" /> Mark Complete
-                    </Button>
-                  )}
-                  <Button variant="destructive" className="gap-1.5" onClick={() => { setDeleteTarget(selected); setSelected(null); }}>
-                    <Trash2 className="h-4 w-4" /> Delete
-                  </Button>
-                </div>
-              </div>
-            );
-          })()}
-        </DialogContent>
-      </Dialog>
+      {/* ── Edit / Detail dialog ─────────────────────────────────────────────── */}
+      <EditDetailDialog
+        booking={selected}
+        onClose={() => setSelected(null)}
+        onUpdated={() => { fetchBookings(); setSelected(null); }}
+        onDeleteRequest={(b) => setDeleteTarget(b)}
+        onMarkComplete={markComplete}
+      />
 
       {/* ── Delete confirmation dialog ───────────────────────────────────────── */}
       <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
