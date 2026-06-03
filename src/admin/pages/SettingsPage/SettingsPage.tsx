@@ -22,13 +22,37 @@ import {
   GripVertical,
 } from "lucide-react";
 import { toast } from "sonner";
+import heic2any from "heic2any";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const convertToWebP = (file: File): Promise<Blob> =>
-  new Promise((resolve, reject) => {
+const isHeicFile = (file: File): boolean => {
+  const name = file.name.toLowerCase();
+  return (
+    name.endsWith(".heic") ||
+    name.endsWith(".heif") ||
+    file.type === "image/heic" ||
+    file.type === "image/heif"
+  );
+};
+
+const convertToWebP = async (file: File): Promise<Blob> => {
+  // HEIC/HEIF files can't be decoded by the browser's Image element directly.
+  // Convert to JPEG first using heic2any, then draw to canvas for WebP output.
+  let sourceBlob: Blob = file;
+
+  if (isHeicFile(file)) {
+    try {
+      const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.92 });
+      sourceBlob = Array.isArray(converted) ? converted[0] : converted;
+    } catch (e) {
+      throw new Error(`HEIC conversion failed: ${(e as Error).message}`);
+    }
+  }
+
+  return new Promise((resolve, reject) => {
     const img = new Image();
-    const url = URL.createObjectURL(file);
+    const url = URL.createObjectURL(sourceBlob);
     img.onload = () => {
       try {
         const canvas = document.createElement("canvas");
@@ -55,6 +79,7 @@ const convertToWebP = (file: File): Promise<Blob> =>
     };
     img.src = url;
   });
+};
 
 const randomId = () => crypto.randomUUID();
 
@@ -679,7 +704,8 @@ const ImagesSection = () => {
     const newPending: PendingFile[] = files.map((file) => ({
       uid: randomId(),
       file,
-      previewUrl: URL.createObjectURL(file),
+      // HEIC files can't render in <img> tags directly — use a placeholder until uploaded
+      previewUrl: isHeicFile(file) ? "" : URL.createObjectURL(file),
       label: "",
     }));
     setPending((p) => [...p, ...newPending]);
@@ -689,7 +715,7 @@ const ImagesSection = () => {
   const removePending = (uid: string) => {
     setPending((p) => {
       const item = p.find((x) => x.uid === uid);
-      if (item) URL.revokeObjectURL(item.previewUrl);
+      if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
       return p.filter((x) => x.uid !== uid);
     });
   };
@@ -721,7 +747,7 @@ const ImagesSection = () => {
           await supabase.storage.from("portfolio").remove([filename]);
           throw insertError;
         }
-        URL.revokeObjectURL(item.previewUrl);
+        if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
         successCount++;
       } catch (err) {
         console.error("Upload failed for", item.file.name, err);
@@ -747,9 +773,9 @@ const ImagesSection = () => {
     <div className="space-y-5">
       <p className="text-sm text-muted-foreground">
         Upload photos here and they'll appear automatically in the Portfolio section on your homepage.
-        Images are auto-converted to WebP for fast loading.
+        Images are auto-converted to WebP for fast loading. HEIC files from iPhone are supported.
       </p>
-      <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFilePick} />
+      <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif" multiple className="hidden" onChange={handleFilePick} />
       <Button size="sm" variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()}>
         <Upload className="h-4 w-4" /> Choose Images
       </Button>
@@ -760,8 +786,17 @@ const ImagesSection = () => {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {pending.map((item) => (
               <div key={item.uid} className="relative rounded-xl border border-border overflow-hidden bg-card">
-                <div className="aspect-square">
-                  <img src={item.previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                <div className="aspect-square bg-muted/30 flex items-center justify-center">
+                  {item.previewUrl ? (
+                    <img src={item.previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    // HEIC files can't be previewed in browser — show filename instead
+                    <div className="flex flex-col items-center justify-center gap-1 p-3 text-center">
+                      <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+                      <p className="text-[10px] text-muted-foreground leading-tight break-all">{item.file.name}</p>
+                      <span className="text-[9px] text-muted-foreground/60 bg-muted px-1.5 py-0.5 rounded">HEIC</span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-2">
                   <Input placeholder='Label (e.g. "Ceramic Coating")' value={item.label}
@@ -779,7 +814,7 @@ const ImagesSection = () => {
               <Upload className="h-4 w-4" />
               {uploading ? "Uploading..." : `Upload ${pending.length} Image${pending.length > 1 ? "s" : ""}`}
             </Button>
-            <Button size="sm" variant="ghost" disabled={uploading} onClick={() => { pending.forEach((x) => URL.revokeObjectURL(x.previewUrl)); setPending([]); }}>
+            <Button size="sm" variant="ghost" disabled={uploading} onClick={() => { pending.forEach((x) => { if (x.previewUrl) URL.revokeObjectURL(x.previewUrl); }); setPending([]); }}>
               Clear All
             </Button>
           </div>
