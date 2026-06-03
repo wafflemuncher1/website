@@ -41,7 +41,7 @@ const categoryData: Record<ServiceCategory, { label: string; packages: Package[]
         badge: "Most Popular",
         badgeVariant: "popular",
         tagline: "High-Performance Interior & Exterior Deep Clean",
-        price: "$165",
+        price: "$130",
         interior: [
     "High-Power Deep Vacuum: Complete debris removal from cabin, trunk, and tight crevices.",
     "Full Interior Sanitization & Wipe Down",
