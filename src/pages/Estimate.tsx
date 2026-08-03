@@ -24,10 +24,8 @@ import Footer from "@/components/Footer";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const ALL_SLOTS = [
-  "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM",
-  "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM",
-];
+const CONTACT_PHONE = "(502) 612-0430";
+const NO_AVAILABILITY_MESSAGE = `Sorry, no times are available for this date. Please contact ${CONTACT_PHONE} for more info.`;
 
 const SHEET_ENDPOINT =
   "https://script.google.com/macros/s/AKfycbzdxiRLadUk1R3y5uFfB6MUPtGDMDc6qoCVig1_PwmSueUf0e0ubjKRGF68K5wwpQFObw/exec";
@@ -96,6 +94,56 @@ const addOns = [
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const isValidPhone = (phone: string) => /^[\d\s\-\+\(\)]{7,15}$/.test(phone.trim());
 
+// ─── Scheduling helpers (mirrors the rules set on the admin Calendar page) ────
+
+// Matches the shape saved by the admin's "Work Hours" dialog:
+// { "0": { enabled: false }, "1": { enabled: true, start: "08:00", end: "18:00" }, ... }
+// where the key is JS's Date.getDay() (0 = Sunday).
+type DayHours = { enabled: boolean; start?: string; end?: string };
+type WeeklySchedule = Record<string, DayHours>;
+
+// Local (not UTC) y-m-d — avoids the classic "toISOString() shifts near midnight" bug.
+const toYmdLocal = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
+const addDaysLocal = (base: Date, n: number) => {
+  const d = new Date(base);
+  d.setDate(d.getDate() + n);
+  return d;
+};
+
+// "HH:MM" (24h) -> minutes since midnight
+const hhmmToMins = (t: string) => {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + (m || 0);
+};
+
+// "9:00 AM" -> minutes since midnight
+const time12ToMins = (t: string) => {
+  const m = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!m) return 9 * 60;
+  let h = parseInt(m[1]);
+  const mins = parseInt(m[2]);
+  const ap = m[3].toUpperCase();
+  if (ap === "PM" && h !== 12) h += 12;
+  if (ap === "AM" && h === 12) h = 0;
+  return h * 60 + mins;
+};
+
+// minutes since midnight -> "9:00 AM"
+const minsTo12 = (totalMins: number) => {
+  let h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  const ap = h >= 12 ? "PM" : "AM";
+  if (h > 12) h -= 12;
+  if (h === 0) h = 12;
+  return `${h}:${String(m).padStart(2, "0")} ${ap}`;
+};
+
 /** Convert a flat list of active DB packages into the UI shape */
 const toUiPackages = (rows: DbPackage[]): UiPackage[] =>
   rows.map((r) => ({
@@ -131,6 +179,27 @@ const Estimate = () => {
     loadPackages();
   }, []);
 
+  // ── Scheduling rules loaded from Supabase (set on the admin Calendar page) ──
+  useEffect(() => {
+    const loadSchedulingSettings = async () => {
+      const { data } = await supabase
+        .from("admin_settings")
+        .select("key,value")
+        .in("key", ["booking_window_days", "weekly_schedule", "slot_interval_mins"]);
+
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((row: { key: string; value: string }) => { map[row.key] = row.value; });
+
+      if (map.booking_window_days) setBookingWindowDays(parseInt(map.booking_window_days) || 30);
+      if (map.slot_interval_mins) setSlotIntervalMins(parseInt(map.slot_interval_mins) || 30);
+      if (map.weekly_schedule) {
+        try { setWeeklySchedule(JSON.parse(map.weekly_schedule)); } catch { /* fall back to "always open" below */ }
+      }
+      setSchedulingSettingsLoaded(true);
+    };
+    loadSchedulingSettings();
+  }, []);
+
   // ── Form state (unchanged) ─────────────────────────────────────────────────
   const [step, setStep] = useState(0);
   const [vehicle, setVehicle] = useState<number | null>(null);
@@ -145,6 +214,12 @@ const Estimate = () => {
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [slotError, setSlotError] = useState<string | null>(null);
+
+  // ── Scheduling rules pulled from the admin Calendar page ──────────────────
+  const [bookingWindowDays, setBookingWindowDays] = useState(30);
+  const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule | null>(null);
+  const [slotIntervalMins, setSlotIntervalMins] = useState(30);
+  const [schedulingSettingsLoaded, setSchedulingSettingsLoaded] = useState(false);
 
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
@@ -178,10 +253,10 @@ const Estimate = () => {
     return pkg?.duration_mins ?? 180;
   };
 
-  // ── Availability — pure Supabase query (replaces Google Sheet call) ─────────
+  // ── Availability — follows whatever's set on the admin Calendar page ────────
   useEffect(() => {
     const loadAvailability = async () => {
-      if (!selectedDate) return;
+      if (!selectedDate || !schedulingSettingsLoaded) return;
 
       setLoadingSlots(true);
       setSlotError(null);
@@ -189,20 +264,74 @@ const Estimate = () => {
       setSelectedTime("");
 
       try {
-        // 1. Check if the whole day is blocked by admin
-        const { data: blockedDay } = await supabase
-          .from("blocked_dates")
-          .select("id")
-          .eq("date", selectedDate)
-          .maybeSingle();
+        const todayYmd = toYmdLocal(new Date());
+        const maxYmd = toYmdLocal(addDaysLocal(new Date(), bookingWindowDays));
 
-        if (blockedDay) {
-          setSlotError("This date is unavailable. Please choose another day.");
-          setLoadingSlots(false);
+        // 0. Booking-window guard (the date input's max already stops most of
+        //    this, but the input is still a plain HTML control, so double-check).
+        if (selectedDate < todayYmd || selectedDate > maxYmd) {
+          setSlotError(NO_AVAILABILITY_MESSAGE);
           return;
         }
 
-        // 2. Fetch existing (non-completed) bookings on this date
+        // 1. Any one-off override for this exact date? (opens a normally-off
+        //    day, closes a normally-open one, or gives it custom hours)
+        const { data: overrideRow } = await supabase
+          .from("schedule_overrides")
+          .select("status,start_time,end_time")
+          .eq("date", selectedDate)
+          .maybeSingle();
+
+        const dow = new Date(selectedDate + "T00:00:00").getDay(); // 0-6
+        const weeklyDay = weeklySchedule?.[String(dow)];
+
+        let working = false;
+        let dayStart = "08:00";
+        let dayEnd = "18:00";
+
+        if (overrideRow?.status === "closed") {
+          working = false;
+        } else if (overrideRow?.status === "open" || overrideRow?.status === "custom") {
+          working = true;
+          dayStart = overrideRow.start_time || weeklyDay?.start || dayStart;
+          dayEnd = overrideRow.end_time || weeklyDay?.end || dayEnd;
+        } else if (weeklyDay) {
+          working = weeklyDay.enabled;
+          dayStart = weeklyDay.start || dayStart;
+          dayEnd = weeklyDay.end || dayEnd;
+        } else if (!weeklySchedule) {
+          // Settings failed to load for some reason — fail open with the old
+          // default hours rather than blocking every date on the site.
+          working = true;
+        }
+
+        if (!working) {
+          setSlotError(NO_AVAILABILITY_MESSAGE);
+          return;
+        }
+
+        // 2. Any manual all-day block (vacation, rain day, etc.) on this date?
+        const { data: dayBlocks } = await supabase
+          .from("calendar_blocks")
+          .select("start_at,end_at,all_day,block_type")
+          .gte("start_at", selectedDate + "T00:00:00")
+          .lte("start_at", selectedDate + "T23:59:59")
+          .neq("block_type", "booking");
+
+        const busy: { start: number; end: number }[] = [];
+        for (const bl of dayBlocks ?? []) {
+          if (bl.all_day) { busy.push({ start: 0, end: 24 * 60 }); continue; }
+          const s = new Date(bl.start_at);
+          const e = new Date(bl.end_at);
+          busy.push({ start: s.getHours() * 60 + s.getMinutes(), end: e.getHours() * 60 + e.getMinutes() });
+        }
+
+        if (busy.some((b) => b.start === 0 && b.end === 24 * 60)) {
+          setSlotError(NO_AVAILABILITY_MESSAGE);
+          return;
+        }
+
+        // 3. Existing (non-completed) bookings on this date
         const { data: bookings, error: bookingsError } = await supabase
           .from("estimate_requests")
           .select("booking_time, duration_mins")
@@ -211,29 +340,26 @@ const Estimate = () => {
 
         if (bookingsError) throw bookingsError;
 
-        // 3. Build the set of already-occupied slots
-        const occupiedSlots = new Set<string>();
         for (const booking of bookings ?? []) {
-          const startIdx = ALL_SLOTS.indexOf(booking.booking_time ?? "");
-          if (startIdx === -1) continue;
-          const bookedSlotCount = Math.ceil((booking.duration_mins ?? 120) / 60);
-          for (let i = 0; i < bookedSlotCount; i++) {
-            if (ALL_SLOTS[startIdx + i]) occupiedSlots.add(ALL_SLOTS[startIdx + i]);
-          }
+          const start = time12ToMins(booking.booking_time ?? "9:00 AM");
+          busy.push({ start, end: start + (booking.duration_mins ?? 120) });
         }
 
-        // 4. Filter slots: a slot is available only if every slot the new
-        //    booking would occupy is currently free.
-        const newSlotCount = Math.ceil(getDurationMins() / 60);
-        const available = ALL_SLOTS.filter((_, startIdx) => {
-          for (let j = 0; j < newSlotCount; j++) {
-            const slot = ALL_SLOTS[startIdx + j];
-            if (!slot || occupiedSlots.has(slot)) return false;
-          }
-          return true;
-        });
+        // 4. Build candidate start times across THIS day's actual hours, at
+        //    the admin's configured slot interval, long enough to fit the job.
+        const durationMins = getDurationMins();
+        const dayStartMin = hhmmToMins(dayStart);
+        const dayEndMin = hhmmToMins(dayEnd);
+        const interval = slotIntervalMins || 30;
+
+        const available: string[] = [];
+        for (let t = dayStartMin; t + durationMins <= dayEndMin; t += interval) {
+          const overlaps = busy.some((b) => t < b.end && t + durationMins > b.start);
+          if (!overlaps) available.push(minsTo12(t));
+        }
 
         setAvailableSlots(available);
+        if (available.length === 0) setSlotError(NO_AVAILABILITY_MESSAGE);
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "Failed to load availability";
         setSlotError(msg);
@@ -244,7 +370,7 @@ const Estimate = () => {
 
     loadAvailability();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate]);
+  }, [selectedDate, schedulingSettingsLoaded, weeklySchedule, bookingWindowDays, slotIntervalMins]);
 
   // ── Scroll to top on step change (unchanged) ───────────────────────────────
   useEffect(() => {
@@ -698,8 +824,12 @@ const Estimate = () => {
                           value={selectedDate}
                           onChange={(e) => setSelectedDate(e.target.value)}
                           className="bg-neutral-900 border-neutral-800 text-white"
-                          min={new Date().toISOString().split("T")[0]}
+                          min={toYmdLocal(new Date())}
+                          max={toYmdLocal(addDaysLocal(new Date(), bookingWindowDays))}
                         />
+                        <p className="text-xs text-muted-foreground mt-1.5">
+                          We book up to {bookingWindowDays} days out.
+                        </p>
                       </div>
 
                       <div>
@@ -711,9 +841,7 @@ const Estimate = () => {
                         ) : slotError ? (
                           <p className="text-sm text-red-400">{slotError}</p>
                         ) : availableSlots.length === 0 ? (
-                          <p className="text-sm text-muted-foreground">
-                            No availability for this date. Try another day.
-                          </p>
+                          <p className="text-sm text-muted-foreground">{NO_AVAILABILITY_MESSAGE}</p>
                         ) : (
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                             {availableSlots.map((t) => (

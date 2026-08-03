@@ -33,6 +33,13 @@ import {
   Ban,
   CalendarCheck,
   Settings,
+  CalendarClock,
+  Lock,
+  Unlock,
+  Sparkles,
+  Copy,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -123,6 +130,17 @@ const parseHour24 = (timeStr: string): number => {
   return h;
 };
 
+const time12ToMins = (t: string) => {
+  const m = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!m) return 9 * 60;
+  let h = parseInt(m[1]);
+  const mins = parseInt(m[2]);
+  const ap = m[3].toUpperCase();
+  if (ap === "PM" && h !== 12) h += 12;
+  if (ap === "AM" && h === 12) h = 0;
+  return h * 60 + mins;
+};
+
 const startOfWeekSun = (d: Date) => {
   const r = new Date(d);
   r.setDate(d.getDate() - d.getDay());
@@ -169,6 +187,630 @@ const WINDOW_OPTIONS = [
   { label: "3 months", value: 90 },
 ];
 
+// ─── Scheduling / availability engine ─────────────────────────────────────────
+
+// ─── Types ────────────────────────────────────────────────────────────────
+
+type DayHours = { enabled: boolean; start?: string; end?: string }; // start/end = "HH:MM" 24h
+type WeeklySchedule = Record<string, DayHours>; // key "0"..."6", 0 = Sunday
+
+type ScheduleOverride = {
+  id?: string;
+  date: string; // YYYY-MM-DD
+  status: "closed" | "open" | "custom";
+  start_time?: string | null;
+  end_time?: string | null;
+  note?: string | null;
+};
+
+type BusyBooking = {
+  id: string;
+  booking_date: string; // YYYY-MM-DD
+  booking_time: string; // "9:00 AM"
+  duration_mins: number;
+};
+
+type BusyBlock = {
+  id: string;
+  start_at: string; // ISO
+  end_at: string;   // ISO
+  all_day: boolean;
+  block_type: string; // 'manual' | 'rain_day' | 'booking'
+};
+
+type EffectiveDayHours =
+  | { working: false }
+  | { working: true; start: string; end: string; source: "override" | "weekly" };
+
+type AvailabilityContext = {
+  weeklySchedule: WeeklySchedule;
+  overrides: Map<string, ScheduleOverride>;
+  bookings: BusyBooking[];
+  blocks: BusyBlock[];
+  bookingWindowDays: number;
+  slotIntervalMins: number;
+};
+
+// ─── Defaults ─────────────────────────────────────────────────────────────
+
+const DEFAULT_WEEKLY_SCHEDULE: WeeklySchedule = {
+  "0": { enabled: false },
+  "1": { enabled: true, start: "08:00", end: "18:00" },
+  "2": { enabled: true, start: "08:00", end: "18:00" },
+  "3": { enabled: true, start: "08:00", end: "18:00" },
+  "4": { enabled: true, start: "08:00", end: "18:00" },
+  "5": { enabled: true, start: "08:00", end: "18:00" },
+  "6": { enabled: false },
+};
+
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+// ─── Small time helpers (all local, no timezone libs needed) ──────────────
+
+// Safe LOCAL-timezone y-m-d string (unlike the page's own `ymd`, which uses
+// toISOString() / UTC — that's fine for the existing month/week grid math, but
+// would silently shift dates near midnight, so the scheduling engine below
+// uses this instead for anything doing date-string arithmetic).
+const localYmd = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
+const addDaysStr = (dateStr: string, n: number) => {
+  const d = new Date(dateStr + "T00:00:00");
+  d.setDate(d.getDate() + n);
+  return localYmd(d);
+};
+
+const dayOfWeek = (dateStr: string) => new Date(dateStr + "T00:00:00").getDay(); // 0-6
+
+// "HH:MM" -> minutes since midnight
+const hhmmToMins = (t: string) => {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + (m || 0);
+};
+
+const minsToHHMM = (mins: number) => {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+};
+
+const minsTo12 = (totalMins: number) => {
+  let h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  const ap = h >= 12 ? "PM" : "AM";
+  if (h > 12) h -= 12;
+  if (h === 0) h = 12;
+  return `${h}:${String(m).padStart(2, "0")} ${ap}`;
+};
+
+// ─── Fetching settings ──────────────────────────────────────────────────
+
+const fetchWeeklySchedule = async (): Promise<WeeklySchedule> => {
+  const { data } = await supabase.from("admin_settings").select("value").eq("key", "weekly_schedule").single();
+  if (!data?.value) return DEFAULT_WEEKLY_SCHEDULE;
+  try {
+    return { ...DEFAULT_WEEKLY_SCHEDULE, ...JSON.parse(data.value) };
+  } catch {
+    return DEFAULT_WEEKLY_SCHEDULE;
+  }
+};
+
+const saveWeeklySchedule = async (schedule: WeeklySchedule) => {
+  return supabase.from("admin_settings").upsert({
+    key: "weekly_schedule",
+    value: JSON.stringify(schedule),
+    updated_at: new Date().toISOString(),
+  });
+};
+
+const fetchSlotIntervalMins = async (): Promise<number> => {
+  const { data } = await supabase.from("admin_settings").select("value").eq("key", "slot_interval_mins").single();
+  return parseInt(data?.value || "30") || 30;
+};
+
+const fetchOverridesInRange = async (from: string, to: string): Promise<Map<string, ScheduleOverride>> => {
+  const { data } = await supabase.from("schedule_overrides").select("*").gte("date", from).lte("date", to);
+  const map = new Map<string, ScheduleOverride>();
+  (data || []).forEach((row: ScheduleOverride) => map.set(row.date, row));
+  return map;
+};
+
+const upsertOverride = async (override: ScheduleOverride) => {
+  return supabase.from("schedule_overrides").upsert(override, { onConflict: "date" });
+};
+
+const deleteOverride = async (date: string) => {
+  return supabase.from("schedule_overrides").delete().eq("date", date);
+};
+
+/** Loads everything needed to compute availability across a date range in one shot. */
+const fetchAvailabilityContext = async (from: string, to: string): Promise<AvailabilityContext> => {
+  const [weeklySchedule, overrides, slotIntervalMins, bRes, cbRes, winRes] = await Promise.all([
+    fetchWeeklySchedule(),
+    fetchOverridesInRange(from, to),
+    fetchSlotIntervalMins(),
+    supabase
+      .from("estimate_requests")
+      .select("id,booking_date,booking_time,duration_mins")
+      .not("booking_date", "is", null)
+      .gte("booking_date", from)
+      .lte("booking_date", to),
+    supabase
+      .from("calendar_blocks")
+      .select("id,start_at,end_at,all_day,block_type")
+      .gte("start_at", from + "T00:00:00")
+      .lte("start_at", to + "T23:59:59"),
+    supabase.from("admin_settings").select("value").eq("key", "booking_window_days").single(),
+  ]);
+
+  return {
+    weeklySchedule,
+    overrides,
+    bookings: (bRes.data || []) as BusyBooking[],
+    blocks: (cbRes.data || []) as BusyBlock[],
+    bookingWindowDays: parseInt(winRes.data?.value || "30") || 30,
+    slotIntervalMins,
+  };
+};
+
+// ─── Core availability logic ───────────────────────────────────────────
+
+/** What hours (if any) you're bookable on a given date, after applying overrides on top of the weekly pattern. */
+const getEffectiveHours = (
+  date: string,
+  weeklySchedule: WeeklySchedule,
+  overrides: Map<string, ScheduleOverride>
+): EffectiveDayHours => {
+  const override = overrides.get(date);
+  if (override) {
+    if (override.status === "closed") return { working: false };
+    if (override.status === "open" || override.status === "custom") {
+      const dow = weeklySchedule[String(dayOfWeek(date))];
+      const start = override.start_time || dow?.start || "08:00";
+      const end = override.end_time || dow?.end || "18:00";
+      return { working: true, start, end, source: "override" };
+    }
+  }
+  const dow = weeklySchedule[String(dayOfWeek(date))];
+  if (!dow || !dow.enabled) return { working: false };
+  return { working: true, start: dow.start || "08:00", end: dow.end || "18:00", source: "weekly" };
+};
+
+const isWithinBookingWindow = (date: string, windowDays: number, from: string = localYmd(new Date())) => {
+  return date >= from && date <= addDaysStr(from, windowDays);
+};
+
+/** Busy [startMin,endMin) intervals for a date, from real bookings + manual/rain blocks (not the shadow "booking" blocks, to avoid double counting). */
+const getBusyIntervals = (
+  date: string,
+  bookings: BusyBooking[],
+  blocks: BusyBlock[]
+): { start: number; end: number }[] => {
+  const intervals: { start: number; end: number }[] = [];
+
+  bookings
+    .filter((b) => b.booking_date === date)
+    .forEach((b) => {
+      const start = time12ToMins(b.booking_time || "9:00 AM");
+      intervals.push({ start, end: start + (b.duration_mins || 120) });
+    });
+
+  blocks
+    .filter((bl) => bl.block_type !== "booking" && bl.start_at.slice(0, 10) === date)
+    .forEach((bl) => {
+      if (bl.all_day) {
+        intervals.push({ start: 0, end: 24 * 60 });
+      } else {
+        const s = new Date(bl.start_at);
+        const e = new Date(bl.end_at);
+        intervals.push({ start: s.getHours() * 60 + s.getMinutes(), end: e.getHours() * 60 + e.getMinutes() });
+      }
+    });
+
+  return intervals;
+};
+
+/** All open start times (24h "HH:MM") on a date that can fit a job of durationMins, respecting working hours + existing busy time. */
+const getAvailableSlots = (
+  date: string,
+  durationMins: number,
+  ctx: AvailabilityContext
+): string[] => {
+  const hours = getEffectiveHours(date, ctx.weeklySchedule, ctx.overrides);
+  if (!hours.working) return [];
+
+  const dayStart = hhmmToMins(hours.start);
+  const dayEnd = hhmmToMins(hours.end);
+  const busy = getBusyIntervals(date, ctx.bookings, ctx.blocks);
+  const interval = ctx.slotIntervalMins || 30;
+
+  const slots: string[] = [];
+  for (let t = dayStart; t + durationMins <= dayEnd; t += interval) {
+    const overlaps = busy.some((b) => t < b.end && t + durationMins > b.start);
+    if (!overlaps) slots.push(minsToHHMM(t));
+  }
+  return slots;
+};
+
+/**
+ * Walk forward day by day (starting the day after `afterDate`, or today if omitted)
+ * and return the first open date+time that fits `durationMins`. Returns null if
+ * nothing found within the booking window (+7 day grace buffer).
+ */
+const findNextAvailableSlot = (
+  durationMins: number,
+  ctx: AvailabilityContext,
+  afterDate?: string
+): { date: string; time: string } | null => {
+  const start = afterDate ? addDaysStr(afterDate, 1) : localYmd(new Date());
+  const searchLimit = addDaysStr(localYmd(new Date()), ctx.bookingWindowDays + 7);
+
+  let cursor = start;
+  while (cursor <= searchLimit) {
+    if (isWithinBookingWindow(cursor, ctx.bookingWindowDays + 7)) {
+      const slots = getAvailableSlots(cursor, durationMins, ctx);
+      if (slots.length > 0) return { date: cursor, time: minsTo12(hhmmToMins(slots[0])) };
+    }
+    cursor = addDaysStr(cursor, 1);
+  }
+  return null;
+};
+
+/** Moves a booking to a new date/time: updates the row, re-syncs its calendar_blocks
+ *  shadow entry, and optionally texts the customer via your existing send-sms edge function. */
+const rescheduleBookingRecord = async (
+  booking: { id: string; name?: string; phone?: string; service?: string; duration_mins: number },
+  newDate: string,
+  newTime: string, // "9:00 AM"
+  opts?: { notifyCustomer?: boolean }
+) => {
+  const { error: bErr } = await supabase
+    .from("estimate_requests")
+    .update({ booking_date: newDate, booking_time: newTime })
+    .eq("id", booking.id);
+  if (bErr) return { error: bErr };
+
+  await supabase.from("calendar_blocks").delete().eq("estimate_request_id", booking.id);
+
+  const startMin = time12ToMins(newTime);
+  const h = Math.floor(startMin / 60);
+  const m = startMin % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const newStart = new Date(`${newDate}T${pad(h)}:${pad(m)}:00-04:00`).toISOString();
+  const newEnd = new Date(new Date(newStart).getTime() + (booking.duration_mins || 120) * 60000).toISOString();
+
+  await supabase.from("calendar_blocks").insert({
+    start_at: newStart,
+    end_at: newEnd,
+    all_day: false,
+    note: `Booking: ${booking.name ?? ""} — ${booking.service ?? ""}`.trim(),
+    estimate_request_id: booking.id,
+    block_type: "booking",
+  });
+
+  if (opts?.notifyCustomer && booking.phone) {
+    try {
+      await supabase.functions.invoke("send-sms", {
+        body: {
+          to: booking.phone,
+          message: `Hi ${booking.name ?? ""}, your Glossworks appointment has been moved to ${newDate} at ${newTime}. Reply with questions!`,
+        },
+      });
+    } catch {
+      // non-blocking — an SMS failure shouldn't block the reschedule itself
+    }
+  }
+
+  return { error: null };
+};
+
+/** Which bookings fall inside a proposed block window (used to warn/auto-reschedule before saving a block). */
+const getBookingsInWindow = <T extends BusyBooking>(
+  bookings: T[],
+  startAt: string, // ISO
+  endAt: string,   // ISO
+  allDay: boolean
+): T[] => {
+  const startDate = startAt.slice(0, 10);
+  const endDate = endAt.slice(0, 10);
+  const startMin = allDay ? 0 : new Date(startAt).getHours() * 60 + new Date(startAt).getMinutes();
+  const endMin = allDay ? 24 * 60 : new Date(endAt).getHours() * 60 + new Date(endAt).getMinutes();
+
+  return bookings.filter((b) => {
+    if (b.booking_date < startDate || b.booking_date > endDate) return false;
+    if (allDay) return true;
+    if (b.booking_date !== startDate && b.booking_date !== endDate) return true; // multi-day block, middle days always hit
+    const bStart = time12ToMins(b.booking_time || "9:00 AM");
+    const bEnd = bStart + (b.duration_mins || 120);
+    return bStart < endMin && bEnd > startMin;
+  });
+};
+
+// ─── Weekly Schedule dialog (work days + bookable hours) ──────────────────────
+
+type WeeklyScheduleDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSaved: () => void;
+};
+
+type ConflictRow = {
+  id: string;
+  name: string;
+  phone: string;
+  service: string;
+  duration_mins: number;
+  booking_date: string;
+  booking_time: string;
+  resolution: { date: string; time: string } | null;
+};
+
+const WeeklyScheduleDialog = ({ open, onOpenChange, onSaved }: WeeklyScheduleDialogProps) => {
+  const [schedule, setSchedule] = useState<WeeklySchedule>(DEFAULT_WEEKLY_SCHEDULE);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [conflicts, setConflicts] = useState<ConflictRow[] | null>(null);
+  const [notifyOnMove, setNotifyOnMove] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!open) return;
+    setConflicts(null);
+    setLoading(true);
+    fetchWeeklySchedule().then((s) => {
+      setSchedule(s);
+      setLoading(false);
+    });
+  }, [open]);
+
+  const toggleDay = (dow: string, enabled: boolean) => {
+    setSchedule((s) => ({
+      ...s,
+      [dow]: { ...s[dow], enabled, start: s[dow]?.start || "08:00", end: s[dow]?.end || "18:00" },
+    }));
+  };
+
+  const setDayTime = (dow: string, field: "start" | "end", value: string) => {
+    setSchedule((s) => ({ ...s, [dow]: { ...s[dow], [field]: value } }));
+  };
+
+  const copyMondayToAll = () => {
+    const mon = schedule["1"];
+    if (!mon) return;
+    setSchedule((s) => {
+      const next = { ...s };
+      Object.keys(next).forEach((dow) => {
+        if (next[dow].enabled) next[dow] = { ...next[dow], start: mon.start, end: mon.end };
+      });
+      return next;
+    });
+    toast({ title: "Monday's hours copied to every enabled day" });
+  };
+
+  // Scan upcoming bookings against the *pending* schedule (not yet saved) and
+  // find any that would no longer fit — either the day got turned off, or
+  // the hours no longer cover their slot.
+  const checkConflicts = async () => {
+    setChecking(true);
+    setConflicts(null);
+    const today = todayStr();
+    const to = addDaysStr(today, 120); // generous look-ahead regardless of booking window
+
+    const ctx = await fetchAvailabilityContext(today, to);
+    ctx.weeklySchedule = schedule; // use the *pending* edits, not what's saved yet
+
+    const { data: bookingRows } = await supabase
+      .from("estimate_requests")
+      .select("id,name,phone,service,duration_mins,booking_date,booking_time")
+      .not("booking_date", "is", null)
+      .gte("booking_date", today)
+      .lte("booking_date", to);
+
+    const rows: ConflictRow[] = [];
+
+    (bookingRows || []).forEach((b: any) => {
+      const hours = getEffectiveHours(b.booking_date, schedule, ctx.overrides);
+      let conflicted = false;
+
+      if (!hours.working) {
+        conflicted = true;
+      } else {
+        const dayStart = hhmmToMins(hours.start);
+        const dayEnd = hhmmToMins(hours.end);
+        const bStartMin = (() => {
+          const m = b.booking_time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+          if (!m) return dayStart;
+          let h = parseInt(m[1]);
+          const mins = parseInt(m[2]);
+          const ap = m[3].toUpperCase();
+          if (ap === "PM" && h !== 12) h += 12;
+          if (ap === "AM" && h === 12) h = 0;
+          return h * 60 + mins;
+        })();
+        const bEndMin = bStartMin + (b.duration_mins || 120);
+        if (bStartMin < dayStart || bEndMin > dayEnd) conflicted = true;
+      }
+
+      if (conflicted) {
+        const resolution = findNextAvailableSlot(b.duration_mins || 120, ctx, b.booking_date);
+        rows.push({ ...b, resolution });
+      }
+    });
+
+    setConflicts(rows);
+    setChecking(false);
+    if (rows.length === 0) {
+      toast({ title: "No conflicts — every upcoming booking still fits ✓" });
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    const { error } = await saveWeeklySchedule(schedule);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      setSaving(false);
+      return;
+    }
+    toast({ title: "Weekly schedule saved ✓" });
+    onSaved();
+
+    if (conflicts && conflicts.length > 0) {
+      let moved = 0;
+      for (const c of conflicts) {
+        if (!c.resolution) continue;
+        const { error: rErr } = await rescheduleBookingRecord(
+          { id: c.id, name: c.name, phone: c.phone, service: c.service, duration_mins: c.duration_mins },
+          c.resolution.date,
+          c.resolution.time,
+          { notifyCustomer: notifyOnMove }
+        );
+        if (!rErr) moved++;
+      }
+      toast({ title: `${moved} booking${moved !== 1 ? "s" : ""} auto-rescheduled to fit the new hours` });
+      onSaved();
+    }
+
+    setSaving(false);
+    onOpenChange(false);
+  };
+
+  const unresolvedCount = (conflicts || []).filter((c) => !c.resolution).length;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CalendarClock className="h-4 w-4" /> Weekly Work Schedule
+          </DialogTitle>
+        </DialogHeader>
+
+        {loading ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                Days you're off are automatically closed to booking. Set your bookable hours per day (e.g. 2 AM–2 PM).
+              </p>
+              <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 shrink-0" onClick={copyMondayToAll}>
+                <Copy className="h-3 w-3" /> Copy Mon to all
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              {DAY_NAMES.map((name, i) => {
+                const dow = String(i);
+                const day = schedule[dow] || { enabled: false };
+                return (
+                  <div key={dow} className={["rounded-lg border p-2.5", day.enabled ? "bg-card" : "bg-muted/40"].join(" ")}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Switch checked={day.enabled} onCheckedChange={(v) => toggleDay(dow, v)} />
+                        <span className="text-sm font-medium">{name}</span>
+                      </div>
+                      {!day.enabled && <span className="text-xs text-muted-foreground">Off</span>}
+                    </div>
+                    {day.enabled && (
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        <div>
+                          <Label className="text-[10px] text-muted-foreground">From</Label>
+                          <Input
+                            type="time"
+                            value={day.start || "08:00"}
+                            onChange={(e) => setDayTime(dow, "start", e.target.value)}
+                            className="h-8 text-xs"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-[10px] text-muted-foreground">Until</Label>
+                          <Input
+                            type="time"
+                            value={day.end || "18:00"}
+                            onChange={(e) => setDayTime(dow, "end", e.target.value)}
+                            className="h-8 text-xs"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="rounded-lg border p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-medium">Check for conflicts</p>
+                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={checkConflicts} disabled={checking}>
+                  {checking ? "Checking…" : "Scan upcoming bookings"}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Looks at bookings in the next 120 days and flags any that no longer fit this schedule.
+              </p>
+
+              {conflicts && conflicts.length > 0 && (
+                <div className="space-y-2 mt-2">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-orange-600">
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                    {conflicts.length} booking{conflicts.length !== 1 ? "s" : ""} need to move
+                  </div>
+                  {conflicts.map((c) => (
+                    <div key={c.id} className="text-xs rounded bg-muted p-2">
+                      <span className="font-medium">{c.name}</span> — {c.booking_date} at {c.booking_time}
+                      <br />
+                      {c.resolution ? (
+                        <span className="text-primary">
+                          → moving to {c.resolution.date} at {c.resolution.time}
+                        </span>
+                      ) : (
+                        <span className="text-destructive">→ no open slot found, needs manual handling</span>
+                      )}
+                    </div>
+                  ))}
+                  <div className="flex items-center gap-2 pt-1">
+                    <Switch checked={notifyOnMove} onCheckedChange={setNotifyOnMove} id="notifyMove" />
+                    <Label htmlFor="notifyMove" className="text-xs">
+                      Text customers when they're auto-moved
+                    </Label>
+                  </div>
+                  {unresolvedCount > 0 && (
+                    <p className="text-xs text-destructive">
+                      {unresolvedCount} of these couldn't be auto-placed — you'll need to reschedule manually from the
+                      Bookings page after saving.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={saving || loading}>
+            {saving
+              ? "Saving…"
+              : conflicts && conflicts.length > 0
+              ? `Save & Reschedule ${conflicts.filter((c) => c.resolution).length}`
+              : "Save Schedule"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const CalendarPage = () => {
@@ -183,6 +825,12 @@ const CalendarPage = () => {
   const [savingWindow, setSavingWindow] = useState(false);
   const { toast } = useToast();
 
+  // ── Weekly schedule + per-date overrides ─────────────────────────────────
+  const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule | null>(null);
+  const [overrides, setOverrides] = useState<Map<string, ScheduleOverride>>(new Map());
+  const [weeklyScheduleOpen, setWeeklyScheduleOpen] = useState(false);
+  const [overrideSaving, setOverrideSaving] = useState(false);
+
   // ── Block modal (multi-day) ──────────────────────────────────────────────
   const [blockModal, setBlockModal] = useState(false);
   const [blockSelectedDays, setBlockSelectedDays] = useState<string[]>([]);
@@ -192,6 +840,8 @@ const CalendarPage = () => {
   const [blockEndTime, setBlockEndTime] = useState("17:00");
   const [blockReason, setBlockReason] = useState("");
   const [blockSaving, setBlockSaving] = useState(false);
+  const [blockNotify, setBlockNotify] = useState(true);
+  const [blockAffectedCount, setBlockAffectedCount] = useState(0);
 
   // ── Reschedule, rain, delete ─────────────────────────────────────────────
   const [rescheduleModal, setRescheduleModal] = useState(false);
@@ -204,6 +854,7 @@ const CalendarPage = () => {
     reason: "Rain cancellation — we will reach out to reschedule.",
   });
   const [rainSaving, setRainSaving] = useState(false);
+  const [rainNotify, setRainNotify] = useState(true);
 
   const [deleteBlockId, setDeleteBlockId] = useState<string | null>(null);
 
@@ -224,7 +875,7 @@ const CalendarPage = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     const { from, to } = getRanges();
-    const [bRes, cbRes, settRes] = await Promise.all([
+    const [bRes, cbRes, settRes, weekly, overridesMap] = await Promise.all([
       supabase
         .from("estimate_requests")
         .select("id,name,email,phone,service,vehicle_size,total_cents,booking_date,booking_time,duration_mins,address,city,zip_code,completed")
@@ -241,10 +892,14 @@ const CalendarPage = () => {
         .select("value")
         .eq("key", "booking_window_days")
         .single(),
+      fetchWeeklySchedule(),
+      fetchOverridesInRange(from, to),
     ]);
     if (bRes.data) setBookings(bRes.data as Booking[]);
     if (cbRes.data) setBlocks(cbRes.data as CalBlock[]);
     if (settRes.data) setBookingWindowDays(parseInt(settRes.data.value) || 30);
+    setWeeklySchedule(weekly);
+    setOverrides(overridesMap);
     setLoading(false);
   }, [getRanges]);
 
@@ -273,6 +928,11 @@ const CalendarPage = () => {
 
   const isDayFullyBlocked = (d: string) =>
     blocks.some(bl => bl.start_at.slice(0, 10) === d && bl.all_day && bl.block_type !== "booking");
+
+  // Is this a normal "day off" per the weekly work schedule (and no override opening it)?
+  const dayHours = (d: string) => (weeklySchedule ? getEffectiveHours(d, weeklySchedule, overrides) : { working: true, start: "08:00", end: "18:00", source: "weekly" as const });
+  const isWorkDayOff = (d: string) => !dayHours(d).working;
+  const hasOverride = (d: string) => overrides.has(d);
 
   const bookingsForHour = (d: string, h: number) =>
     bookings.filter(b => {
@@ -315,6 +975,33 @@ const CalendarPage = () => {
     );
   };
 
+  // Live preview of how many bookings a pending block would touch
+  useEffect(() => {
+    if (!blockModal || blockSelectedDays.length === 0) {
+      setBlockAffectedCount(0);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("estimate_requests")
+        .select("id,booking_time,duration_mins,booking_date")
+        .not("booking_date", "is", null)
+        .in("booking_date", blockSelectedDays);
+      if (cancelled || !data) return;
+      const winStart = blockAllDay ? 0 : hhmmToMins(blockStartTime);
+      const winEnd = blockAllDay ? 24 * 60 : hhmmToMins(blockEndTime);
+      const count = data.filter((b: any) => {
+        if (blockAllDay) return true;
+        const bStart = time12ToMins(b.booking_time || "9:00 AM");
+        const bEnd = bStart + (b.duration_mins || 120);
+        return bStart < winEnd && bEnd > winStart;
+      }).length;
+      setBlockAffectedCount(count);
+    })();
+    return () => { cancelled = true; };
+  }, [blockModal, blockSelectedDays, blockAllDay, blockStartTime, blockEndTime]);
+
   // ── Save booking window ───────────────────────────────────────────────────
 
   const saveBookingWindow = async (days: number) => {
@@ -330,7 +1017,7 @@ const CalendarPage = () => {
     setSavingWindow(false);
   };
 
-  // ── Save multi-day block ──────────────────────────────────────────────────
+  // ── Save multi-day block (with auto-reschedule) ───────────────────────────
 
   const handleMultiBlockSave = async () => {
     if (!blockSelectedDays.length || !blockReason.trim()) {
@@ -349,18 +1036,58 @@ const CalendarPage = () => {
       return { start_at: start, end_at: end, all_day: blockAllDay, note: blockReason, block_type: "manual" };
     });
 
+    // Figure out which bookings this block will collide with, BEFORE inserting.
+    const { data: candidateRows } = await supabase
+      .from("estimate_requests")
+      .select("id,name,phone,service,duration_mins,booking_date,booking_time")
+      .not("booking_date", "is", null)
+      .in("booking_date", blockSelectedDays);
+
+    const winStart = blockAllDay ? 0 : hhmmToMins(blockStartTime);
+    const winEnd = blockAllDay ? 24 * 60 : hhmmToMins(blockEndTime);
+    const toReschedule = (candidateRows || []).filter((b: any) => {
+      if (blockAllDay) return true;
+      const bStart = time12ToMins(b.booking_time || "9:00 AM");
+      const bEnd = bStart + (b.duration_mins || 120);
+      return bStart < winEnd && bEnd > winStart;
+    });
+
     const { error } = await supabase.from("calendar_blocks").insert(inserts);
-    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-    else {
-      toast({ title: `${blockSelectedDays.length} day${blockSelectedDays.length > 1 ? "s" : ""} blocked ✓` });
-      setBlockModal(false);
-      setBlockSelectedDays([]);
-      setBlockReason("");
-      setBlockAllDay(false);
-      setBlockStartTime("09:00");
-      setBlockEndTime("17:00");
-      fetchData();
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      setBlockSaving(false);
+      return;
     }
+
+    let movedCount = 0;
+    let unresolvedCount = 0;
+    if (toReschedule.length) {
+      const today = todayStr();
+      const ctx = await fetchAvailabilityContext(today, addDaysStr(today, bookingWindowDays + 37));
+      for (const b of toReschedule as any[]) {
+        const slot = findNextAvailableSlot(b.duration_mins || 120, ctx, b.booking_date);
+        if (slot) {
+          await rescheduleBookingRecord(b, slot.date, slot.time, { notifyCustomer: blockNotify });
+          movedCount++;
+        } else {
+          unresolvedCount++;
+        }
+      }
+    }
+
+    toast({
+      title: `${blockSelectedDays.length} day${blockSelectedDays.length > 1 ? "s" : ""} blocked ✓`,
+      description: movedCount
+        ? `${movedCount} booking${movedCount > 1 ? "s" : ""} auto-rescheduled${unresolvedCount ? `, ${unresolvedCount} need manual attention` : ""}.`
+        : undefined,
+    });
+    setBlockModal(false);
+    setBlockSelectedDays([]);
+    setBlockReason("");
+    setBlockAllDay(false);
+    setBlockStartTime("09:00");
+    setBlockEndTime("17:00");
+    fetchData();
     setBlockSaving(false);
   };
 
@@ -374,30 +1101,13 @@ const CalendarPage = () => {
     setDeleteBlockId(null);
   };
 
-  // ── Reschedule booking ────────────────────────────────────────────────────
+  // ── Reschedule booking (manual, from the UI) ──────────────────────────────
 
   const handleRescheduleBooking = async () => {
     if (!selectedBooking || !rescheduleForm.date || !rescheduleForm.time) return;
     setRescheduleSaving(true);
-    const { error: bErr } = await supabase
-      .from("estimate_requests")
-      .update({ booking_date: rescheduleForm.date, booking_time: rescheduleForm.time })
-      .eq("id", selectedBooking.id);
-
-    if (bErr) { toast({ title: "Error", description: bErr.message, variant: "destructive" }); setRescheduleSaving(false); return; }
-
-    await supabase.from("calendar_blocks").delete().eq("estimate_request_id", selectedBooking.id);
-
-    const h24 = parseHour24(rescheduleForm.time);
-    const padH = h24.toString().padStart(2, "0");
-    const newStart = new Date(`${rescheduleForm.date}T${padH}:00:00-04:00`).toISOString();
-    const newEnd = new Date(new Date(`${rescheduleForm.date}T${padH}:00:00-04:00`).getTime() + (selectedBooking.duration_mins || 120) * 60000).toISOString();
-
-    await supabase.from("calendar_blocks").insert({
-      start_at: newStart, end_at: newEnd, all_day: false,
-      note: `Booking: ${selectedBooking.name} — ${selectedBooking.service}`,
-      estimate_request_id: selectedBooking.id, block_type: "booking",
-    });
+    const { error } = await rescheduleBookingRecord(selectedBooking, rescheduleForm.date, rescheduleForm.time, { notifyCustomer: false });
+    if (error) { toast({ title: "Error", description: (error as any).message, variant: "destructive" }); setRescheduleSaving(false); return; }
 
     toast({ title: "Booking rescheduled ✓" });
     setRescheduleModal(false);
@@ -415,22 +1125,62 @@ const CalendarPage = () => {
     else { toast({ title: "Marked complete ✓" }); setSelectedBooking(null); fetchData(); }
   };
 
-  // ── Rain day ──────────────────────────────────────────────────────────────
+  // ── Rain day (with auto-reschedule) ───────────────────────────────────────
 
   const handleRainDay = async () => {
     if (!rainForm.fromDate) return;
     setRainSaving(true);
+
+    const affected = bookingsOnDay(rainForm.fromDate);
+
     await supabase.from("reschedule_requests").insert({ day: rainForm.fromDate, reason: rainForm.reason, status: "pending" });
     await supabase.from("calendar_blocks").insert({
       start_at: new Date(rainForm.fromDate + "T00:00:00-04:00").toISOString(),
       end_at: new Date(rainForm.fromDate + "T23:59:59-04:00").toISOString(),
       all_day: true, note: `🌧 Rain Day — ${rainForm.reason}`, block_type: "rain_day",
     });
-    toast({ title: "Rain day set ✓", description: `${fmtShortDate(rainForm.fromDate)} is blocked.` });
+
+    let movedCount = 0;
+    if (affected.length) {
+      const today = todayStr();
+      const ctx = await fetchAvailabilityContext(today, addDaysStr(today, bookingWindowDays + 37));
+      for (const b of affected) {
+        const slot = findNextAvailableSlot(b.duration_mins || 120, ctx, b.booking_date);
+        if (slot) {
+          await rescheduleBookingRecord(b, slot.date, slot.time, { notifyCustomer: rainNotify });
+          movedCount++;
+        }
+      }
+    }
+
+    toast({
+      title: "Rain day set ✓",
+      description: `${fmtShortDate(rainForm.fromDate)} is blocked.${movedCount ? ` ${movedCount} booking${movedCount > 1 ? "s" : ""} auto-rescheduled.` : ""}`,
+    });
     setRainModal(false);
     setRainForm({ fromDate: todayStr(), reason: "Rain cancellation — we will reach out to reschedule." });
     fetchData();
     setRainSaving(false);
+  };
+
+  // ── Per-date schedule overrides (open a normally-off day / custom hours) ──
+
+  const openDayOverride = async (date: string) => {
+    setOverrideSaving(true);
+    const { error } = await upsertOverride({ date, status: "open", note: "Opened manually from calendar" });
+    if (error) toast({ title: "Error", description: (error as any).message, variant: "destructive" });
+    else toast({ title: `${fmtShortDate(date)} opened for booking ✓` });
+    fetchData();
+    setOverrideSaving(false);
+  };
+
+  const removeDayOverride = async (date: string) => {
+    setOverrideSaving(true);
+    const { error } = await deleteOverride(date);
+    if (error) toast({ title: "Error", description: (error as any).message, variant: "destructive" });
+    else toast({ title: "Override removed — back to your normal weekly schedule" });
+    fetchData();
+    setOverrideSaving(false);
   };
 
   // ── Block label helper ────────────────────────────────────────────────────
@@ -463,6 +1213,8 @@ const CalendarPage = () => {
             const isPast = date < today;
             const isBeyondWindow = date > cutoffDate;
             const isSelected = date === selectedDay;
+            const off = cur && !isPast && !blocked && isWorkDayOff(date);
+            const overridden = hasOverride(date);
 
             return (
               <button
@@ -475,6 +1227,7 @@ const CalendarPage = () => {
                   isBeyondWindow && !isPast ? "bg-muted/30" : "",
                   isSelected ? "ring-2 ring-inset ring-primary" : "",
                   blocked ? "bg-red-50 dark:bg-red-950/20" : "",
+                  off ? "bg-slate-100 dark:bg-slate-900/40" : "",
                 ].join(" ")}
               >
                 {/* Date number */}
@@ -487,7 +1240,15 @@ const CalendarPage = () => {
 
                 {/* Beyond window indicator */}
                 {isBeyondWindow && !isPast && cur && (
-                  <div className="absolute top-1.5 right-1.5 text-[9px] text-muted-foreground/60">lock</div>
+                  <div className="absolute top-1.5 right-1.5 text-muted-foreground/60"><Lock className="h-2.5 w-2.5" /></div>
+                )}
+
+                {/* Off-day indicator (weekly schedule, no override) */}
+                {off && !isBeyondWindow && (
+                  <div className="mt-0.5 text-[9px] font-medium text-slate-500 dark:text-slate-400">Off</div>
+                )}
+                {overridden && cur && !isPast && (
+                  <div className="absolute top-1.5 right-1.5 text-amber-500"><Sparkles className="h-2.5 w-2.5" /></div>
                 )}
 
                 {/* Block indicators */}
@@ -541,8 +1302,9 @@ const CalendarPage = () => {
             {days.map((d, i) => {
               const isToday = d === today;
               const isBeyond = d > cutoffDate;
+              const off = d >= today && !isDayFullyBlocked(d) && isWorkDayOff(d);
               return (
-                <div key={d} className={["py-2 text-center border-r last:border-r-0", isToday ? "bg-primary/5" : "", isBeyond ? "bg-muted/20" : ""].join(" ")}>
+                <div key={d} className={["py-2 text-center border-r last:border-r-0", isToday ? "bg-primary/5" : "", isBeyond ? "bg-muted/20" : "", off ? "bg-slate-100 dark:bg-slate-900/40" : ""].join(" ")}>
                   <div className="text-xs text-muted-foreground">{DAY_ABBR[i]}</div>
                   <div className={["mx-auto mt-0.5 text-sm font-semibold w-7 h-7 rounded-full flex items-center justify-center", isToday ? "bg-primary text-primary-foreground" : ""].join(" ")}>
                     {parseInt(d.slice(-2))}
@@ -554,6 +1316,9 @@ const CalendarPage = () => {
                   )}
                   {isBeyond && (
                     <div className="text-[9px] text-muted-foreground/50 mt-0.5">locked</div>
+                  )}
+                  {off && !isBeyond && (
+                    <div className="text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">Off</div>
                   )}
                 </div>
               );
@@ -567,12 +1332,19 @@ const CalendarPage = () => {
               {days.map(d => {
                 const bForHour = bookingsForHour(d, h);
                 const blocked = isHourBlocked(d, h);
+                const hrs = dayHours(d);
+                const outsideHours = hrs.working && (h < Math.floor(hhmmToMins(hrs.start) / 60) || h >= Math.ceil(hhmmToMins(hrs.end) / 60));
+                const off = !hrs.working;
                 const manualBl = blocks.filter(bl =>
                   bl.block_type !== "booking" && bl.start_at.slice(0, 10) === d &&
                   (bl.all_day || (new Date(bl.start_at).getHours() === h))
                 );
                 return (
-                  <div key={d} className={["border-r last:border-r-0 p-0.5", blocked ? "bg-red-50 dark:bg-red-950/20" : ""].join(" ")}>
+                  <div key={d} className={[
+                    "border-r last:border-r-0 p-0.5",
+                    blocked ? "bg-red-50 dark:bg-red-950/20" : "",
+                    (off || outsideHours) && !blocked ? "bg-slate-50 dark:bg-slate-900/30" : "",
+                  ].join(" ")}>
                     {bForHour.map(b => {
                       if (parseHour24(b.booking_time || "9:00 AM") !== h) return null;
                       return (
@@ -613,6 +1385,8 @@ const CalendarPage = () => {
     const dayBookings = bookingsOnDay(selectedDay);
     const dayManualBlocks = manualBlocksOnDay(selectedDay);
     const isPast = selectedDay < todayStr();
+    const hrs = dayHours(selectedDay);
+    const override = overrides.get(selectedDay);
 
     return (
       <div className="mt-4 rounded-lg border bg-card">
@@ -623,10 +1397,34 @@ const CalendarPage = () => {
               {dayBookings.length} booking{dayBookings.length !== 1 ? "s" : ""}
               {dayManualBlocks.length > 0 && ` · ${dayManualBlocks.length} block${dayManualBlocks.length > 1 ? "s" : ""}`}
             </p>
+            <p className="text-xs mt-1 flex items-center gap-1.5">
+              {hrs.working ? (
+                <span className="text-foreground font-medium flex items-center gap-1">
+                  <Clock className="h-3 w-3" /> {fmt12(hrs.start)} – {fmt12(hrs.end)}
+                </span>
+              ) : (
+                <span className="text-slate-500 font-medium flex items-center gap-1"><Lock className="h-3 w-3" /> Not a work day</span>
+              )}
+              {override && (
+                <Badge variant="outline" className="text-[9px] h-4 border-amber-300 text-amber-600">override</Badge>
+              )}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             {!isPast && (
               <>
+                {!hrs.working && !override && (
+                  <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-amber-200 text-amber-700 hover:bg-amber-50" disabled={overrideSaving}
+                    onClick={() => openDayOverride(selectedDay)}>
+                    <Unlock className="h-3 w-3" /> Open this day
+                  </Button>
+                )}
+                {override && (
+                  <Button size="sm" variant="outline" className="h-7 text-xs gap-1" disabled={overrideSaving}
+                    onClick={() => removeDayOverride(selectedDay)}>
+                    <X className="h-3 w-3" /> Remove override
+                  </Button>
+                )}
                 <Button size="sm" variant="outline" className="h-7 text-xs gap-1"
                   onClick={() => { setBlockMultiAnchor(new Date(selectedDay + "T00:00:00")); setBlockSelectedDays([selectedDay]); setBlockModal(true); }}>
                   <Ban className="h-3 w-3" /> Block
@@ -759,6 +1557,9 @@ const CalendarPage = () => {
               <CalendarDays className="h-3.5 w-3.5" /> Week
             </button>
           </div>
+          <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5" onClick={() => setWeeklyScheduleOpen(true)}>
+            <CalendarClock className="h-3.5 w-3.5" /> Work Hours
+          </Button>
           <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5 border-blue-200 text-blue-600 hover:bg-blue-50" onClick={() => setRainModal(true)}>
             <CloudRain className="h-3.5 w-3.5" /> Rain Day
           </Button>
@@ -776,6 +1577,7 @@ const CalendarPage = () => {
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-primary/20" /> Booking</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-red-100 dark:bg-red-900/30" /> Blocked</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-blue-100 dark:bg-blue-900/30" /> Rain day</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-slate-100 dark:bg-slate-900/40" /> Off (weekly schedule)</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-muted/50" /> Beyond booking window</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-primary" /> Today</span>
       </div>
@@ -788,6 +1590,9 @@ const CalendarPage = () => {
       ) : view === "month" ? <MonthView /> : <WeekView />}
 
       <DayPanel />
+
+      {/* ── Weekly Schedule Dialog ───────────────────────────────────────── */}
+      <WeeklyScheduleDialog open={weeklyScheduleOpen} onOpenChange={setWeeklyScheduleOpen} onSaved={fetchData} />
 
       {/* ── Settings Modal ───────────────────────────────────────────────── */}
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
@@ -820,6 +1625,18 @@ const CalendarPage = () => {
                 ⚠ You also need to enforce this in your <code className="text-xs bg-muted px-1 rounded">Estimate.tsx</code> date picker — set the <code className="text-xs bg-muted px-1 rounded">max</code> attribute on the date input to the cutoff date (read from Supabase on load).
               </p>
             </div>
+            <div className="border-t pt-3">
+              <Label className="text-sm font-medium">Work hours &amp; days off</Label>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+                Set which days you work and your bookable hours per day (e.g. only 2 AM–2 PM on Tuesdays).
+              </p>
+              <Button size="sm" variant="outline" className="w-full text-xs gap-1.5" onClick={() => { setSettingsOpen(false); setWeeklyScheduleOpen(true); }}>
+                <CalendarClock className="h-3.5 w-3.5" /> Edit Weekly Schedule
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">
+                ⚠ Same as the booking window — your <code className="text-xs bg-muted px-1 rounded">Estimate.tsx</code> time picker should also read this schedule so customers can't request times you're not working.
+              </p>
+            </div>
           </div>
           <DialogFooter>
             <Button onClick={() => setSettingsOpen(false)}>Done</Button>
@@ -829,7 +1646,7 @@ const CalendarPage = () => {
 
       {/* ── Multi-Day Block Modal ─────────────────────────────────────────── */}
       <Dialog open={blockModal} onOpenChange={setBlockModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Block Time</DialogTitle></DialogHeader>
           <div className="space-y-4">
             {/* Reason first — most important */}
@@ -920,6 +1737,22 @@ const CalendarPage = () => {
               )}
             </div>
 
+            {/* Affected bookings + auto-reschedule notice */}
+            {blockAffectedCount > 0 && (
+              <div className="rounded-lg border border-orange-200 bg-orange-50 dark:bg-orange-950/20 p-2.5 space-y-2">
+                <p className="text-xs font-medium text-orange-700 dark:text-orange-300">
+                  {blockAffectedCount} existing booking{blockAffectedCount > 1 ? "s" : ""} overlap{blockAffectedCount === 1 ? "s" : ""} this block.
+                </p>
+                <p className="text-xs text-orange-600 dark:text-orange-400">
+                  They'll be auto-moved to the next open slot when you save.
+                </p>
+                <div className="flex items-center gap-2">
+                  <Switch checked={blockNotify} onCheckedChange={setBlockNotify} id="blockNotify" />
+                  <Label htmlFor="blockNotify" className="text-xs">Text affected customers</Label>
+                </div>
+              </div>
+            )}
+
             {/* Preview */}
             {blockSelectedDays.length > 0 && blockReason && (
               <div className="rounded-lg bg-muted p-2.5 text-xs">
@@ -985,14 +1818,18 @@ const CalendarPage = () => {
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle className="flex items-center gap-2"><CloudRain className="h-4 w-4 text-blue-500" /> Rain Day</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <p className="text-xs text-muted-foreground">Blocks the entire day and logs a reschedule request.</p>
+            <p className="text-xs text-muted-foreground">Blocks the entire day and auto-reschedules anyone booked that day.</p>
             <div>
               <Label className="text-xs mb-1 block">Day to cancel</Label>
               <Input type="date" value={rainForm.fromDate} onChange={e => setRainForm({ ...rainForm, fromDate: e.target.value })} />
             </div>
             {rainForm.fromDate && bookingsOnDay(rainForm.fromDate).length > 0 && (
-              <div className="rounded bg-orange-50 dark:bg-orange-950/20 border border-orange-200 p-2 text-xs text-orange-700 dark:text-orange-300">
-                ⚠ {bookingsOnDay(rainForm.fromDate).length} booking{bookingsOnDay(rainForm.fromDate).length > 1 ? "s" : ""} need rescheduling.
+              <div className="rounded bg-orange-50 dark:bg-orange-950/20 border border-orange-200 p-2 text-xs text-orange-700 dark:text-orange-300 space-y-2">
+                <p>⚠ {bookingsOnDay(rainForm.fromDate).length} booking{bookingsOnDay(rainForm.fromDate).length > 1 ? "s" : ""} will be auto-moved to the next open slot.</p>
+                <div className="flex items-center gap-2">
+                  <Switch checked={rainNotify} onCheckedChange={setRainNotify} id="rainNotify" />
+                  <Label htmlFor="rainNotify" className="text-xs">Text affected customers</Label>
+                </div>
               </div>
             )}
             <div>
